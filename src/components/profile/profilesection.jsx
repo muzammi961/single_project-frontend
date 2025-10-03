@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import axios from "axios";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 // ========== Reusable UI: Logout Modal ==========
 function LogoutModal({ open, onConfirm, onCancel }) {
-  if (!open) return null;
+  if (!open) return null; // render nothing when closed [web:12]
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div
@@ -48,12 +49,12 @@ function LogoutToast({ show, onDone, timeout = 4000 }) {
     if (!show) return;
     const id = setTimeout(onDone, timeout);
     return () => clearTimeout(id);
-  }, [show, timeout, onDone]);
+  }, [show, timeout, onDone]); // timeout-based cleanup [web:12]
 
   return (
     <div
       className={`fixed z-[90] transition-all duration-300 ${
-        show ? 'opacity-100 translate-y-0' : 'pointer-events-none opacity-0 translate-y-3'
+        show ? "opacity-100 translate-y-0" : "pointer-events-none opacity-0 translate-y-3"
       } bottom-4 right-4 left-4 sm:left-auto`}
     >
       <div className="mx-auto w-full max-w-sm rounded-xl border border-white/10 bg-slate-900/80 backdrop-blur-xl text-white shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)] ring-1 ring-white/10">
@@ -74,51 +75,65 @@ const socialActivity = {
   posts: [
     {
       id: 1,
-      title: 'Santorini Sunset',
-      content: 'Amazing time in Santorini! #travel',
+      title: "Santorini Sunset",
+      content: "Amazing time in Santorini! #travel",
       image:
-        'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5db?auto=format&fit=crop&w=800&q=80',
+        "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5db?auto=format&fit=crop&w=800&q=80",
       likes: 54100,
       comments: 120,
-      timestamp: '2 days ago'
+      timestamp: "2 days ago",
     },
     {
       id: 2,
-      title: 'Bali Adventure',
-      content: 'Loved the beaches in Bali! #bali',
+      title: "Bali Adventure",
+      content: "Loved the beaches in Bali! #bali",
       image:
-        'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80',
+        "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80",
       likes: 173,
       comments: 45,
-      timestamp: '1 week ago'
-    }
+      timestamp: "1 week ago",
+    },
   ],
   followers: [
     {
       id: 1,
-      name: 'Emma Traveler',
+      name: "Emma Traveler",
       profileImage:
-        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80'
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80",
     },
     {
       id: 2,
-      name: 'John Explorer',
+      name: "John Explorer",
       profileImage:
-        'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80'
-    }
+        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80",
+    },
   ],
   following: [
     {
       id: 1,
-      name: 'Sarah Wanderer',
+      name: "Sarah Wanderer",
       profileImage:
-        'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=100&q=80'
-    }
-  ]
+        "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=100&q=80",
+    },
+  ],
 };
 
+// ========== Helpers ==========
+const isHttpUrl = (v) => typeof v === "string" && /^https?:\/\//i.test(v); // string-only guard [web:12]
+const stripLeadingSlashes = (p) => (typeof p === "string" ? p.replace(/^\/+/, "") : "");
+const toAbs = (base, p) => (p ? `${base}/${stripLeadingSlashes(p)}` : "");
+const readAsDataURL = (file) =>
+  new Promise((resolve) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result || ""));
+    r.readAsDataURL(file);
+  }); // allow preview for File [web:21]
+
+// ========== Component ==========
 const ProfilePage = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // must be inside Router [web:30]
+  const accesstoken = localStorage.getItem("access_token");
+  const refreshtoken = localStorage.getItem("refresh_token");
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [showFollowersModal, setShowFollowersModal] = useState(false);
@@ -127,79 +142,177 @@ const ProfilePage = () => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
+  // Initialize as object to match property-based reads [web:12]
   const [profileData, setProfileData] = useState({
-    name: 'Sophia Carter',
-    bio: 'Travel Enthusiast',
-    location: 'San Francisco, CA',
-    profileImage:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=128&h=128&fit=crop&crop=face'
+    name: "",
+    bio: "",
+    location: "",
+    gender: "",
+    date_of_birth: "",
+    contact_number: "",
+    social_links: "",
+    profile_picture: "", // string URL or File
+    cover_photo: "", // string URL or File
   });
 
-  const travelHistory = [
-    {
-      city: 'Paris',
-      date: '2023-07-15',
-      image:
-        'https://images.unsplash.com/photo-1502602898536-47ad22581b52?w=400&h=300&fit=crop',
-      description: 'Explored the charming streets and iconic Eiffel Tower.'
-    },
-    {
-      city: 'Tokyo',
-      date: '2023-05-20',
-      image:
-        'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=300&fit=crop',
-      description: 'Immersed in vibrant culture and cutting-edge technology.'
-    },
-    {
-      city: 'New York',
-      date: '2023-03-10',
-      image:
-        'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=400&h=300&fit=crop',
-      description: 'Experienced the bustling energy of Times Square.'
-    }
-  ];
+  // Local previews for newly chosen files [web:21]
+  const [coverPreview, setCoverPreview] = useState("");
+  const [avatarPreview, setAvatarPreview] = useState("");
 
-  const upcomingTrips = [
-    {
-      city: 'London',
-      date: '2024-08-15',
-      daysLeft: 3,
-      image:
-        'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=200&h=150&fit=crop'
-    }
-  ];
+  const token = accesstoken || localStorage.getItem("access_token");
 
-  const wishlist = [
-    {
-      city: 'Santorini',
-      country: 'Greece',
-      image:
-        'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5db?w=400&h=300&fit=crop'
-    },
-    {
-      city: 'Bali',
-      country: 'Indonesia',
-      image:
-        'https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?w=400&h=300&fit=crop'
+  const ProfiledataFunc = async () => {
+    try {
+      const res = await axios.get("http://127.0.0.1:8002/GetProfileAPIView/", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      // Expecting object payload
+      setProfileData((prev) => ({
+        ...prev,
+        ...(res.data || {}),
+      })); // safe merge [web:12]
+    } catch (error) {
+      console.log("Error fetching profile:", error);
     }
-  ];
-
-  const handleEditProfile = () => {
-    setShowEditModal(false);
-    console.log('Updated Profile:', profileData);
   };
 
-  const confirmLogout = () => {
-    // Clear tokens
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+  useEffect(() => {
+    if (token) {
+      ProfiledataFunc();
+    } else {
+      console.log("does not have access token");
+    }
+  }, [token]); // standard fetch-on-token [web:12]
 
-    // Close modal, show toast, then navigate
-    setShowLogoutModal(false);
-    setShowToast(true);
-    setTimeout(() => {
-      navigate('/LoginPage', { replace: true });
-    }, 400); // small delay so toast displays momentarily before route change (optional)
+  // Compute safe URLs for cover/avatar: File -> dataURL, string(http) -> as-is, string(relative) -> base prefix [web:12][web:21]
+  const base = "http://127.0.0.1:8002";
+
+  const coverUrl = useMemo(() => {
+    const v = profileData?.cover_photo;
+    if (v instanceof File) return coverPreview || "";
+    if (isHttpUrl(v)) return v;
+    if (typeof v === "string" && v) return toAbs(base, v);
+    return "";
+  }, [profileData?.cover_photo, coverPreview]); // memoized resolution [web:12]
+
+  const avatarUrl = useMemo(() => {
+    const v = profileData?.profile_picture;
+    if (v instanceof File) return avatarPreview || "";
+    if (isHttpUrl(v)) return v;
+    if (typeof v === "string" && v) return toAbs(base, v);
+    return "";
+  }, [profileData?.profile_picture, avatarPreview]); // memoized resolution [web:12]
+
+  // When user selects files, compute previews [web:21]
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      if (profileData.cover_photo instanceof File) {
+        const url = await readAsDataURL(profileData.cover_photo);
+        if (active) setCoverPreview(url);
+      } else {
+        setCoverPreview("");
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [profileData.cover_photo]); // file -> dataURL [web:21]
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      if (profileData.profile_picture instanceof File) {
+        const url = await readAsDataURL(profileData.profile_picture);
+        if (active) setAvatarPreview(url);
+      } else {
+        setAvatarPreview("");
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [profileData.profile_picture]); // file -> dataURL [web:21]
+
+  const handleEditProfile = async () => {
+    try {
+      const tok = accesstoken || localStorage.getItem("access_token");
+      if (!tok) throw new Error("Missing access token");
+
+      const form = new FormData();
+
+      const maybeAppend = (key, val) => {
+        if (val !== undefined && val !== null && val !== "") form.append(key, val);
+      };
+
+      maybeAppend("name", profileData.name);
+      maybeAppend("bio", profileData.bio);
+      maybeAppend("location", profileData.location);
+      maybeAppend("gender", profileData.gender);
+      maybeAppend("date_of_birth", profileData.date_of_birth);
+      maybeAppend("contact_number", profileData.contact_number);
+
+      if (profileData.social_links !== undefined && profileData.social_links !== null && profileData.social_links !== "") {
+      if (typeof profileData.social_links === "string") {
+        // treat as simple string (e.g., single URL)
+        form.append("social_links", profileData.social_links);
+      } else {
+        // array/object -> send as JSON Blob part
+        const blob = new Blob([JSON.stringify(profileData.social_links)], { type: "application/json" });
+        form.append("social_links", blob, "social_links.json");
+      }
+    }
+
+      if (profileData.profile_picture instanceof File) {
+        form.append("profile_picture", profileData.profile_picture);
+      }
+      if (profileData.cover_photo instanceof File) {
+        form.append("cover_photo", profileData.cover_photo);
+      }
+
+      const res = await axios.patch("http://127.0.0.1:8002/UpdateProfileAPIView/", form, {
+        headers: {
+          Authorization: `Bearer ${tok}`,
+          // Let Axios set multipart boundary in browser automatically [web:31][web:37]
+        },
+      });
+
+      console.log("Profile updated", res.data);
+      setShowEditModal(false);
+      // Optionally refresh from server
+      ProfiledataFunc();
+    } catch (error) {
+      console.error(
+        "Update error:",
+        error?.response?.status,
+        error?.response?.data || error?.message
+      );
+    } finally {
+      // optional cleanup
+    }
+  };
+
+  const confirmLogout = async () => {
+    try {
+      const datas = await axios.post(
+        "http://127.0.0.1:8001/authentication/LogoutPasswordApiView/",
+        { refresh: refreshtoken },
+        {
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${accesstoken}` },
+        }
+      );
+      console.log("datas", datas.data);
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+    } catch (e) {
+      console.warn("Logout cleanup error:", e.response?.data || e.message);
+    } finally {
+      setShowLogoutModal(false);
+      setShowToast(true);
+      setTimeout(() => {
+        navigate("/LoginPage", { replace: true }); // requires Router context [web:30]
+      }, 600);
+    }
   };
 
   // Header
@@ -210,7 +323,7 @@ const ProfilePage = () => {
           <button
             className="flex h-10 w-10 items-center justify-center rounded-full text-teal-400 hover:bg-teal-500/20 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-teal-500"
             aria-label="Go back"
-            onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}
+            onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/"))}
           >
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
@@ -231,23 +344,35 @@ const ProfilePage = () => {
     </header>
   );
 
-  // Profile Card component from your previous version...
   const ProfileCard = () => (
-    <section className="flex flex-col items-center gap-4 sm:gap-6 bg-white/10 dark:bg-gray-900/30 backdrop-blur-lg rounded-xl p-4 sm:p-6 shadow-lg shadow-teal-500/20 animate-fade-in">
+    <section
+      className="flex flex-col items-center gap-4 sm:gap-6 bg-white/10 dark:bg-gray-900/30 backdrop-blur-lg rounded-xl p-4 sm:p-6 shadow-lg shadow-teal-500/20 animate-fade-in"
+      style={{
+        backgroundImage: coverUrl
+          ? `url("${coverUrl}")`
+          : "linear-gradient(135deg, rgba(20,184,166,0.15), rgba(8,145,178,0.15))",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }} // inline background per React style [web:21]
+    >
       <div className="flex flex-col items-center gap-3 sm:gap-4 text-center">
         <div
           className="h-24 w-24 sm:h-32 sm:w-32 rounded-full bg-cover bg-center shadow-lg ring-4 ring-teal-500/20 transition-transform duration-300 hover:scale-105"
-          style={{ backgroundImage: `url("${profileData.profileImage}")` }}
+          style={{ backgroundImage: avatarUrl ? `url("${avatarUrl}")` : undefined }}
         />
         <div>
-          <p className="text-lg sm:text-2xl font-bold text-white">{profileData.name}</p>
-          <p className="text-sm sm:text-base text-gray-200">{profileData.bio}</p>
+          <p className="text-lg sm:text-2xl font-bold text-white">
+            {profileData.name || "Unnamed"}
+          </p>
+          <p className="text-sm sm:text-base text-gray-200">{profileData.bio || "—"}</p>
           <p className="text-xs sm:text-sm text-gray-400 flex items-center justify-center gap-1">
             <span className="material-symbols-outlined text-xs sm:text-sm">location_on</span>
-            {profileData.location}
+            {profileData.location || "—"}
           </p>
         </div>
       </div>
+
       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full max-w-xs sm:max-w-sm">
         <button
           className="flex-1 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-semibold px-4 py-2 sm:py-2.5 text-sm sm:text-base shadow-lg hover:shadow-teal-500/50 transition-all duration-300 transform hover:scale-105"
@@ -288,7 +413,7 @@ const ProfilePage = () => {
           <div className="flex items-center gap-3 sm:gap-4">
             <span className="flex items-center gap-1 text-teal-400">
               <span className="material-symbols-outlined text-xs sm:text-sm">favorite</span>
-              <span className="text-xs sm:text-sm">{likes.toLocaleString()}</span>
+              <span className="text-xs sm:text-sm">{Number(likes).toLocaleString()}</span>
             </span>
             <span className="flex items-center gap-1 text-teal-400">
               <span className="material-symbols-outlined text-xs sm:text-sm">comment</span>
@@ -383,20 +508,18 @@ const ProfilePage = () => {
   const SettingsCard = ({ label }) => (
     <div className="flex items-center justify-between rounded-xl bg-white/10 dark:bg-gray-900/30 p-3 sm:p-4 border border-teal-500/30 backdrop-blur-lg shadow-lg hover:shadow-teal-500/40 transition-all duration-300 hover:bg-gray-800/70 animate-fade-in">
       <span className="text-sm sm:text-base text-white font-medium">{label}</span>
-      <span className="material-symbols-outlined text-teal-400 text-lg sm:text-xl">
-        chevron_right
-      </span>
+      <span className="material-symbols-outlined text-teal-400 text-lg sm:text-xl">chevron_right</span>
     </div>
   );
 
   const Footer = () => (
     <footer className="sticky bottom-0 bg-black/80 backdrop-blur-lg border-t border-teal-500/50 shadow-lg shadow-teal-500/20">
       <nav className="flex justify-around py-3 sm:py-4">
-        {['home', 'explore', 'bookmark', 'person'].map((icon) => (
+        {["home", "explore", "bookmark", "person"].map((icon) => (
           <button
             key={icon}
             className={`flex flex-col items-center gap-1 p-2 sm:p-3 rounded-lg transition-colors duration-300 ${
-              icon === 'person' ? 'text-teal-500' : 'text-gray-200 hover:text-teal-400'
+              icon === "person" ? "text-teal-500" : "text-gray-200 hover:text-teal-400"
             } focus:outline-none focus:ring-2 focus:ring-teal-500`}
             aria-label={`Navigate to ${icon}`}
           >
@@ -405,15 +528,64 @@ const ProfilePage = () => {
           </button>
         ))}
       </nav>
-      <div style={{ height: 'env(safe-area-inset-bottom)' }} />
+      <div style={{ height: "env(safe-area-inset-bottom)" }} />
     </footer>
   );
+
+  // Travel/Wishlist demo data (unchanged)
+  const travelHistory = [
+    {
+      city: "Paris",
+      date: "2023-07-15",
+      image:
+        "https://images.unsplash.com/photo-1502602898536-47ad22581b52?w=400&h=300&fit=crop",
+      description: "Explored the charming streets and iconic Eiffel Tower.",
+    },
+    {
+      city: "Tokyo",
+      date: "2023-05-20",
+      image:
+        "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=300&fit=crop",
+      description: "Immersed in vibrant culture and cutting-edge technology.",
+    },
+    {
+      city: "New York",
+      date: "2023-03-10",
+      image:
+        "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=400&h=300&fit=crop",
+      description: "Experienced the bustling energy of Times Square.",
+    },
+  ];
+
+  const upcomingTrips = [
+    {
+      city: "London",
+      date: "2024-08-15",
+      daysLeft: 3,
+      image:
+        "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=200&h=150&fit=crop",
+    },
+  ];
+
+  const wishlist = [
+    {
+      city: "Santorini",
+      country: "Greece",
+      image:
+        "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5db?w=400&h=300&fit=crop",
+    },
+    {
+      city: "Bali",
+      country: "Indonesia",
+      image:
+        "https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?w=400&h=300&fit=crop",
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-black flex flex-col font-display text-white">
       <Header />
 
-      {/* Edge-to-edge main to avoid big side gaps */}
       <main className="w-full px-3 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8 sm:space-y-12 flex-grow">
         <div className="max-w-7xl mx-auto">
           <ProfileCard />
@@ -500,7 +672,7 @@ const ProfilePage = () => {
 
       {showEditModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 sm:p-6">
-          <div className="bg-white/10 dark:bg-gray-900/30 backdrop-blur-lg rounded-xl p-6 sm:p-8 w-full max-w-md max-h-[80vh] overflow-y-auto scrollbar-thin">
+          <div className="bg-white/10 dark:bg-gray-900/30 backdrop-blur-lg rounded-xl p-6 sm:p-8 w-full max-w-md max-h-[80vh] overflow-y-auto scrollbar-hidden">
             <h3 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6">Edit Profile</h3>
             <div className="space-y-4 sm:space-y-6">
               <input
@@ -512,25 +684,101 @@ const ProfilePage = () => {
               />
               <input
                 className="w-full rounded-lg border-none bg-white/10 pl-4 pr-4 py-2 sm:py-3 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none text-white placeholder:text-gray-200 transition-all duration-300"
-                placeholder="Bio"
+                placeholder="contact number"
+                value={profileData.contact_number}
+                onChange={(e) => setProfileData({ ...profileData, contact_number: e.target.value })}
+                aria-label="Contact number"
+              />
+              <input
+                className="w-full rounded-lg border-none bg-white/10 pl-4 pr-4 py-2 sm:py-3 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none text-white placeholder:text-gray-200 transition-all duration-300"
+                placeholder="bio"
                 value={profileData.bio}
                 onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
                 aria-label="Bio"
               />
               <input
                 className="w-full rounded-lg border-none bg-white/10 pl-4 pr-4 py-2 sm:py-3 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none text-white placeholder:text-gray-200 transition-all duration-300"
-                placeholder="Location"
+                placeholder="location"
                 value={profileData.location}
                 onChange={(e) => setProfileData({ ...profileData, location: e.target.value })}
                 aria-label="Location"
               />
+
+              <label className="block">
+                <select
+                  className="w-full rounded-lg border-none bg-white/10 pl-4 pr-4 py-2 sm:py-3 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none text-white transition-all duration-300"
+                  value={profileData.gender || ""}
+                  onChange={(e) => setProfileData({ ...profileData, gender: e.target.value })}
+                  aria-label="Gender"
+                >
+                  <option className="bg-slate-900" value="">
+                    Select gender
+                  </option>
+                  <option className="bg-slate-900" value="M">
+                    Male
+                  </option>
+                  <option className="bg-slate-900" value="F">
+                    Female
+                  </option>
+                  <option className="bg-slate-900" value="O">
+                    Other
+                  </option>
+                </select>
+              </label>
+
+              <label className="block">
+                <span className="block text-sm text-white/80 mb-1">Cover image</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  aria-label="Cover image file"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setProfileData((p) => ({ ...p, cover_photo: file }));
+                    // preview updated via effect; no startsWith on File [web:12][web:21]
+                  }}
+                  className="block w-full text-sm text-white file:mr-3 file:rounded-lg file:border-0 file:bg-teal-600 file:px-3 file:py-2 file:text-white file:cursor-pointer file:hover:bg-teal-700 bg-white/10 rounded-lg p-1 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
+                />
+                <p className="mt-1 text-xs text-white/60">JPG, PNG, or WebP. Max ~5MB.</p>
+              </label>
+
+              <label className="block">
+                <span className="block text-sm text-white/80 mb-1">Profile image</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  aria-label="Profile image file"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setProfileData((p) => ({ ...p, profile_picture: file }));
+                  }}
+                  className="block w-full text-sm text-white file:mr-3 file:rounded-lg file:border-0 file:bg-teal-600 file:px-3 file:py-2 file:text-white file:cursor-pointer file:hover:bg-teal-700 bg-white/10 rounded-lg p-1 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"
+                />
+                <p className="mt-1 text-xs text-white/60">JPG, PNG, or WebP. Max ~5MB.</p>
+              </label>
+
               <input
                 className="w-full rounded-lg border-none bg-white/10 pl-4 pr-4 py-2 sm:py-3 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none text-white placeholder:text-gray-200 transition-all duration-300"
-                placeholder="Profile Image URL"
-                value={profileData.profileImage}
-                onChange={(e) => setProfileData({ ...profileData, profileImage: e.target.value })}
-                aria-label="Profile image URL"
+                placeholder="date of birth "
+                type="date"
+                value={profileData.date_of_birth}
+                onChange={(e) => setProfileData({ ...profileData, date_of_birth: e.target.value })}
+                aria-label="Date of birth"
               />
+
+              <input
+  className="w-full rounded-lg border-none bg-white/10 pl-4 pr-4 py-2 sm:py-3 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none text-white placeholder:text-gray-200 transition-all duration-300"
+  type="url"
+  inputMode="url"
+  placeholder="LinkedIn, YouTube, etc."
+  value={typeof profileData.social_links === "string" ? profileData.social_links : ""}
+  onChange={(e) => setProfileData({ ...profileData, social_links: e.target.value })}
+  aria-label="Social links URL"
+/>
+
+
               <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
                 <button
                   className="bg-gray-600 hover:bg-gray-700 text-white font-semibold px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base rounded-lg transition-all duration-300"
@@ -569,7 +817,6 @@ const ProfilePage = () => {
 
       <Footer />
 
-      {/* Logout confirm modal + toast */}
       <LogoutModal
         open={showLogoutModal}
         onConfirm={confirmLogout}
@@ -577,10 +824,11 @@ const ProfilePage = () => {
       />
       <LogoutToast show={showToast} onDone={() => setShowToast(false)} />
 
-      {/* Global Styles */}
+      {/* Global Styles (no separate CSS file) */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+
         body { font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
         .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }

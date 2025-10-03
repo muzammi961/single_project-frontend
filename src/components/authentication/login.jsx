@@ -61,7 +61,7 @@ export default function LoginPage({ dark = true }) {
        localStorage.setItem('access_token', res.data.access);
        localStorage.setItem('refresh_token', res.data.refresh);
        if(res){
-        navigate('/HomeSide')
+        navigate('/')
        }
     } catch (err) {
       if (err.response) {
@@ -192,7 +192,7 @@ export default function LoginPage({ dark = true }) {
                 <div className="text-center mt-6">
                   <p className="text-sm text-slate-600 dark:text-slate-300 font-medium">
                     Don’t have an account?
-                    <Link to="/RegistrationForm" className="ml-1 font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+                    <Link to="/" className="ml-1 font-semibold text-blue-600 dark:text-blue-400 hover:underline">
                       Sign Up
                     </Link>
                   </p>

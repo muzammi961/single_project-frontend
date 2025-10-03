@@ -5,8 +5,8 @@ import { useNavigate } from 'react-router-dom';
 
 function GoogleLoginButton() {
   const btnRef = useRef(null);
-  const navigate=useNavigate()
-  // Load when google is ready and render the button
+  const navigate = useNavigate();
+
   useEffect(() => {
     let cancelled = false;
 
@@ -22,11 +22,10 @@ function GoogleLoginButton() {
       });
 
     const init = async () => {
-      await waitForGoogle(); // GIS script loaded from index.html
+      await waitForGoogle();
       if (cancelled) return;
 
       const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-      console.log('clind   ....',clientId)
       if (!clientId) {
         console.error('Missing VITE_GOOGLE_CLIENT_ID');
         return;
@@ -34,10 +33,10 @@ function GoogleLoginButton() {
 
       window.google.accounts.id.initialize({
         client_id: clientId,
-        callback: handleCredentialResponse
+        callback: handleCredentialResponse,
+        // ux_mode: 'popup', // uncomment if redirect flow causes COOP/COEP warnings
       });
 
-      // Render official Google button inside the div
       if (btnRef.current) {
         window.google.accounts.id.renderButton(btnRef.current, {
           theme: 'outline',
@@ -45,11 +44,9 @@ function GoogleLoginButton() {
           text: 'signin_with',
           shape: 'pill',
           logo_alignment: 'left',
-          width: 360
+          width: 360,
         });
       }
-      // Optionally show One Tap:
-      // window.google.accounts.id.prompt();
     };
 
     init();
@@ -60,8 +57,9 @@ function GoogleLoginButton() {
 
   const handleCredentialResponse = async (response) => {
     try {
+      // Backend expects { token } per your view
       const res = await axios.post(
-        'http://127.0.0.1:8000/authentication/api/auth/google/',
+        'http://127.0.0.1:8001/authentication/api/auth/google/',
         { token: response.credential },
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -70,20 +68,14 @@ function GoogleLoginButton() {
         localStorage.setItem('access_token', res.data.access);
         localStorage.setItem('refresh_token', res.data.refresh);
       }
-      if(res){
-      navigate('/')
-      }else{
-      navigate('/LoginPage')
-      }
+      navigate('/');
     } catch (err) {
-      console.error(
-        'Error logging in:',
-        err?.response ? err.response.data : err
-      );
+      console.error('Error logging in:', err?.response ? err.response.data : err);
+      // If you still see "Token used too early": sync OS time and retry
+      // If you see "Wrong recipient": verify frontend client ID matches server audience
     }
   };
 
-  // Container for the official Google button
   return (
     <div
       ref={btnRef}

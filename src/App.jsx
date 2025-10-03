@@ -7,7 +7,9 @@ import ProfilePage from './components/profile/profilesection.jsx'
 import GoogleLoginButton from './components/authentication/googlelogin.jsx'
 import RegistrationForm  from "./components/authentication/registration.jsx"
 import ForgotPassword from './components/authentication/forget_password/password_reset_request.jsx'
-import ResetPassword from './components/authentication/forget_password/resetpassword.jsx'
+// import ResetPassword from './components/authentication/forget_password/resetpassword.jsx'
+import CreateProfile from './components/profile/createprofile.jsx'
+import ProfileUpdate from './components/profile/updateprofile.jsx'
 function App() {
 const isAuthenticated = !!localStorage.getItem("access_token");
 const baseURL = import.meta.env.VITE_API_BASE_URL;
@@ -17,15 +19,22 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
 
            {/* <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/" />}/> */}
             <Route path="/LoginPage" element={<LoginPage />}/>
-            <Route path="/HomeSide" element={<HomeSide/>}/>
+            <Route path="/" element={<HomeSide/>}/>
             <Route path='/ExperienceSide' element={<ExperienceSide/>}/>
             <Route path='/ProfilePage' element={<ProfilePage/>}/>
 
             <Route path="/GoogleLoginButton" element={<GoogleLoginButton/>}/>
 
-            <Route path='/' element={<RegistrationForm/>}/>
+            <Route path='/RegistrationForm' element={<RegistrationForm/>}/>
             <Route path='/ForgotPassword' element={<ForgotPassword/>}/>
-            <Route path='/ResetPassword' element={<ResetPassword/>}/>
+            {/* <Route path='/ResetPassword' element={<ResetPassword/>}/> */}
+            <Route path='/CreateProfile' element={<CreateProfile/>}/>
+            <Route path='/ProfileUpdate' element={<ProfileUpdate/>}/>
+
+
+
+
+           
           </Routes>
       </BrowserRouter>
   )

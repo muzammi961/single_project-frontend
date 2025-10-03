@@ -1,144 +1,322 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import axios from 'axios';
 
-function ResetPassword() {
-  const [form, setForm] = useState({ password: '', confirm: '' });
+const API_ORIGIN = 'http://127.0.0.1:8001';
+
+const STEPS = {
+  REQUEST: 'REQUEST',
+  VERIFY: 'VERIFY',
+  RESET: 'RESET',
+};
+
+export default function ForgotPassword() {
+  const [step, setStep] = useState(STEPS.REQUEST);
+  const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const [sending, setSending] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
-  const onChange = (e) => {
-    const { id, value } = e.target;
-    setForm((p) => ({
-      ...p,
-      [id === 'new-password' ? 'password' : 'confirm']: value
-    }));
+  // OTP window timer
+  const OTP_WINDOW_SEC = 120;
+  const [remaining, setRemaining] = useState(0);
+  const [otpIssuedAt, setOtpIssuedAt] = useState(null);
+  const [expired, setExpired] = useState(false);
+
+const mmss = useMemo(() => {
+  const total = Math.max(0, Math.floor(Number(remaining) || 0));
+  const mm = String(Math.floor(total / 60)).padStart(2, '0');
+  const ss = String(total % 60).padStart(2, '0');
+  return `${mm}:${ss}`;
+}, [remaining]);
+
+  useEffect(() => {
+    if (!otpIssuedAt) return;
+    const tick = () => {
+      const elapsed = Math.floor((Date.now() - otpIssuedAt) / 1000);
+      const left = Math.max(OTP_WINDOW_SEC - elapsed, 0);
+      setRemaining(left);
+      setExpired(left === 0);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [otpIssuedAt]);
+
+  const sendCode = async () => {
     setError('');
-  };
-
-  const onBack = () => {
-    // Prefer history back; if no history, go to LoginPage
-    if (window.history.length > 1) navigate(-1);
-    else navigate('/LoginPage', { replace: true });
-  };
-
-  const onSubmit = (e) => {
-    e.preventDefault();
-    if (!form.password || !form.confirm) {
-      setError('Please fill out both fields');
+    if (!email) {
+      setError('Enter a valid email');
       return;
     }
-    if (form.password !== form.confirm) {
+    try {
+      setSending(true);
+      await axios.post(`${API_ORIGIN}/authentication/password-reset-request/`, { email });
+      setOtp('');
+      setOtpIssuedAt(Date.now());
+      setExpired(false);
+      setStep(STEPS.VERIFY);
+    } catch (e) {
+      setError(parseAxiosError(e));
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const verifyOtp = async (e) => {
+    e.preventDefault();
+    setError('');
+    if (expired) {
+      setError('OTP expired, resend.');
+      return;
+    }
+    if (!otp.trim()) {
+      setError('Enter the OTP code');
+      return;
+    }
+    try {
+      setVerifying(true);
+      await axios.post(`${API_ORIGIN}/authentication/otp-verify/`, { email, otp });
+      setStep(STEPS.RESET);
+    } catch (e) {
+      setError(parseAxiosError(e));
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  const resetPassword = async (e) => {
+    e.preventDefault();
+    setError('');
+    if (!password || !confirm) {
+      setError('Fill both password fields');
+      return;
+    }
+    if (password !== confirm) {
       setError('Passwords do not match');
       return;
     }
-    // TODO: call reset password API
-    console.log('Resetting password...');
+    try {
+      setResetting(true);
+      await axios.post(`${API_ORIGIN}/authentication/password-reset/`, {
+        email,
+        password,
+        confirm
+      });
+      // Done: show simple success and go back to first step
+      alert('Password reset successful');
+      setStep(STEPS.REQUEST);
+      setOtp('');
+      setPassword('');
+      setConfirm('');
+      setOtpIssuedAt(null);
+      setExpired(false);
+      setRemaining(0);
+    } catch (e) {
+      setError(parseAxiosError(e));
+    } finally {
+      setResetting(false);
+    }
   };
 
-  return (
-    <div className="min-h-screen relative font-display text-gray-200">
-      {/* Deep base background */}
-      <div className="absolute inset-0 bg-slate-950" />
+  const canSend = !sending && email.length > 3 && (!otpIssuedAt || expired || step === STEPS.REQUEST);
+  const canVerify = !verifying && !expired && otp.trim().length > 0;
+  const canReset = !resetting && password.length >= 6 && confirm.length >= 6;
 
-      {/* Radial blue glow */}
+  return (
+    <div className="min-h-screen relative text-gray-200">
+      <div className="absolute inset-0 bg-slate-950" />
       <div
         className="absolute inset-0"
         style={{
           background:
-            'radial-gradient(900px 500px at 50% 0%, rgba(37,99,235,0.30), rgba(2,6,23,0) 65%)'
+            'radial-gradient(900px 500px at 50% 0%, rgba(37,99,235,0.25), rgba(2,6,23,0) 65%)'
         }}
       />
+      <div className="relative z-10 flex items-center justify-center min-h-screen px-4">
+        <div className="w-full max-w-md bg-slate-900/50 border border-slate-800 rounded-2xl shadow-2xl backdrop-blur-md p-6">
+          <h1 className="text-center text-2xl md:text-3xl font-semibold text-white">
+            {step === STEPS.REQUEST && 'Forgot your password?'}
+            {step === STEPS.VERIFY && 'Verify your email'}
+            {step === STEPS.RESET && 'Set a new password'}
+          </h1>
+          <p className="text-center text-slate-400 mt-2">
+            {step === STEPS.REQUEST && 'Enter the email to receive a verification code.'}
+            {step === STEPS.VERIFY && 'Enter the 6-digit code sent to your email.'}
+            {step === STEPS.RESET && 'Choose a strong password to secure the account.'}
+          </p>
 
-      {/* Content */}
-      <div className="relative z-10 flex flex-col h-screen">
-        <header className="flex items-center p-4">
-         <button
-            type="button"
-            onClick={onBack}
-            className="text-white rounded-lg p-1 hover:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            aria-label="Go back"
-            title="Back"
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M19 12H5" />
-              <path d="M12 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <h1 className="flex-1 text-center text-lg font-bold text-white"></h1>
-          <div className="w-10" />
-        </header>
-
-        <main className="flex-grow flex flex-col justify-center px-6">
-          <form className="space-y-6 max-w-lg w-full mx-auto" onSubmit={onSubmit}>
-            <div>
-              <label
-                htmlFor="new-password"
-                className="block text-sm font-medium text-slate-300 mb-1"
-              >
-                New Password
-              </label>
-              <input
-                id="new-password"
-                type="password"
-                placeholder="Enter new password"
-                value={form.password}
-                onChange={onChange}
-                className="form-input w-full rounded-lg border-slate-700 bg-slate-900/70 text-white h-12 px-4 focus:ring-blue-500 focus:border-blue-500 placeholder:text-slate-500"
-                autoComplete="new-password"
-                aria-label="New password"
-                required
-              />
+          {/* Error */}
+          {error && (
+            <div className="mt-4 p-3 rounded-lg bg-rose-500/10 text-rose-300 border border-rose-500/30 text-sm">
+              {error}
             </div>
+          )}
 
-            <div>
-              <label
-                htmlFor="confirm-password"
-                className="block text-sm font-medium text-slate-300 mb-1"
-              >
-                Confirm Password
-              </label>
-              <input
-                id="confirm-password"
-                type="password"
-                placeholder="Confirm new password"
-                value={form.confirm}
-                onChange={onChange}
-                className="form-input w-full rounded-lg border-slate-700 bg-slate-900/70 text-white h-12 px-4 focus:ring-blue-500 focus:border-blue-500 placeholder:text-slate-500"
-                autoComplete="new-password"
-                aria-label="Confirm password"
-                required
-              />
-            </div>
-
-            {error && (
-              <p className="text-sm text-rose-400 font-medium -mt-2" role="alert">
-                {error}
-              </p>
-            )}
-
-            <div className="mt-2">
+          {/* Step: Request */}
+          {step === STEPS.REQUEST && (
+            <div className="mt-6 space-y-5">
+              <div className="relative">
+                <input
+                  type="email"
+                  placeholder="Email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full h-12 px-4 rounded-lg bg-slate-800/70 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-slate-500 text-white"
+                />
+              </div>
               <button
-                type="submit"
-                className="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-slate-950 shadow-[0_10px_30px_-10px_rgba(37,99,235,0.6)]"
+                onClick={sendCode}
+                disabled={!canSend}
+                className={`w-full h-12 rounded-lg text-white font-semibold shadow-[0_10px_30px_-10px_rgba(37,99,235,0.6)] ${
+                  canSend ? 'bg-blue-600 hover:bg-blue-500' : 'bg-slate-700 cursor-not-allowed'
+                }`}
               >
-                Reset Password
+                {sending ? 'Sending…' : 'Send Code'}
               </button>
             </div>
-          </form>
-        </main>
+          )}
+
+          {/* Step: Verify */}
+          {step === STEPS.VERIFY && (
+            <form onSubmit={verifyOtp} className="mt-6 space-y-5">
+              <div className="space-y-3">
+                <div className="relative">
+                  <input
+                    type="email"
+                    value={email}
+                    readOnly
+                    className="w-full h-12 px-4 rounded-lg bg-slate-800/50 border border-slate-700 text-slate-300 cursor-not-allowed"
+                  />
+                </div>
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="6-digit OTP"
+                    inputMode="numeric"
+                    pattern="\d*"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    className={`w-full h-12 px-4 rounded-lg bg-slate-800/70 border focus:outline-none placeholder-slate-500 text-white ${
+                      expired
+                        ? 'border-rose-500 focus:ring-2 focus:ring-rose-500'
+                        : 'border-slate-700 focus:ring-2 focus:ring-blue-500'
+                    }`}
+                  />
+                </div>
+                {otpIssuedAt && (
+                  <div className="flex items-center justify-center gap-2 text-xs -mt-1">
+                    {!expired ? (
+                      <>
+                        <span className="text-slate-400">Code expires in</span>
+                        <span className="font-semibold text-blue-400 tabular-nums">{mmss}</span>
+                      </>
+                    ) : (
+                      <span className="font-semibold text-rose-400">OTP expired. Resend.</span>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep(STEPS.REQUEST);
+                    setOtp('');
+                    setOtpIssuedAt(null);
+                    setExpired(false);
+                    setRemaining(0);
+                  }}
+                  className="flex-1 h-12 rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700"
+                >
+                  Change Email
+                </button>
+                <button
+                  type="submit"
+                  disabled={!canVerify}
+                  className={`flex-1 h-12 rounded-lg text-white font-semibold shadow-[0_10px_30px_-10px_rgba(37,99,235,0.6)] ${
+                    canVerify ? 'bg-blue-600 hover:bg-blue-500' : 'bg-slate-700 cursor-not-allowed'
+                  }`}
+                >
+                  {verifying ? 'Verifying…' : 'Verify'}
+                </button>
+              </div>
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (sending) return;
+                    try {
+                      setSending(true);
+                      await axios.post(`${API_ORIGIN}/authentication/password-reset-request/`, { email });
+                      setOtp('');
+                      setOtpIssuedAt(Date.now());
+                      setExpired(false);
+                    } catch (e) {
+                      setError(parseAxiosError(e));
+                    } finally {
+                      setSending(false);
+                    }
+                  }}
+                  className="text-sm font-semibold text-blue-400 hover:text-blue-300"
+                >
+                  Resend {otpIssuedAt && !expired ? `in ${mmss}` : ''}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* Step: Reset */}
+          {step === STEPS.RESET && (
+            <form onSubmit={resetPassword} className="mt-6 space-y-5">
+              <div className="space-y-3">
+                <input
+                  type="password"
+                  placeholder="New password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full h-12 px-4 rounded-lg bg-slate-800/70 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-slate-500 text-white"
+                />
+                <input
+                  type="password"
+                  placeholder="Confirm password"
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  className="w-full h-12 px-4 rounded-lg bg-slate-800/70 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-slate-500 text-white"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={!canReset}
+                className={`w-full h-12 rounded-lg text-white font-semibold shadow-[0_10px_30px_-10px_rgba(37,99,235,0.6)] ${
+                  canReset ? 'bg-blue-600 hover:bg-blue-500' : 'bg-slate-700 cursor-not-allowed'
+                }`}
+              >
+                {resetting ? 'Resetting…' : 'Reset Password'}
+              </button>
+              <p className="text-center text-xs text-slate-400 mt-2">
+                Tip: Use at least 6 characters with a mix of letters and numbers.
+              </p>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
-export default ResetPassword;
+function parseAxiosError(err) {
+  if (err?.response?.data) {
+    const d = err.response.data;
+    if (typeof d === 'string') return d;
+    try {
+      return JSON.stringify(d);
+    } catch {
+      return 'Request failed';
+    }
+  }
+  return 'Network error';
+}

@@ -36,6 +36,7 @@ function ForgotPassword() {
     if (!email) return;
     try {
       setSending(true);
+      await axios.post(`${baseURL}/authentication/password-reset-request/`,{"email":email})
       console.log('Send code to:', email);
       setOtp('');
       setOtpIssuedAt(Date.now());
@@ -50,12 +51,11 @@ const onBack = () => {
 
   const onVerify = async (e) => {
     e.preventDefault();
-    value=await axios.post(`${baseURL}/authentication/password-reset-request/`,email,{
-        header
-    })
+      try {
+    console.log(email)    
     if (expired) return;
-    try {
       setVerifying(true);
+       
       console.log('Verify OTP:', otp, 'for', email);
     } finally {
       setVerifying(false);
