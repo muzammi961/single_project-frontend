@@ -1,28 +1,38 @@
-// import {configureStore,combineReducers } from "@reduxjs/toolkit"
-// import appSlice  from "./actioncreate"
-
-
-// const rootReducer = combineReducers({
-//   app: appReducer, // must be a valid reducer function
-// });
-
+// import { configureStore } from "@reduxjs/toolkit";
+// import appReducer from "./actioncreate"; // This must export reducer
 
 // export const store = configureStore({
 //   reducer: {
-//     app: appSlice.reducer,
-//     reducer: rootReducer,
-//   }
+//     app: appReducer, 
+//   },
 // });
-// export default store
 
+// export default store;
 
-import { configureStore } from "@reduxjs/toolkit";
-import appReducer from "./actioncreate"; // This must export reducer
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import { persistReducer, persistStore } from "redux-persist";
+import storage from "redux-persist/lib/storage";
+import appReducer from "./actioncreate";
 
-export const store = configureStore({
-  reducer: {
-    app: appReducer, // ✅ just use the slice reducer
-  },
+// persist configuration
+const persistConfig = {
+  key: "root",
+  storage,
+  whitelist: ["app"], // persist only the app slice
+};
+
+const rootReducer = combineReducers({
+  app: appReducer,
 });
 
-export default store;
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+export const store = configureStore({
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false, 
+    }),
+});
+
+export const persistor = persistStore(store);

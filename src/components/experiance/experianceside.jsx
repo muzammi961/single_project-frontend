@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link,useNavigate } from 'react-router-dom';
 
 const ExperienceSide = () => {
-  // Mock data for places (unchanged)
+  const navigator=useNavigate()
   const places = [
     {
       id: 1,
@@ -299,7 +299,7 @@ const ExperienceSide = () => {
               <h2 className="text-2xl font-bold text-white">Share Your Experience</h2>
               <button
                 className="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-semibold px-6 py-2 rounded-lg shadow-lg shadow-teal-500/30 hover:shadow-teal-500/50 transition-all duration-300 transform hover:scale-105 shine-effect"
-                onClick={() => setShowModal('addExperience')}
+                onClick={() =>navigator('/AddExperience')}
                 aria-label="Add new experience"
               >
                 Post Experience
