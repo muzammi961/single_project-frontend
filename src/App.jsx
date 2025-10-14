@@ -1,4 +1,5 @@
 import './App.css'
+import { useEffect } from "react";
 import LoginPage from './components/authentication/login.jsx'
 import HomeSide from './components/homeside/home.jsx'
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -22,9 +23,27 @@ import AddExperience from './components/experiance/createexperiances.jsx'
 import Viewphotoorvideofromprofile  from './components/profile/viewphotoorvideofromprofile.jsx'
 import FollowingMembers from './components/socialmedia/FollowingMembers .jsx'
 import FollowersMembers from './components/socialmedia/FollowersMembers.jsx'
+
+
 function App() {
 const isAuthenticated = !!localStorage.getItem("access_token");
 const baseURL = import.meta.env.VITE_API_BASE_URL;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   return (
      <BrowserRouter>
         <Routes>
