@@ -796,11 +796,11 @@ const ExperienceSide = () => {
       {/* Footer */}
       <footer className="sticky bottom-0 bg-black/80 backdrop-blur-lg border-t border-teal-500/50 shadow-lg shadow-teal-500/20">
         <nav className="flex justify-around items-center p-4">
-          <a className="flex flex-col items-center gap-1 text-teal-400 hover:text-teal-300 transition-colors duration-200" href="#">
+          <a onClick={()=>navigator('/ExperienceSide')} className="flex flex-col items-center gap-1 text-teal-400 hover:text-teal-300 transition-colors duration-200" href="#">
             <span className="material-symbols-outlined text-2xl">explore</span>
             <span className="text-sm font-medium">Experience</span>
           </a>
-          <a className="flex flex-col items-center gap-1 text-gray-200 hover:text-gray-100 transition-colors duration-200" href="#">
+          <a onClick={()=>navigator('/TripPlanner')} className="flex flex-col items-center gap-1 text-gray-200 hover:text-gray-100 transition-colors duration-200" href="#">
             <span className="material-symbols-outlined text-2xl">receipt_long</span>
             <span className="text-sm font-medium">Expense</span>
           </a>

@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.35.0",
+    "@tailwindcss/postcss": "^4.1.14",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.2",
@@ -39,7 +40,20 @@
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.4.0",
     "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.13",
+    "tailwindcss": "^4.1.14",
     "vite": "^7.1.6"
-  }
+  },
+  "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
+  "main": "eslint.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/muzammi961/single_project-frendend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/muzammi961/single_project-frendend/issues"
+  },
+  "homepage": "https://github.com/muzammi961/single_project-frendend#readme"
 }

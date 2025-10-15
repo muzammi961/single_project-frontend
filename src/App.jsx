@@ -25,6 +25,15 @@ import FollowingMembers from './components/socialmedia/FollowingMembers .jsx'
 import FollowersMembers from './components/socialmedia/FollowersMembers.jsx'
 
 
+
+
+
+
+import Dashboard from './components/expense_travelplanning/Dashboard .jsx';
+import TripPlanner from './components/expense_travelplanning/TripPlanner .jsx';
+import ExpenseTracker from './components/expense_travelplanning/ExpenseTracker .jsx';
+import GroupExpenses from './components/expense_travelplanning/GroupExpenses .jsx'
+import Payments from './components/expense_travelplanning/Payments .jsx'
 function App() {
 const isAuthenticated = !!localStorage.getItem("access_token");
 const baseURL = import.meta.env.VITE_API_BASE_URL;
@@ -81,6 +90,18 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
 
             <Route path='Viewphotoorvideofromprofile/' element={<Viewphotoorvideofromprofile/>}/>
             <Route path='/AddExperience' element={<AddExperience/>}/>
+
+
+
+
+
+
+
+            <Route path='/Dashboard' element={<Dashboard/>}/>
+            <Route path='/TripPlanner' element={<TripPlanner/>}/>
+            <Route path='/ExpenseTracker' element={<ExpenseTracker/>}/>
+            <Route path='/GroupExpenses' element={<GroupExpenses/>}/>
+            <Route path='/Payments' element={<Payments/>}/>
           </Routes>
       </BrowserRouter>
   )
