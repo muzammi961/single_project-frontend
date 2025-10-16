@@ -34,6 +34,21 @@ import TripPlanner from './components/expense_travelplanning/TripPlanner .jsx';
 import ExpenseTracker from './components/expense_travelplanning/ExpenseTracker .jsx';
 import GroupExpenses from './components/expense_travelplanning/GroupExpenses .jsx'
 import Payments from './components/expense_travelplanning/Payments .jsx'
+import Calendar from './components/experiance/CalendarComponent.jsx'
+
+
+
+
+
+
+
+
+
+
+
+
+
+import GoogleMapComponent from './components/live journy/googleapicall.jsx'
 function App() {
 const isAuthenticated = !!localStorage.getItem("access_token");
 const baseURL = import.meta.env.VITE_API_BASE_URL;
@@ -102,6 +117,12 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
             <Route path='/ExpenseTracker' element={<ExpenseTracker/>}/>
             <Route path='/GroupExpenses' element={<GroupExpenses/>}/>
             <Route path='/Payments' element={<Payments/>}/>
+
+
+
+            <Route path='/Calendar' element={<Calendar/>}/>
+
+            <Route path='/GoogleMapComponent' element={<GoogleMapComponent/>}/>
           </Routes>
       </BrowserRouter>
   )
