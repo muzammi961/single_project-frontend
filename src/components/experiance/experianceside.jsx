@@ -875,12 +875,6 @@
 
 
 
-
-
-
-
-
-
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from "axios";
@@ -1008,6 +1002,13 @@ const ExperienceSide = () => {
     fetchExperiences();
   }, [token, profiles, navigate]);
 
+  // Reset selected place when starting search
+  useEffect(() => {
+    if (searchQuery !== '') {
+      setSelectedPlaceForExperiences(null);
+    }
+  }, [searchQuery]);
+
   // Fetch place-specific experiences
   const fetchPlaceExperiences = async (placeName) => {
     try {
@@ -1054,6 +1055,9 @@ const ExperienceSide = () => {
     : experiences;
 
   const displayExperiences = selectedPlaceForExperiences ? placeExperiences : filteredExperiences;
+
+  const showPlacesSection = !selectedPlaceForExperiences && (searchQuery === '' || searchType === 'Places');
+  const showExperiencesSection = selectedPlaceForExperiences || (searchQuery === '' || searchType === 'Experiences');
 
   // Handle form submissions
   const handleAddExperience = () => {
@@ -1206,7 +1210,7 @@ const ExperienceSide = () => {
         {/* Header */}
         <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-lg shadow-sm shadow-teal-500/20 border-b border-gray-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-            <button className="p-2" aria-label="Calendar">
+            <button onClick={()=>navigate('/Calendar')} className="p-2" aria-label="Calendar">
               <span className="material-symbols-outlined text-teal-400 hover:text-teal-300 transition-colors">calendar_today</span>
             </button>
             <h1 className="text-2xl font-bold text-teal-500">TravelAI</h1>
@@ -1263,163 +1267,167 @@ const ExperienceSide = () => {
           </section>
 
           {/* Places Listing */}
-          <section className="animate-fade-in">
-            <h2 className="text-3xl font-bold text-white mb-6">Explore Places</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredPlaces.map(place => (
-                <div
-                  key={place.id}
-                  className="w-full bg-gray-800/50 backdrop-blur-lg rounded-xl shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40 transition-all duration-300 transform hover:scale-105 shine-effect"
-                >
-                  <img
-                    alt={place.name}
-                    className="w-full h-48 object-cover rounded-t-xl"
-                    src={place.image}
-                  />
-                  <div className="p-5">
-                    <h3 className="text-xl font-semibold text-white">{place.name}</h3>
-                    <p className="text-sm text-gray-200 mt-2 line-clamp-2">{place.description}</p>
-                    <div className="flex items-center mt-3 text-sm text-gray-200">
-                      <span className="material-symbols-outlined text-base text-teal-400 mr-1">star</span>
-                      <span>{place.rating} ({place.reviewsCount} reviews)</span>
+          {showPlacesSection && (
+            <section className="animate-fade-in">
+              <h2 className="text-3xl font-bold text-white mb-6">Explore Places</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredPlaces.map(place => (
+                  <div
+                    key={place.id}
+                    className="w-full bg-gray-800/50 backdrop-blur-lg rounded-xl shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40 transition-all duration-300 transform hover:scale-105 shine-effect"
+                  >
+                    <img
+                      alt={place.name}
+                      className="w-full h-48 object-cover rounded-t-xl"
+                      src={place.image}
+                    />
+                    <div className="p-5">
+                      <h3 className="text-xl font-semibold text-white">{place.name}</h3>
+                      <p className="text-sm text-gray-200 mt-2 line-clamp-2">{place.description}</p>
+                      <div className="flex items-center mt-3 text-sm text-gray-200">
+                        <span className="material-symbols-outlined text-base text-teal-400 mr-1">star</span>
+                        <span>{place.rating} ({place.reviewsCount} reviews)</span>
+                      </div>
+                      <p className="text-sm text-gray-200 mt-3 line-clamp-3">{place.overview}</p>
+                      <button
+                        className="mt-4 text-teal-400 hover:text-teal-300 text-sm font-medium transition-colors duration-200"
+                        onClick={() => {
+                          setSelectedPlaceForExperiences(place);
+                          fetchPlaceExperiences(place.name);
+                        }}
+                        aria-label={`View experiences for ${place.name}`}
+                      >
+                        View Experiences
+                      </button>
                     </div>
-                    <p className="text-sm text-gray-200 mt-3 line-clamp-3">{place.overview}</p>
-                    <button
-                      className="mt-4 text-teal-400 hover:text-teal-300 text-sm font-medium transition-colors duration-200"
-                      onClick={() => {
-                        setSelectedPlaceForExperiences(place);
-                        fetchPlaceExperiences(place.name);
-                      }}
-                      aria-label={`View experiences for ${place.name}`}
-                    >
-                      View Experiences
-                    </button>
                   </div>
-                </div>
-              ))}
-            </div>
-          </section>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Experience Listing */}
-          <section className="animate-fade-in">
-            {selectedPlaceForExperiences ? (
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-3xl font-bold text-white">Experiences in {selectedPlaceForExperiences.name}</h2>
-                <button
-                  className="bg-gray-600 hover:bg-gray-700 text-white font-semibold px-4 py-2 rounded-lg transition-all duration-300"
-                  onClick={() => setSelectedPlaceForExperiences(null)}
-                  aria-label="Back to all experiences"
-                >
-                  Back
-                </button>
-              </div>
-            ) : (
-              <h2 className="text-3xl font-bold text-white mb-6">Traveler Experiences</h2>
-            )}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displayExperiences.map(exp => (
-                <div
-                  key={exp.id}
-                  className="w-full bg-gray-800/50 backdrop-blur-lg rounded-xl shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40 transition-all duration-300 transform hover:scale-105 shine-effect"
-                >
-                  {exp.image ? (
-                    <img
-                      alt={exp.title}
-                      className="w-full h-48 object-cover rounded-t-xl"
-                      src={exp.image}
-                    />
-                  ) : (
-                    <div className="w-full h-48 bg-gray-700 flex items-center justify-center rounded-t-xl">
-                      No Image
-                    </div>
-                  )}
-                  <div className="p-5">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-3">
-                        <img
-                          src={exp.profileImage}
-                          className="w-10 h-10 rounded-full object-cover border-2 border-teal-400/30"
-                          alt={`${exp.userName}'s profile`}
-                        />
-                        <div>
-                          <p className="text-sm font-semibold text-white">{exp.userName}</p>
-                          <p className="text-xs text-gray-200">{exp.timestamp}</p>
+          {showExperiencesSection && (
+            <section className="animate-fade-in">
+              {selectedPlaceForExperiences ? (
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-3xl font-bold text-white">Experiences in {selectedPlaceForExperiences.name}</h2>
+                  <button
+                    className="bg-gray-600 hover:bg-gray-700 text-white font-semibold px-4 py-2 rounded-lg transition-all duration-300"
+                    onClick={() => setSelectedPlaceForExperiences(null)}
+                    aria-label="Back to all experiences"
+                  >
+                    Back
+                  </button>
+                </div>
+              ) : (
+                <h2 className="text-3xl font-bold text-white mb-6">Traveler Experiences</h2>
+              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {displayExperiences.map(exp => (
+                  <div
+                    key={exp.id}
+                    className="w-full bg-gray-800/50 backdrop-blur-lg rounded-xl shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40 transition-all duration-300 transform hover:scale-105 shine-effect"
+                  >
+                    {exp.image ? (
+                      <img
+                        alt={exp.title}
+                        className="w-full h-48 object-cover rounded-t-xl"
+                        src={exp.image}
+                      />
+                    ) : (
+                      <div className="w-full h-48 bg-gray-700 flex items-center justify-center rounded-t-xl">
+                        No Image
+                      </div>
+                    )}
+                    <div className="p-5">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center space-x-3">
+                          <img
+                            src={exp.profileImage}
+                            className="w-10 h-10 rounded-full object-cover border-2 border-teal-400/30"
+                            alt={`${exp.userName}'s profile`}
+                          />
+                          <div>
+                            <p className="text-sm font-semibold text-white">{exp.userName}</p>
+                            <p className="text-xs text-gray-200">{exp.timestamp}</p>
+                          </div>
                         </div>
-                      </div>
-                      <button
-                        className="text-teal-400 hover:text-teal-300 text-sm font-medium"
-                        onClick={() => setSelectedExperience(exp)}
-                        aria-label={`View details for ${exp.title}`}
-                      >
-                        Details
-                      </button>
-                    </div>
-                    <h3 className="text-xl font-semibold text-white">{exp.title}</h3>
-                    <p className="text-sm text-gray-200 mt-2 line-clamp-3">{exp.content}</p>
-                    <div className="flex items-center justify-between mt-4">
-                      <div className="flex space-x-6">
                         <button
-                          className="flex items-center space-x-1 text-teal-400 hover:text-teal-300 transition-colors duration-200"
-                          onClick={() => handleLikeExperience(exp.id)}
-                          aria-label={exp.liked ? `Unlike ${exp.title}` : `Like ${exp.title}`}
+                          className="text-teal-400 hover:text-teal-300 text-sm font-medium"
+                          onClick={() => setSelectedExperience(exp)}
+                          aria-label={`View details for ${exp.title}`}
                         >
-                          <svg
-                            className={`w-5 h-5 ${exp.liked ? 'fill-current text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-teal-500' : ''}`}
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M12 21C12 21 4 13.5 4 8.5a4.5 4.5 0 019-1 4.5 4.5 0 019 1c0 5-8 12.5-8 12.5z"
-                            />
-                          </svg>
-                          <span className="text-sm text-white">{exp.likes.toLocaleString()}</span>
-                        </button>
-                        <button
-                          className="flex items-center space-x-1 text-teal-400 hover:text-teal-300 transition-colors duration-200"
-                          onClick={() => setShowModal(`addComment-${exp.id}`)}
-                          aria-label={`Comment on ${exp.title}`}
-                        >
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
-                            />
-                          </svg>
-                          <span className="text-sm text-white">{exp.comments.length}</span>
+                          Details
                         </button>
                       </div>
-                      <button
-                        className="text-teal-400 hover:text-teal-300 text-sm font-medium"
-                        onClick={() => setShowModal(`addReview-${exp.id}`)}
-                        aria-label={`Add review for ${exp.title}`}
-                      >
-                        Add Review
-                      </button>
+                      <h3 className="text-xl font-semibold text-white">{exp.title}</h3>
+                      <p className="text-sm text-gray-200 mt-2 line-clamp-3">{exp.content}</p>
+                      <div className="flex items-center justify-between mt-4">
+                        <div className="flex space-x-6">
+                          <button
+                            className="flex items-center space-x-1 text-teal-400 hover:text-teal-300 transition-colors duration-200"
+                            onClick={() => handleLikeExperience(exp.id)}
+                            aria-label={exp.liked ? `Unlike ${exp.title}` : `Like ${exp.title}`}
+                          >
+                            <svg
+                              className={`w-5 h-5 ${exp.liked ? 'fill-current text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-teal-500' : ''}`}
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M12 21C12 21 4 13.5 4 8.5a4.5 4.5 0 019-1 4.5 4.5 0 019 1c0 5-8 12.5-8 12.5z"
+                              />
+                            </svg>
+                            <span className="text-sm text-white">{exp.likes.toLocaleString()}</span>
+                          </button>
+                          <button
+                            className="flex items-center space-x-1 text-teal-400 hover:text-teal-300 transition-colors duration-200"
+                            onClick={() => setShowModal(`addComment-${exp.id}`)}
+                            aria-label={`Comment on ${exp.title}`}
+                          >
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
+                              />
+                            </svg>
+                            <span className="text-sm text-white">{exp.comments.length}</span>
+                          </button>
+                        </div>
+                        <button
+                          className="text-teal-400 hover:text-teal-300 text-sm font-medium"
+                          onClick={() => setShowModal(`addReview-${exp.id}`)}
+                          aria-label={`Add review for ${exp.title}`}
+                        >
+                          Add Review
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-            <div className="flex justify-center pt-6">
-              <button
-                className="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-semibold px-8 py-3 rounded-full shadow-lg shadow-teal-500/30 hover:shadow-teal-500/50 transition-all duration-300 transform hover:scale-105 shine-effect"
-                aria-label="Load more experiences"
-              >
-                Load More
-              </button>
-            </div>
-          </section>
+                ))}
+              </div>
+              <div className="flex justify-center pt-6">
+                <button
+                  className="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-semibold px-8 py-3 rounded-full shadow-lg shadow-teal-500/30 hover:shadow-teal-500/50 transition-all duration-300 transform hover:scale-105 shine-effect"
+                  aria-label="Load more experiences"
+                >
+                  Load More
+                </button>
+              </div>
+            </section>
+          )}
 
           {/* Experience Details Modal */}
           {selectedExperience && (

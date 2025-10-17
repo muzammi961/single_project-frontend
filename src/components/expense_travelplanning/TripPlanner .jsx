@@ -4,14 +4,21 @@ const TripPlanner = () => {
   const [tripData, setTripData] = useState({
     tripName: '',
     destination: '',
+    startingLocation: '',
     startDate: '',
     endDate: '',
-    travelers: 1,
+    tripType: '',
+    placeType: '',
     budget: '',
-    aiSuggestions: false
+    aiSuggestions: false,
+    privacy: 'private'
   });
 
   const [selectedBudgetTier, setSelectedBudgetTier] = useState('budget-friendly');
+  const [inviteLink, setInviteLink] = useState('');
+
+  const tripTypes = ['Bus', 'Group Tour', 'Bike', 'Car', 'Train'];
+  const placeTypes = ['Urban/City', 'Beach/Coastal', 'Mountain/Hiking', 'Historical', 'Adventure', 'Relaxation'];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -21,10 +28,11 @@ const TripPlanner = () => {
     }));
   };
 
-  const handleTravelerChange = (change) => {
+  const handleSelectChange = (e) => {
+    const { name, value } = e.target;
     setTripData(prev => ({
       ...prev,
-      travelers: Math.max(1, prev.travelers + change)
+      [name]: value
     }));
   };
 
@@ -35,8 +43,27 @@ const TripPlanner = () => {
     }));
   };
 
+  const handlePrivacyChange = (privacy) => {
+    setTripData(prev => ({
+      ...prev,
+      privacy: privacy
+    }));
+    if (privacy === 'public') {
+      // Generate invite link for public trips
+      setInviteLink(`https://app.com/invite/${Date.now()}`);
+    } else {
+      setInviteLink('');
+    }
+  };
+
   const handleBudgetTierSelect = (tier) => {
     setSelectedBudgetTier(tier);
+  };
+
+  const generateInviteLink = () => {
+    if (tripData.privacy === 'public') {
+      setInviteLink(`https://app.com/invite/${Date.now()}`);
+    }
   };
 
   return (
@@ -111,6 +138,22 @@ const TripPlanner = () => {
                 </label>
                 
                 <label className="flex flex-col">
+                  <p className="text-base font-medium pb-2 text-gray-700">Starting Location</p>
+                  <div className="flex">
+                    <input
+                      name="startingLocation"
+                      value={tripData.startingLocation}
+                      onChange={handleInputChange}
+                      className="flex-1 px-4 py-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+                      placeholder="e.g., New York, USA"
+                    />
+                    <div className="bg-gray-100 px-4 py-3 border border-gray-300 border-l-0 rounded-r-lg flex items-center">
+                      <span className="material-symbols-outlined text-gray-400">search</span>
+                    </div>
+                  </div>
+                </label>
+                
+                <label className="flex flex-col">
                   <p className="text-base font-medium pb-2 text-gray-700">Start Date</p>
                   <input
                     name="startDate"
@@ -131,32 +174,35 @@ const TripPlanner = () => {
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
                   />
                 </label>
-                
-                <label className="flex flex-col">
-                  <p className="text-base font-medium pb-2 text-gray-700">Number of Travelers</p>
-                  <div className="flex">
-                    <button
-                      type="button"
-                      onClick={() => handleTravelerChange(-1)}
-                      className="px-4 py-3 bg-gray-200 text-gray-700 border border-gray-300 rounded-l-lg hover:bg-gray-300 transition-colors"
-                    >
-                      -
-                    </button>
-                    <input
-                      name="travelers"
-                      type="number"
-                      value={tripData.travelers}
-                      onChange={handleInputChange}
-                      className="w-20 px-4 py-3 border-t border-b border-gray-300 text-center text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleTravelerChange(1)}
-                      className="px-4 py-3 bg-gray-200 text-gray-700 border border-gray-300 rounded-r-lg hover:bg-gray-300 transition-colors"
-                    >
-                      +
-                    </button>
-                  </div>
+
+                <label className="flex flex-col md:col-span-2">
+                  <p className="text-base font-medium pb-2 text-gray-700">Trip Type (Transportation)</p>
+                  <select
+                    name="tripType"
+                    value={tripData.tripType}
+                    onChange={handleSelectChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+                  >
+                    <option value="">Select Trip Type</option>
+                    {tripTypes.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="flex flex-col md:col-span-2">
+                  <p className="text-base font-medium pb-2 text-gray-700">Type of Place (Location)</p>
+                  <select
+                    name="placeType"
+                    value={tripData.placeType}
+                    onChange={handleSelectChange}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+                  >
+                    <option value="">Select Place Type</option>
+                    {placeTypes.map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
                 </label>
               </div>
             </div>
@@ -246,6 +292,62 @@ const TripPlanner = () => {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Privacy Section Card */}
+            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Privacy Settings</h2>
+              <div className="flex gap-8">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="privacy"
+                    value="private"
+                    checked={tripData.privacy === 'private'}
+                    onChange={(e) => handlePrivacyChange(e.target.value)}
+                    className="rounded"
+                  />
+                  <span className="text-base font-medium text-gray-700">Private</span>
+                  <p className="text-sm text-gray-500">Only invited users can join.</p>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="privacy"
+                    value="public"
+                    checked={tripData.privacy === 'public'}
+                    onChange={(e) => handlePrivacyChange(e.target.value)}
+                    className="rounded"
+                  />
+                  <span className="text-base font-medium text-gray-700">Public</span>
+                  <p className="text-sm text-gray-500">Anyone can join via invite link.</p>
+                </label>
+              </div>
+
+              {/* Invite Link Section */}
+              {tripData.privacy === 'public' && (
+                <div className="mt-6">
+                  <p className="text-base font-medium pb-2 text-gray-700">Shareable Invite Link</p>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={inviteLink}
+                      readOnly
+                      className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base"
+                      placeholder="Invite link will appear here"
+                    />
+                    <button
+                      onClick={generateInviteLink}
+                      className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Generate
+                    </button>
+                  </div>
+                  {inviteLink && (
+                    <p className="text-sm text-gray-500 mt-2">Share this link with others to let them join your trip.</p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Action Buttons */}
