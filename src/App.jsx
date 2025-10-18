@@ -35,9 +35,8 @@ import ExpenseTracker from './components/expense_travelplanning/ExpenseTracker .
 import GroupExpenses from './components/expense_travelplanning/GroupExpenses .jsx'
 import Payments from './components/expense_travelplanning/Payments .jsx'
 import Calendar from './components/experiance/CalendarComponent.jsx'
-
-
-
+import InviteView from './components/expense_travelplanning/InviteView.jsx'
+import PublicTripView from './components/expense_travelplanning/PublicTripView.jsx'
 
 
 
@@ -113,12 +112,15 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 
             <Route path='/Dashboard' element={<Dashboard/>}/>
-            <Route path='/TripPlanner' element={<TripPlanner/>}/>
             <Route path='/ExpenseTracker' element={<ExpenseTracker/>}/>
             <Route path='/GroupExpenses' element={<GroupExpenses/>}/>
             <Route path='/Payments' element={<Payments/>}/>
 
 
+            <Route path='/TripPlanner' element={<TripPlanner/>}/>
+            <Route path="/invite/:inviteCode" element={<InviteView />} />
+            <Route path="/trips/:tripId" element={<PublicTripView />} />
+           
 
             <Route path='/Calendar' element={<Calendar/>}/>
 
