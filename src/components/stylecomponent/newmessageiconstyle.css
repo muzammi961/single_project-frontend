@@ -1,0 +1,39 @@
+/* From Uiverse.io by vinodjangid07 */ 
+.inbox-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.082);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background-color: #464646;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.inbox-btn svg path {
+  fill: white;
+}
+.inbox-btn svg {
+  height: 13px;
+  transition: all 0.3s;
+}
+.msg-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: rgb(255, 255, 255);
+  border-radius: 50%;
+  font-size: 0.7em;
+  color: rgb(0, 0, 0);
+  width: 5px;
+  height: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.inbox-btn:hover {
+  transform: scale(1.1);
+}

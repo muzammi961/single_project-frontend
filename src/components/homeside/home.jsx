@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { AutherazedUserId } from "../actioncreate";
-
+import '../stylecomponent/wetherstyle.css'
+import '../stylecomponent/hometitletext.css'
 // Separate TimeDisplay component to avoid re-renders in parent
 const TimeDisplay = () => {
   const [time, setTime] = useState("");
@@ -36,18 +37,37 @@ const TimeDisplay = () => {
 const WeatherDisplay = () => {
   const navigate = useNavigate();
   return (
-    <div className="bg-black rounded-lg p-3 flex flex-col items-center space-y-1 min-w-0 w-32 cursor-pointer hover:bg-gray-800 transition-colors" onClick={()=>navigate('/WeatherCard')}>
-      <div className="flex items-center space-x-1">
-        <div className="text-lg font-bold text-white">24°</div>
-        <div className="text-2xl">☀️</div>
-      </div>
-      <div className="text-xs text-white text-center">New York</div>
-      <div className="text-xs text-gray-300 text-center">Partly cloudy</div>
-    </div>
+    // <div className="bg-black rounded-lg p-3 flex flex-col items-center space-y-1 min-w-0 w-32 cursor-pointer hover:bg-gray-800 transition-colors" >
+    //   <div className="flex items-center space-x-1">
+    //     <div className="text-lg font-bold text-white">24°</div>
+    //     <div className="text-2xl">☀️</div>
+    //   </div>
+    //   <div className="text-xs text-white text-center">New York</div>
+    //   <div className="text-xs text-gray-300 text-center">Partly cloudy</div>
+    // </div>
+   
+<div class="container" onClick={()=>navigate('/WeatherCard')}>
+  <div class="cloud front">
+    <span class="left-front"></span>
+    <span class="right-front"></span>
+  </div>
+  <span class="sun sunshine"></span>
+  <span class="sun"></span>
+  <div class="cloud back">
+    <span class="left-back"></span>
+    <span class="right-back"></span>
+  </div>
+</div>
   );
 };
 
 export default function HomeSide() {
+const PathFinderLoader = ({ size = 64, label = "PathFinder loading" }) => {
+  const style = { height: size, width: size };
+
+}
+
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const token = localStorage.getItem("access_token");
@@ -331,9 +351,7 @@ export default function HomeSide() {
       <section className="relative min-h-screen flex items-center justify-center bg-white">
        
         <div className="min-h-screen flex flex-col items-center justify-center">
-          {/* PathFinder Animated Image */}
-      
-          {/* Animated Indian Landscape Image */}
+  
           <div className="w-full max-w-4xl h-64 bg-cover bg-center rounded-lg overflow-hidden shadow-lg mb-8 animate-slide-in" 
                 style={{ 
                  backgroundImage: `url("https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=2070&q=80")`

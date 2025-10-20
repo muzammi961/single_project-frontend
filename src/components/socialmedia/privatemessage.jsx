@@ -191,14 +191,18 @@ function DirectMessagesUI() {
           timestamp: data.timestamp || new Date().toISOString()
         };
         
-        setMessages((prev) => {
-          const updatedMessages = [...prev, messageWithTimestamp];
-          // Sort messages to maintain chronological order
-          return updatedMessages.sort((a, b) => 
-            new Date(a.timestamp) - new Date(b.timestamp)
-          );
-        });
-        
+        // setMessages((prev) => {
+        //   const updatedMessages = [...prev, messageWithTimestamp];
+        //   // Sort messages to maintain chronological order
+        //   return updatedMessages.sort((a, b) => 
+        //     new Date(a.timestamp) - new Date(b.timestamp)
+        //   );
+        // });
+        setMessages((prev) => [...prev, messageWithTimestamp]);
+        useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+         }, [messages]);
+
         // Refresh chat list when new message arrives
         fetchChatMembers();
       } catch (error) {

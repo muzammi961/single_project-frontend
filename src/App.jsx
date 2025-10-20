@@ -43,6 +43,12 @@ import PublicTripView from './components/expense_travelplanning/PublicTripView.j
 
 
 
+import PlacesTest from './components/plasesarch.jsx'
+
+
+
+
+
 
 
 
@@ -125,6 +131,18 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
             <Route path='/Calendar' element={<Calendar/>}/>
 
             <Route path='/GoogleMapComponent' element={<GoogleMapComponent/>}/>
+
+
+
+
+
+
+
+
+
+
+
+            <Route path='/PlacesTest' element={<PlacesTest/>}/>
           </Routes>
       </BrowserRouter>
   )
