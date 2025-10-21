@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';  
 import axios from 'axios';
 
-const TripPlanner = () => {
+const TripPlannerofCustome = () => {
   const navigate = useNavigate();
   const [tripData, setTripData] = useState({
     tripName: '',
@@ -197,12 +197,7 @@ const TripPlanner = () => {
             Profile
           </a>
         </nav>
-        <div className="p-4 border-t border-gray-200">
-          <button className="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-600 text-white h-12 text-base font-bold hover:bg-blue-700 transition-colors">
-            <span className="material-symbols-outlined">add</span>
-            New Trip
-          </button>
-        </div>
+      
       </aside>
 
       <main className="flex-1 p-10">
@@ -364,4 +359,4 @@ const TripPlanner = () => {
   );
 };
 
-export default TripPlanner;
+export default TripPlannerofCustome;

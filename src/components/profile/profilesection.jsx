@@ -1835,13 +1835,277 @@
 
 
 
-
 import axios from "axios";
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-// ========== Travel Experiences Section Component ==========
-const TravelExperiencesSection = () => {
+// ========== WebSocket Hook with Authentication ==========
+const useWebSocket = (url, onMessage, dependencies = []) => {
+  const ws = useRef(null);
+  const reconnectTimeout = useRef(null);
+  const [connected, setConnected] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const connect = () => {
+      try {
+        if (!url || url.includes('null') || url.includes('undefined')) {
+          console.log('Invalid WebSocket URL:', url);
+          return;
+        }
+
+        // Get authentication token
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+          console.log('No authentication token available for WebSocket');
+          return;
+        }
+
+        // Add token to WebSocket URL
+        const wsUrl = new URL(url);
+        wsUrl.searchParams.append('token', token);
+        
+        console.log('Connecting to WebSocket:', wsUrl.toString());
+        
+        ws.current = new WebSocket(wsUrl.toString());
+        
+        ws.current.onopen = () => {
+          console.log(`✅ WebSocket connected to ${url}`);
+          if (isMounted) setConnected(true);
+        };
+
+        ws.current.onmessage = (event) => {
+          if (isMounted && onMessage) {
+            try {
+              const data = JSON.parse(event.data);
+              console.log('📨 WebSocket message received:', data);
+              onMessage(data);
+            } catch (error) {
+              console.error('Error parsing WebSocket message:', error);
+            }
+          }
+        };
+
+        ws.current.onclose = (event) => {
+          console.log(`❌ WebSocket disconnected: ${event.code} ${event.reason}`);
+          if (isMounted) setConnected(false);
+          
+          // Attempt reconnect after 3 seconds
+          if (isMounted && event.code !== 1000) {
+            reconnectTimeout.current = setTimeout(connect, 3000);
+          }
+        };
+
+        ws.current.onerror = (error) => {
+          console.error("WebSocket error:", error);
+          if (isMounted) setConnected(false);
+        };
+      } catch (error) {
+        console.error("WebSocket connection failed:", error);
+        if (isMounted) setConnected(false);
+      }
+    };
+
+    connect();
+
+    return () => {
+      isMounted = false;
+      if (reconnectTimeout.current) {
+        clearTimeout(reconnectTimeout.current);
+      }
+      if (ws.current) {
+        ws.current.close(1000, 'Component unmounting');
+      }
+    };
+  }, [url, ...dependencies]);
+
+  const sendMessage = useCallback((message) => {
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      try {
+        console.log('📤 Sending WebSocket message:', message);
+        ws.current.send(JSON.stringify(message));
+        return true;
+      } catch (error) {
+        console.error('Error sending WebSocket message:', error);
+        return false;
+      }
+    }
+    console.warn('WebSocket not connected, message not sent');
+    return false;
+  }, []);
+
+  return { sendMessage, connected };
+};
+
+// ========== Notification Bell Component ==========
+const NotificationBell = () => {
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Mock notifications since API endpoints don't exist
+  const mockNotifications = [
+    {
+      id: 1,
+      notification_type: 'LIKE',
+      sender_name: 'Traveler123',
+      created_at: new Date().toISOString(),
+      read: false
+    },
+    {
+      id: 2,
+      notification_type: 'COMMENT',
+      sender_name: 'AdventureSeeker',
+      created_at: new Date(Date.now() - 86400000).toISOString(),
+      read: true
+    }
+  ];
+
+  // Use mock data instead of API calls
+  useEffect(() => {
+    setNotifications(mockNotifications);
+    setUnreadCount(mockNotifications.filter(n => !n.read).length);
+  }, []);
+
+  const markAsRead = async (notificationId) => {
+    // Mock implementation
+    setNotifications(prev =>
+      prev.map(n =>
+        n.id === notificationId ? { ...n, read: true } : n
+      )
+    );
+    setUnreadCount(prev => Math.max(0, prev - 1));
+  };
+
+  const markAllAsRead = async () => {
+    // Mock implementation
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    setUnreadCount(0);
+  };
+
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case 'LIKE': return 'favorite';
+      case 'COMMENT': return 'chat_bubble';
+      case 'FOLLOW': return 'person_add';
+      default: return 'notifications';
+    }
+  };
+
+  const getNotificationMessage = (notification) => {
+    switch (notification.notification_type) {
+      case 'LIKE':
+        return `${notification.sender_name || 'Someone'} liked your post`;
+      case 'COMMENT':
+        return `${notification.sender_name || 'Someone'} commented on your post`;
+      case 'FOLLOW':
+        return `${notification.sender_name || 'Someone'} started following you`;
+      default:
+        return 'New notification';
+    }
+  };
+
+  return (
+    <div className="relative">
+      {/* Notification Bell */}
+      <button
+        onClick={() => setShowNotifications(!showNotifications)}
+        className="relative p-2 rounded-full hover:bg-teal-500/20 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-teal-500"
+        aria-label="Notifications"
+      >
+        <span className="material-symbols-outlined text-teal-400">
+          notifications
+        </span>
+        {unreadCount > 0 && (
+          <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
+      </button>
+
+      {/* Notifications Dropdown */}
+      {showNotifications && (
+        <div className="absolute right-0 top-12 w-80 sm:w-96 bg-slate-900/95 backdrop-blur-xl border border-teal-500/30 rounded-xl shadow-2xl z-50 max-h-96 overflow-hidden">
+          <div className="p-4 border-b border-teal-500/20">
+            <div className="flex items-center justify-between">
+              <h3 className="text-white font-semibold">Notifications</h3>
+              {unreadCount > 0 && (
+                <button
+                  onClick={markAllAsRead}
+                  className="text-teal-400 hover:text-teal-300 text-sm transition-colors"
+                >
+                  Mark all as read
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="overflow-y-auto max-h-64">
+            {notifications.length > 0 ? (
+              notifications.map((notification) => (
+                <div
+                  key={notification.id}
+                  className={`p-4 border-b border-teal-500/10 hover:bg-white/5 transition-colors cursor-pointer ${
+                    !notification.read ? 'bg-teal-500/10' : ''
+                  }`}
+                  onClick={() => markAsRead(notification.id)}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className={`material-symbols-outlined ${
+                      !notification.read ? 'text-teal-400' : 'text-gray-400'
+                    }`}>
+                      {getNotificationIcon(notification.notification_type)}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-sm">
+                        {getNotificationMessage(notification)}
+                      </p>
+                      <p className="text-gray-400 text-xs mt-1">
+                        {new Date(notification.created_at).toLocaleDateString()} • 
+                        {new Date(notification.created_at).toLocaleTimeString()}
+                      </p>
+                    </div>
+                    {!notification.read && (
+                      <div className="w-2 h-2 bg-teal-400 rounded-full flex-shrink-0 mt-2" />
+                    )}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="p-8 text-center text-gray-400">
+                <span className="material-symbols-outlined text-4xl mb-2">
+                  notifications_off
+                </span>
+                <p>No notifications yet</p>
+              </div>
+            )}
+          </div>
+
+          <div className="p-3 border-t border-teal-500/20">
+            <button
+              onClick={() => setShowNotifications(false)}
+              className="w-full text-teal-400 hover:text-teal-300 text-sm transition-colors py-2"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Click outside to close */}
+      {showNotifications && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setShowNotifications(false)}
+        />
+      )}
+    </div>
+  );
+};
+
+// ========== Travel Experiences Section ==========
+const TravelExperiencesSection = ({ userId }) => {
   const [experiences, setExperiences] = useState([]);
   const [filteredExperiences, setFilteredExperiences] = useState([]);
   const [activeTab, setActiveTab] = useState("All");
@@ -2109,46 +2373,149 @@ const TravelExperiencesSection = () => {
     );
   });
 
-  // Experience Detail Modal Component
+  // Experience Detail Modal Component - SIMPLIFIED VERSION
   const ExperienceDetailModal = React.memo(() => {
     const [newComment, setNewComment] = useState("");
     const [comments, setComments] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [likeCount, setLikeCount] = useState(0);
+    const [hasLiked, setHasLiked] = useState(false);
+    const [commentLoading, setCommentLoading] = useState(false);
+    const [likeLoading, setLikeLoading] = useState(false);
 
-    // Fetch comments when modal opens
+    const postId = selectedExperience?.id;
+    const token = localStorage.getItem("access_token");
+    const currentUserId = localStorage.getItem("user_id");
+
+    // Fetch initial comments
+    const fetchComments = useCallback(async () => {
+      if (!token || !postId) return;
+      try {
+        setCommentLoading(true);
+        console.log('📥 Fetching comments for post:', postId);
+        const response = await axios.get(
+          `${baseUrl}/UserCommentsBYUseridandPostid/${postId}/`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        console.log('✅ Comments fetched:', response.data);
+        setComments(response.data.comments || []);
+      } catch (error) {
+        console.error("❌ Error fetching comments:", error);
+        setComments([]);
+      } finally {
+        setCommentLoading(false);
+      }
+    }, [token, postId, baseUrl]);
+
+    // Fetch initial like status
+    const fetchLikeStatus = useCallback(async () => {
+      if (!token || !postId || !selectedExperience?.user_id) return;
+      try {
+        setLikeLoading(true);
+        console.log('📥 Fetching like status for post:', postId);
+        const response = await axios.get(
+          `${baseUrl}/TravelExperienceLikeStatusAPIView/${postId}/${selectedExperience.user_id}/`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        console.log('✅ Like status fetched:', response.data);
+        setHasLiked(response.data.has_liked || false);
+        setLikeCount(response.data.liked_posts?.length || 0);
+      } catch (error) {
+        console.error("❌ Error fetching like status:", error);
+        setHasLiked(false);
+        setLikeCount(0);
+      } finally {
+        setLikeLoading(false);
+      }
+    }, [token, postId, selectedExperience?.user_id, baseUrl]);
+
+    // Fetch initial data when modal opens
     useEffect(() => {
       if (selectedExperience && showDetailModal) {
-        // Mock comments - replace with actual API call
-        setComments([
-          { id: 1, userName: "Traveler1", content: "Amazing view!", timestamp: new Date().toISOString() },
-          { id: 2, userName: "Explorer2", content: "Loved the hike!", timestamp: new Date(Date.now() - 86400000).toISOString() }
-        ]);
+        console.log('🔄 Modal opened, fetching data...');
+        fetchComments();
+        fetchLikeStatus();
       }
-    }, [selectedExperience, showDetailModal]);
+    }, [selectedExperience, showDetailModal, fetchComments, fetchLikeStatus]);
 
     const handleAddComment = async () => {
-      if (newComment.trim() === "") return;
+      if (newComment.trim() === "" || !currentUserId || !token) {
+        alert("Please login to comment");
+        return;
+      }
       
       setIsLoading(true);
+      
       try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        const updatedComments = [
-          ...comments,
+        console.log('📤 Adding comment via REST API...');
+        const response = await axios.post(
+          `${baseUrl}/add_comment/`,
           {
-            id: Date.now(),
-            userName: "You",
-            content: newComment,
-            timestamp: new Date().toISOString(),
+            post_id: postId,
+            user_id: parseInt(currentUserId),
+            text: newComment.trim()
           },
-        ];
-        setComments(updatedComments);
-        setNewComment("");
+          {
+            headers: { 
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+          }
+        );
+        
+        if (response.data) {
+          console.log('✅ Comment added successfully:', response.data);
+          // Refresh comments to get the latest
+          await fetchComments();
+          setNewComment("");
+        }
       } catch (error) {
-        console.error("Error adding comment:", error);
+        console.error("❌ Error adding comment:", error);
+        console.error("Error details:", error.response?.data);
+        alert(`Failed to post comment: ${error.response?.data?.message || error.message}`);
       } finally {
         setIsLoading(false);
+      }
+    };
+
+    const handleToggleLike = async () => {
+      if (!currentUserId || !token) {
+        alert("Please login to like");
+        return;
+      }
+
+      setLikeLoading(true);
+      try {
+        console.log('📤 Toggling like via REST API...');
+        const response = await axios.post(
+          `${baseUrl}/toggle_like/`,
+          {
+            post_id: postId,
+            user_id: parseInt(currentUserId)
+          },
+          {
+            headers: { 
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+          }
+        );
+        
+        if (response.data) {
+          console.log('✅ Like toggled successfully:', response.data);
+          // Update like status
+          setHasLiked(response.data.liked);
+          setLikeCount(response.data.like_count);
+        }
+      } catch (error) {
+        console.error("❌ Error toggling like:", error);
+        console.error("Error details:", error.response?.data);
+      } finally {
+        setLikeLoading(false);
       }
     };
 
@@ -2171,7 +2538,7 @@ const TravelExperiencesSection = () => {
                 selectedExperience.media.type === "video" ? (
                   <video
                     controls
-                    autoPlay
+                    autoPlay={false}
                     muted
                     loop
                     className="w-full h-full object-contain max-h-full rounded-lg"
@@ -2213,20 +2580,28 @@ const TravelExperiencesSection = () => {
             <div className="p-3 border-t border-gray-700 bg-black/80">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4 text-white">
-                  <button className="flex items-center space-x-1 hover:text-teal-400 transition">
-                    <span className="material-symbols-outlined">favorite</span>
-                    <span>{selectedExperience.likes || 0}</span>
+                  <button 
+                    onClick={handleToggleLike}
+                    disabled={!token || likeLoading}
+                    className={`flex items-center space-x-1 transition-colors disabled:opacity-50 ${
+                      hasLiked ? 'text-red-500' : 'text-white hover:text-red-400'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-xl">
+                      {hasLiked ? 'favorite' : 'favorite_border'}
+                    </span>
+                    <span className="font-semibold">{likeCount}</span>
                   </button>
-                  <button className="flex items-center space-x-1 hover:text-teal-400 transition">
-                    <span className="material-symbols-outlined">chat_bubble</span>
-                    <span>{comments.length}</span>
+                  <button className="flex items-center space-x-1 text-white hover:text-teal-400 transition">
+                    <span className="material-symbols-outlined text-xl">chat_bubble</span>
+                    <span className="font-semibold">{comments.length}</span>
                   </button>
-                  <button className="flex items-center space-x-1 hover:text-teal-400 transition">
-                    <span className="material-symbols-outlined">share</span>
+                  <button className="flex items-center space-x-1 text-white hover:text-teal-400 transition">
+                    <span className="material-symbols-outlined text-xl">share</span>
                   </button>
                 </div>
                 <button className="flex items-center space-x-1 text-white hover:text-teal-400 transition">
-                  <span className="material-symbols-outlined">bookmark</span>
+                  <span className="material-symbols-outlined text-xl">bookmark</span>
                 </button>
               </div>
             </div>
@@ -2237,19 +2612,20 @@ const TravelExperiencesSection = () => {
             {/* Header */}
             <div className="p-4 border-b border-gray-200 flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gray-300 rounded-full flex-shrink-0 bg-cover" 
-                     style={{ backgroundImage: `url(${selectedExperience.userProfilePicture || ""})` }} />
+                <div className="w-10 h-10 bg-teal-500 rounded-full flex-shrink-0 flex items-center justify-center text-white font-bold">
+                  {selectedExperience.user_name?.charAt(0) || 'U'}
+                </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm">{selectedExperience.userName || "User"}</p>
+                  <p className="font-semibold text-sm">{selectedExperience.user_name || "User"}</p>
                   <p className="text-xs text-gray-500">{selectedExperience.place_name || "Unknown location"}</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowDetailModal(false)}
-                className="text-gray-500 hover:text-gray-700 transition-colors"
+                className="text-gray-500 hover:text-gray-700 transition-colors p-1"
                 aria-label="Close modal"
               >
-                <span className="material-symbols-outlined">close</span>
+                <span className="material-symbols-outlined text-2xl">close</span>
               </button>
             </div>
 
@@ -2282,59 +2658,29 @@ const TravelExperiencesSection = () => {
                   ))}
                 </div>
               )}
-
-              {/* Location Coordinates */}
-              <div className="text-xs text-gray-500">
-                <p>Latitude: {selectedExperience.latitude || "N/A"}</p>
-                <p>Longitude: {selectedExperience.longitude || "N/A"}</p>
-              </div>
-
-              {/* Additional Details Grid */}
-              <div className="grid grid-cols-2 gap-4 mt-4">
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-sm">Privacy</h4>
-                  <p className="text-gray-600">{selectedExperience.privacy || "Public"}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-sm">Sentiment</h4>
-                  <span className={`px-2 py-1 rounded-full text-xs ${
-                    selectedExperience.sentiment === "Positive" ? "bg-green-100 text-green-800" :
-                    selectedExperience.sentiment === "Negative" ? "bg-red-100 text-red-800" :
-                    "bg-yellow-100 text-yellow-800"
-                  }`}>
-                    {selectedExperience.sentiment || "Neutral"}
-                  </span>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-sm">Created</h4>
-                  <p className="text-gray-600">
-                    {selectedExperience.created_at ? new Date(selectedExperience.created_at).toLocaleDateString() : "Unknown date"}
-                  </p>
-                </div>
-              </div>
             </div>
 
             {/* Comments Section */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {comments.length > 0 ? (
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
+              {commentLoading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500 mx-auto"></div>
+                  <p className="text-gray-500 mt-2">Loading comments...</p>
+                </div>
+              ) : comments.length > 0 ? (
                 comments.map((comment) => (
                   <div key={comment.id} className="flex space-x-3">
-                    <div className="w-8 h-8 bg-teal-500 rounded-full flex-shrink-0 flex items-center justify-center text-white text-sm">
-                      {comment.userName.charAt(0).toUpperCase()}
+                    <div className="w-8 h-8 bg-teal-500 rounded-full flex-shrink-0 flex items-center justify-center text-white text-sm font-bold">
+                      {comment.user_name?.charAt(0).toUpperCase() || 'U'}
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center space-x-2">
-                        <p className="font-semibold text-sm">{comment.userName}</p>
+                        <p className="font-semibold text-sm">{comment.user_name || `User ${comment.user_id}`}</p>
                         <span className="text-gray-500 text-xs">
                           {new Date(comment.timestamp).toLocaleDateString()}
                         </span>
                       </div>
-                      <p className="text-gray-700 mt-1">{comment.content}</p>
-                      <div className="flex items-center space-x-3 mt-2 text-xs text-gray-500">
-                        <button className="hover:text-teal-600">Like</button>
-                        <button className="hover:text-teal-600">Reply</button>
-                        <button className="hover:text-teal-600">Share</button>
-                      </div>
+                      <p className="text-gray-700 mt-1">{comment.text}</p>
                     </div>
                   </div>
                 ))
@@ -2347,17 +2693,7 @@ const TravelExperiencesSection = () => {
             </div>
 
             {/* Add Comment Section */}
-            <div className="p-4 border-t border-gray-200">
-              <div className="flex items-center space-x-2 mb-3">
-                <button className="flex items-center space-x-1 text-gray-500 hover:text-teal-600 text-sm transition-colors">
-                  <span className="material-symbols-outlined text-base">favorite</span>
-                  <span>Like</span>
-                </button>
-                <button className="flex items-center space-x-1 text-gray-500 hover:text-teal-600 text-sm transition-colors">
-                  <span className="material-symbols-outlined text-base">reply</span>
-                  <span>Reply</span>
-                </button>
-              </div>
+            <div className="p-4 border-t border-gray-200 bg-gray-50">
               <div className="flex space-x-2">
                 <input
                   type="text"
@@ -2365,17 +2701,22 @@ const TravelExperiencesSection = () => {
                   onChange={(e) => setNewComment(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="Add a comment..."
-                  className="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-colors"
-                  disabled={isLoading}
+                  className="flex-1 border border-gray-300 rounded-full px-4 py-3 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-colors"
+                  disabled={isLoading || !token}
                 />
                 <button
                   onClick={handleAddComment}
-                  disabled={!newComment.trim() || isLoading}
-                  className="bg-teal-500 text-white px-4 py-2 rounded-full hover:bg-teal-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!newComment.trim() || isLoading || !token}
+                  className="bg-teal-500 text-white px-6 py-3 rounded-full hover:bg-teal-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
                 >
-                  {isLoading ? "Posting..." : "Post"}
+                  {isLoading ? "..." : "Post"}
                 </button>
               </div>
+              {!token && (
+                <p className="text-xs text-red-500 mt-2 text-center">
+                  Please login to comment
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -2479,448 +2820,8 @@ const TravelExperiencesSection = () => {
   );
 };
 
-// ========== Travel History Section ==========
-const TravelHistorySection = () => {
-  const [travelHistory, setTravelHistory] = useState([
-    {
-      id: 1,
-      city: "Paris, France",
-      date: "2023-07-15",
-      image: "https://images.unsplash.com/photo-1502602898536-47ad22581b52?w=400&h=300&fit=crop",
-      description: "Explored the charming streets and iconic Eiffel Tower. The Louvre Museum was absolutely breathtaking.",
-      duration: "5 days",
-      highlights: ["Eiffel Tower", "Louvre Museum", "Seine River Cruise"]
-    },
-    {
-      id: 2,
-      city: "Tokyo, Japan",
-      date: "2023-05-20",
-      image: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=300&fit=crop",
-      description: "Immersed in vibrant culture and cutting-edge technology. The cherry blossoms were in full bloom.",
-      duration: "7 days",
-      highlights: ["Shibuya Crossing", "Tokyo Skytree", "Traditional Temples"]
-    },
-    {
-      id: 3,
-      city: "New York, USA",
-      date: "2023-03-10",
-      image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=400&h=300&fit=crop",
-      description: "Experienced the bustling energy of Times Square and Broadway shows.",
-      duration: "4 days",
-      highlights: ["Central Park", "Statue of Liberty", "Broadway Show"]
-    }
-  ]);
-
-  const TravelHistoryCard = React.memo(({ trip, isLast }) => (
-    <div className="relative flex items-start mb-8 group animate-fade-in">
-      {!isLast && (
-        <div className="absolute left-6 top-12 bottom-0 w-0.5 bg-teal-500/30" />
-      )}
-      <div className="flex items-start gap-4 z-10 w-full">
-        <div className="w-4 h-4 rounded-full bg-teal-500 ring-4 ring-gray-900/50 group-hover:ring-teal-500/50 transition-all duration-300 mt-2 flex-shrink-0" />
-        <div className="flex-1 rounded-xl border border-teal-500/30 bg-white/10 backdrop-blur-lg shadow-lg group-hover:shadow-teal-500/40 transition-all duration-300 transform group-hover:scale-102 overflow-hidden flex flex-col sm:flex-row">
-          <div className="sm:w-2/5 h-48 sm:h-auto">
-            <img
-              src={trip.image}
-              alt={trip.city}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-              loading="lazy"
-            />
-          </div>
-          <div className="p-4 sm:p-6 flex-1">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-2">
-              <h3 className="font-bold text-lg text-white">{trip.city}</h3>
-              <div className="flex items-center gap-2 text-sm text-teal-400 mt-1 sm:mt-0">
-                <span className="material-symbols-outlined text-base">calendar_today</span>
-                <span>{trip.date}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-gray-300 mb-3">
-              <span className="material-symbols-outlined text-base">schedule</span>
-              <span>{trip.duration}</span>
-            </div>
-            <p className="text-gray-300 text-sm mb-3">{trip.description}</p>
-            <div className="flex flex-wrap gap-1">
-              {trip.highlights.map((highlight, index) => (
-                <span key={index} className="bg-teal-500/20 text-teal-300 px-2 py-1 rounded-full text-xs">
-                  {highlight}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  ));
-
-  return (
-    <section className="max-w-7xl mx-auto">
-      <h2 className="text-xl sm:text-2xl font-bold text-white mb-6 flex items-center gap-2">
-        <span className="material-symbols-outlined text-teal-400">history</span>
-        Travel History
-      </h2>
-      <div className="space-y-2">
-        {travelHistory.map((trip, index) => (
-          <TravelHistoryCard 
-            key={trip.id} 
-            trip={trip} 
-            isLast={index === travelHistory.length - 1}
-          />
-        ))}
-      </div>
-    </section>
-  );
-};
-
-// ========== Upcoming Trips Section ==========
-const UpcomingTripsSection = () => {
-  const [upcomingTrips, setUpcomingTrips] = useState([
-    {
-      id: 1,
-      city: "London, UK",
-      date: "2024-08-15",
-      daysLeft: 45,
-      image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=300&h=200&fit=crop",
-      duration: "6 days",
-      budget: "$2,500",
-      activities: ["British Museum", "London Eye", "West End Show"]
-    },
-    {
-      id: 2,
-      city: "Bali, Indonesia",
-      date: "2024-11-20",
-      daysLeft: 142,
-      image: "https://images.unsplash.com/photo-1537953773345-d172ccf13cf1?w=300&h=200&fit=crop",
-      duration: "10 days",
-      budget: "$1,800",
-      activities: ["Beach Hopping", "Temple Tours", "Spa Treatments"]
-    }
-  ]);
-
-  const UpcomingTripCard = React.memo(({ trip }) => {
-    const getDaysLeftColor = (days) => {
-      if (days < 30) return "text-red-400";
-      if (days < 90) return "text-orange-400";
-      return "text-green-400";
-    };
-
-    return (
-      <div className="flex flex-col sm:flex-row items-start gap-4 rounded-xl bg-white/10 backdrop-blur-lg p-4 border border-teal-500/30 shadow-lg hover:shadow-teal-500/40 transition-all duration-300 transform hover:scale-102">
-        <div className="w-full sm:w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden">
-          <img
-            src={trip.image}
-            alt={trip.city}
-            className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
-            loading="lazy"
-          />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-2">
-            <h3 className="font-bold text-lg text-white">{trip.city}</h3>
-            <div className={`text-sm font-semibold ${getDaysLeftColor(trip.daysLeft)}`}>
-              {trip.daysLeft} days left
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4 text-sm text-gray-300 mb-3">
-            <div className="flex items-center gap-1">
-              <span className="material-symbols-outlined text-base">calendar_today</span>
-              <span>{trip.date}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <span className="material-symbols-outlined text-base">schedule</span>
-              <span>{trip.duration}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <span className="material-symbols-outlined text-base">attach_money</span>
-              <span>{trip.budget}</span>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-1 mb-3">
-            {trip.activities.map((activity, index) => (
-              <span key={index} className="bg-teal-500/20 text-teal-300 px-2 py-1 rounded-full text-xs">
-                {activity}
-              </span>
-            ))}
-          </div>
-          <div className="flex gap-2">
-            <button className="bg-teal-500/20 hover:bg-teal-500/30 text-teal-400 px-3 py-1 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105">
-              Edit Plans
-            </button>
-            <button className="bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 px-3 py-1 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105">
-              Cancel Trip
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  });
-
-  return (
-    <section className="max-w-7xl mx-auto">
-      <h2 className="text-xl sm:text-2xl font-bold text-white mb-6 flex items-center gap-2">
-        <span className="material-symbols-outlined text-teal-400">schedule</span>
-        Upcoming Trips
-      </h2>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {upcomingTrips.map((trip) => (
-          <UpcomingTripCard key={trip.id} trip={trip} />
-        ))}
-      </div>
-    </section>
-  );
-};
-
-// ========== Wishlist Section ==========
-const WishlistSection = () => {
-  const [wishlist, setWishlist] = useState([
-    {
-      id: 1,
-      city: "Santorini",
-      country: "Greece",
-      image: "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5db?w=400&h=300&fit=crop",
-      priority: "High",
-      estimatedCost: "$3,200",
-      bestSeason: "Summer",
-      attractions: ["Sunset Views", "White Buildings", "Volcanic Beaches"]
-    },
-    {
-      id: 2,
-      city: "Machu Picchu",
-      country: "Peru",
-      image: "https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=400&h=300&fit=crop",
-      priority: "Medium",
-      estimatedCost: "$2,800",
-      bestSeason: "Dry Season",
-      attractions: ["Ancient Ruins", "Mountain Views", "Inca Trail"]
-    },
-    {
-      id: 3,
-      city: "Kyoto",
-      country: "Japan",
-      image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=400&h=300&fit=crop",
-      priority: "High",
-      estimatedCost: "$3,500",
-      bestSeason: "Spring",
-      attractions: ["Cherry Blossoms", "Traditional Temples", "Geisha District"]
-    }
-  ]);
-
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case "High": return "text-red-400";
-      case "Medium": return "text-orange-400";
-      case "Low": return "text-green-400";
-      default: return "text-gray-400";
-    }
-  };
-
-  const WishlistCard = React.memo(({ item }) => (
-    <div className="group relative overflow-hidden rounded-xl bg-white/10 border border-teal-500/30 backdrop-blur-lg shadow-lg hover:shadow-teal-500/40 transition-all duration-300 transform hover:scale-105">
-      <div className="h-48 w-full overflow-hidden">
-        <img
-          src={item.image}
-          alt={`${item.city}, ${item.country}`}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-          loading="lazy"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        <div className="absolute top-3 right-3">
-          <span className={`bg-black/70 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-semibold ${getPriorityColor(item.priority)}`}>
-            {item.priority} Priority
-          </span>
-        </div>
-        <button className="absolute top-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full bg-rose-500/80 p-2 text-white hover:bg-rose-600">
-          <span className="material-symbols-outlined text-sm">favorite</span>
-        </button>
-      </div>
-      <div className="p-4">
-        <div className="mb-2">
-          <h3 className="font-bold text-white text-lg">{item.city}</h3>
-          <p className="text-gray-300 text-sm">{item.country}</p>
-        </div>
-        <div className="grid grid-cols-2 gap-2 text-xs text-gray-300 mb-3">
-          <div className="flex items-center gap-1">
-            <span className="material-symbols-outlined text-sm">attach_money</span>
-            <span>{item.estimatedCost}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="material-symbols-outlined text-sm">sunny</span>
-            <span>{item.bestSeason}</span>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-1">
-          {item.attractions.map((attraction, index) => (
-            <span key={index} className="bg-teal-500/20 text-teal-300 px-2 py-1 rounded-full text-xs">
-              {attraction}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
-  ));
-
-  return (
-    <section className="max-w-7xl mx-auto">
-      <h2 className="text-xl sm:text-2xl font-bold text-white mb-6 flex items-center gap-2">
-        <span className="material-symbols-outlined text-teal-400">favorite</span>
-        Travel Wishlist
-      </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {wishlist.map((item) => (
-          <WishlistCard key={item.id} item={item} />
-        ))}
-      </div>
-    </section>
-  );
-};
-
-// ========== Settings Section ==========
-const SettingsSection = () => {
-  const [settings, setSettings] = useState({
-    notifications: true,
-    emailUpdates: false,
-    darkMode: true,
-    language: "English",
-    currency: "USD"
-  });
-
-  const handleSettingChange = useCallback((key, value) => {
-    setSettings(prev => ({
-      ...prev,
-      [key]: value
-    }));
-  }, []);
-
-  const SettingsCard = React.memo(({ icon, label, description, children }) => (
-    <div className="flex items-center justify-between rounded-xl bg-white/10 backdrop-blur-lg p-4 border border-teal-500/30 shadow-lg hover:shadow-teal-500/40 transition-all duration-300 hover:bg-gray-800/70">
-      <div className="flex items-center gap-4 flex-1">
-        <span className="material-symbols-outlined text-teal-400 text-2xl">{icon}</span>
-        <div className="flex-1">
-          <h3 className="text-white font-semibold">{label}</h3>
-          <p className="text-gray-300 text-sm">{description}</p>
-        </div>
-      </div>
-      {children}
-    </div>
-  ));
-
-  return (
-    <section className="max-w-7xl mx-auto">
-      <h2 className="text-xl sm:text-2xl font-bold text-white mb-6 flex items-center gap-2">
-        <span className="material-symbols-outlined text-teal-400">settings</span>
-        Settings & Preferences
-      </h2>
-      <div className="space-y-4">
-        <SettingsCard 
-          icon="notifications"
-          label="Push Notifications"
-          description="Receive updates about your trips and new features"
-        >
-          <button
-            onClick={() => handleSettingChange('notifications', !settings.notifications)}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              settings.notifications ? 'bg-teal-500' : 'bg-gray-600'
-            }`}
-            aria-label={`${settings.notifications ? 'Disable' : 'Enable'} notifications`}
-          >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                settings.notifications ? 'translate-x-6' : 'translate-x-1'
-              }`}
-            />
-          </button>
-        </SettingsCard>
-
-        <SettingsCard 
-          icon="mail"
-          label="Email Updates"
-          description="Get weekly travel inspiration and deals"
-        >
-          <button
-            onClick={() => handleSettingChange('emailUpdates', !settings.emailUpdates)}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              settings.emailUpdates ? 'bg-teal-500' : 'bg-gray-600'
-            }`}
-            aria-label={`${settings.emailUpdates ? 'Disable' : 'Enable'} email updates`}
-          >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                settings.emailUpdates ? 'translate-x-6' : 'translate-x-1'
-              }`}
-            />
-          </button>
-        </SettingsCard>
-
-        <SettingsCard 
-          icon="dark_mode"
-          label="Dark Mode"
-          description="Use dark theme across the application"
-        >
-          <button
-            onClick={() => handleSettingChange('darkMode', !settings.darkMode)}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              settings.darkMode ? 'bg-teal-500' : 'bg-gray-600'
-            }`}
-            aria-label={`${settings.darkMode ? 'Disable' : 'Enable'} dark mode`}
-          >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                settings.darkMode ? 'translate-x-6' : 'translate-x-1'
-              }`}
-            />
-          </button>
-        </SettingsCard>
-
-        <SettingsCard 
-          icon="language"
-          label="Language"
-          description="Choose your preferred language"
-        >
-          <select 
-            value={settings.language}
-            onChange={(e) => handleSettingChange('language', e.target.value)}
-            className="bg-white/10 border border-teal-500/30 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 transition-colors"
-          >
-            <option value="English">English</option>
-            <option value="Spanish">Spanish</option>
-            <option value="French">French</option>
-            <option value="German">German</option>
-          </select>
-        </SettingsCard>
-
-        <SettingsCard 
-          icon="payments"
-          label="Currency"
-          description="Select your preferred currency"
-        >
-          <select 
-            value={settings.currency}
-            onChange={(e) => handleSettingChange('currency', e.target.value)}
-            className="bg-white/10 border border-teal-500/30 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 transition-colors"
-          >
-            <option value="USD">USD ($)</option>
-            <option value="EUR">EUR (€)</option>
-            <option value="GBP">GBP (£)</option>
-            <option value="JPY">JPY (¥)</option>
-          </select>
-        </SettingsCard>
-
-        <SettingsCard 
-          icon="privacy_tip"
-          label="Privacy & Security"
-          description="Manage your data and privacy settings"
-        >
-          <button className="bg-teal-500/20 hover:bg-teal-500/30 text-teal-400 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105">
-            Manage
-          </button>
-        </SettingsCard>
-      </div>
-    </section>
-  );
-};
-
 // ========== Reusable UI: Logout Modal ==========
-function LogoutModal({ open, onConfirm, onCancel }) {
+const LogoutModal = ({ open, onConfirm, onCancel }) => {
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -2958,10 +2859,10 @@ function LogoutModal({ open, onConfirm, onCancel }) {
       </div>
     </div>
   );
-}
+};
 
 // ========== Reusable UI: Toast ==========
-function LogoutToast({ show, onDone, timeout = 4000 }) {
+const LogoutToast = ({ show, onDone, timeout = 4000 }) => {
   useEffect(() => {
     if (!show) return;
     const id = setTimeout(onDone, timeout);
@@ -2985,18 +2886,42 @@ function LogoutToast({ show, onDone, timeout = 4000 }) {
       </div>
     </div>
   );
-}
+};
 
-// ========== Helpers ==========
-const isHttpUrl = (v) => typeof v === "string" && /^https?:\/\//i.test(v);
-const stripLeadingSlashes = (p) => (typeof p === "string" ? p.replace(/^\/+/, "") : "");
-const toAbs = (base, p) => (p ? `${base}/${stripLeadingSlashes(p)}` : "");
-const readAsDataURL = (file) =>
-  new Promise((resolve) => {
-    const r = new FileReader();
-    r.onload = () => resolve(String(r.result || ""));
-    r.readAsDataURL(file);
-  });
+// ========== Updated Header Component with Notification Bell ==========
+const Header = ({ onBackClick, onLogoutClick }) => (
+  <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-lg shadow-lg shadow-teal-500/20 border-b border-teal-500/30">
+    <div className="w-full px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
+      <div className="flex items-center justify-between gap-3">
+        <button
+          className="flex h-10 w-10 items-center justify-center rounded-full text-teal-400 hover:bg-teal-500/20 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-teal-500"
+          aria-label="Go back"
+          onClick={onBackClick}
+        >
+          <span className="material-symbols-outlined">arrow_back</span>
+        </button>
+
+        <h1 className="text-xl sm:text-2xl font-bold text-teal-500">Profile</h1>
+
+        <div className="flex items-center gap-2">
+          {/* Notification Bell */}
+          <NotificationBell />
+          
+          {/* Logout Button */}
+          <button
+            onClick={onLogoutClick}
+            className="inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-semibold px-3 py-2 text-sm shadow-lg shadow-rose-500/30 hover:shadow-rose-500/50 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-rose-500 hover:scale-105"
+            aria-label="Logout"
+            title="Logout"
+          >
+            <span className="material-symbols-outlined">logout</span>
+            <span className="hidden sm:inline">Logout</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+);
 
 // ========== Main Profile Page Component ==========
 const ProfilePage = () => {
@@ -3010,6 +2935,7 @@ const ProfilePage = () => {
 
   // Profile state
   const [profileData, setProfileData] = useState({
+    id: null,
     name: "",
     bio: "",
     location: "",
@@ -3039,10 +2965,17 @@ const ProfilePage = () => {
       const res = await axios.get("http://127.0.0.1:8002/GetProfileAPIView/", {
         headers: { Authorization: `Bearer ${token}` },
       });
+      const data = res.data || {};
       setProfileData((prev) => ({
         ...prev,
-        ...(res.data || {}),
+        id: data.id,
+        ...data,
       }));
+      
+      // Store user ID for WebSocket connections
+      if (data.id) {
+        localStorage.setItem("user_id", data.id);
+      }
     } catch (error) {
       console.error("Error fetching profile:", error);
     } finally {
@@ -3084,18 +3017,18 @@ const ProfilePage = () => {
   const coverUrl = useMemo(() => {
     const v = profileData?.cover_photo;
     if (v instanceof File) return coverPreview || "";
-    if (isHttpUrl(v)) return v;
-    if (typeof v === "string" && v) return toAbs(base, v);
+    if (typeof v === "string" && v.startsWith('http')) return v;
+    if (typeof v === "string" && v) return `${base}${v}`;
     return "";
-  }, [profileData?.cover_photo, coverPreview]);
+  }, [profileData?.cover_photo, coverPreview, base]);
 
   const avatarUrl = useMemo(() => {
     const v = profileData?.profile_picture;
     if (v instanceof File) return avatarPreview || "";
-    if (isHttpUrl(v)) return v;
-    if (typeof v === "string" && v) return toAbs(base, v);
+    if (typeof v === "string" && v.startsWith('http')) return v;
+    if (typeof v === "string" && v) return `${base}${v}`;
     return "";
-  }, [profileData?.profile_picture, avatarPreview]);
+  }, [profileData?.profile_picture, avatarPreview, base]);
 
   // Previews for selected files
   useEffect(() => {
@@ -3127,6 +3060,13 @@ const ProfilePage = () => {
       active = false;
     };
   }, [profileData.profile_picture]);
+
+  const readAsDataURL = (file) =>
+    new Promise((resolve) => {
+      const r = new FileReader();
+      r.onload = () => resolve(String(r.result || ""));
+      r.readAsDataURL(file);
+    });
 
   const handleEditProfile = async () => {
     try {
@@ -3197,6 +3137,7 @@ const ProfilePage = () => {
       console.log("datas", datas.data);
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
+      localStorage.removeItem("user_id");
     } catch (e) {
       console.warn("Logout cleanup error:", e.response?.data || e.message);
     } finally {
@@ -3207,34 +3148,6 @@ const ProfilePage = () => {
       }, 600);
     }
   };
-
-  const Header = () => (
-    <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-lg shadow-lg shadow-teal-500/20 border-b border-teal-500/30">
-      <div className="w-full px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
-        <div className="flex items-center justify-between gap-3">
-          <button
-            className="flex h-10 w-10 items-center justify-center rounded-full text-teal-400 hover:bg-teal-500/20 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-teal-500"
-            aria-label="Go back"
-            onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/"))}
-          >
-            <span className="material-symbols-outlined">arrow_back</span>
-          </button>
-
-          <h1 className="text-xl sm:text-2xl font-bold text-teal-500">Profile</h1>
-
-          <button
-            onClick={() => setShowLogoutModal(true)}
-            className="inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-semibold px-3 py-2 text-sm shadow-lg shadow-rose-500/30 hover:shadow-rose-500/50 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-rose-500 hover:scale-105"
-            aria-label="Logout"
-            title="Logout"
-          >
-            <span className="material-symbols-outlined">logout</span>
-            <span className="hidden sm:inline">Logout</span>
-          </button>
-        </div>
-      </div>
-    </header>
-  );
 
   const ProfileCard = () => (
     <section
@@ -3331,7 +3244,10 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex flex-col font-display text-white">
-      <Header />
+      <Header 
+        onBackClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/"))}
+        onLogoutClick={() => setShowLogoutModal(true)}
+      />
 
       <main className="w-full px-3 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-12 flex-grow">
         <div className="max-w-7xl mx-auto">
@@ -3348,20 +3264,9 @@ const ProfilePage = () => {
         <SocialCounters />
 
         {/* Integrated Travel Experiences Section */}
-        <TravelExperiencesSection />
+        <TravelExperiencesSection userId={profileData.id} />
 
-        {/* Travel History Section */}
-        <TravelHistorySection />
-
-        {/* Upcoming Trips Section */}
-        <UpcomingTripsSection />
-
-        {/* Wishlist Section */}
-        <WishlistSection />
-
-        {/* Settings Section */}
-        <SettingsSection />
-
+        {/* Add other sections as needed */}
       </main>
 
       {showEditModal && (
@@ -3474,33 +3379,16 @@ const ProfilePage = () => {
                 <button
                   className="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-semibold px-4 sm:px-6 py-2 sm:py-3 text-sm sm:text-base rounded-lg shadow-lg hover:shadow-teal-500/50 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-teal-500"
                   onClick={handleEditProfile}
+                  disabled={isLoading}
                   aria-label="Save profile changes"
                 >
-                  Save
+                  {isLoading ? "Saving..." : "Save"}
                 </button>
               </div>
             </div>
           </div>
         </div>
       )}
-
-      <footer className="sticky bottom-0 bg-black/80 backdrop-blur-lg border-t border-teal-500/50 shadow-lg shadow-teal-500/20">
-        <nav className="flex justify-around py-3 sm:py-4">
-          {["home", "explore", "bookmark", "person"].map((icon) => (
-            <button
-              key={icon}
-              className={`flex flex-col items-center gap-1 p-2 sm:p-3 rounded-lg transition-all duration-300 hover:scale-110 ${
-                icon === "person" ? "text-teal-500" : "text-gray-200 hover:text-teal-400"
-              } focus:outline-none focus:ring-2 focus:ring-teal-500`}
-              aria-label={`Navigate to ${icon}`}
-            >
-              <span className="material-symbols-outlined text-xl sm:text-2xl">{icon}</span>
-              <span className="text-xs sm:text-sm font-medium capitalize">{icon}</span>
-            </button>
-          ))}
-        </nav>
-        <div style={{ height: "env(safe-area-inset-bottom)" }} />
-      </footer>
 
       <LogoutModal
         open={showLogoutModal}

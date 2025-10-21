@@ -780,11 +780,11 @@ const ExperienceSide = () => {
             <span className="material-symbols-outlined text-2xl">explore</span>
             <span className="text-sm font-medium">Experience</span>
           </a>
-          <a onClick={() => navigate('/TripPlanner')} className="flex flex-col items-center gap-1 text-gray-600 hover:text-gray-500 transition-colors duration-200" href="#">
+          <a onClick={() => navigate('/TravelPlannerofBadget')} className="flex flex-col items-center gap-1 text-gray-600 hover:text-gray-500 transition-colors duration-200" href="#">
             <span className="material-symbols-outlined text-2xl">receipt_long</span>
             <span className="text-sm font-medium">Expense</span>
           </a>
-          <a className="flex flex-col items-center gap-1 text-gray-600 hover:text-gray-500 transition-colors duration-200" href="#">
+          <a  onClick={() => navigate('/TripPlannerofCustome')}  className="flex flex-col items-center gap-1 text-gray-600 hover:text-gray-500 transition-colors duration-200" href="#">
             <span className="material-symbols-outlined text-2xl">tune</span>
             <span className="text-sm font-medium">Customize</span>
           </a>

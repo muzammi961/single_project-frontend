@@ -46,16 +46,16 @@ const WeatherDisplay = () => {
     //   <div className="text-xs text-gray-300 text-center">Partly cloudy</div>
     // </div>
    
-<div class="container" onClick={()=>navigate('/WeatherCard')}>
-  <div class="cloud front">
-    <span class="left-front"></span>
-    <span class="right-front"></span>
+<div className="container" onClick={()=>navigate('/WeatherCard')}>
+  <div className="cloud front">
+    <span className="left-front"></span>
+    <span className="right-front"></span>
   </div>
-  <span class="sun sunshine"></span>
-  <span class="sun"></span>
-  <div class="cloud back">
-    <span class="left-back"></span>
-    <span class="right-back"></span>
+  <span className="sun sunshine"></span>
+  <span className="sun"></span>
+  <div className="cloud back">
+    <span className="left-back"></span>
+    <span className="right-back"></span>
   </div>
 </div>
   );

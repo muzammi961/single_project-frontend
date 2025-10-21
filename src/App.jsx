@@ -25,35 +25,38 @@ import FollowingMembers from './components/socialmedia/FollowingMembers .jsx'
 import FollowersMembers from './components/socialmedia/FollowersMembers.jsx'
 
 
+// ExpenseTracker 
 
 
 
 
-import Dashboard from './components/expense_travelplanning/Dashboard .jsx';
-import TripPlanner from './components/expense_travelplanning/TripPlanner .jsx';
-import ExpenseTracker from './components/expense_travelplanning/ExpenseTracker .jsx';
-import GroupExpenses from './components/expense_travelplanning/GroupExpenses .jsx'
-import Payments from './components/expense_travelplanning/Payments .jsx'
-import Calendar from './components/experiance/CalendarComponent.jsx'
-import InviteView from './components/expense_travelplanning/InviteView.jsx'
-import PublicTripView from './components/expense_travelplanning/PublicTripView.jsx'
-
-
-
-
-
-
-import PlacesTest from './components/plasesarch.jsx'
+// import Dashboard from './components/Customizetravelplanning/Dashboard.jsx';
+import TripPlannerofCustome from './components/Customizetravelplanning/TripPlannerofCustome.jsx';
+import ExpenseTracker from './components/Customizetravelplanning/ExpenseTracker .jsx';
+import GroupExpenses from './components/Customizetravelplanning/GroupExpenses .jsx';
+import Payments from './components/Customizetravelplanning/GroupExpenses .jsx';
+import InviteView from './components/Customizetravelplanning/InviteView.jsx';
+import PublicTripView from './components/Customizetravelplanning/PublicTripView.jsx';
 
 
 
 
 
+import Calendar from './components/experiance/CalendarComponent.jsx';
+import PlacesTest from './components/plasesarch.jsx';
 
 
 
 
-import GoogleMapComponent from './components/live journy/googleapicall.jsx'
+// Customize_travelplanning
+
+
+import TravelPlannerofBadget from './components/BudgetFriendlyTravel/TravelPlannerofBadget.jsx';
+
+
+
+
+import GoogleMapComponent from './components/live journy/googleapicall.jsx';
 function App() {
 const isAuthenticated = !!localStorage.getItem("access_token");
 const baseURL = import.meta.env.VITE_API_BASE_URL;
@@ -117,13 +120,13 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 
 
-            <Route path='/Dashboard' element={<Dashboard/>}/>
+            {/* <Route path='/Dashboard' element={<Dashboard/>}/> */}
             <Route path='/ExpenseTracker' element={<ExpenseTracker/>}/>
             <Route path='/GroupExpenses' element={<GroupExpenses/>}/>
             <Route path='/Payments' element={<Payments/>}/>
 
 
-            <Route path='/TripPlanner' element={<TripPlanner/>}/>
+            <Route path='/TripPlannerofCustome' element={<TripPlannerofCustome/>}/>
             <Route path="/invite/:inviteCode" element={<InviteView />} />
             <Route path="/trips/:tripId" element={<PublicTripView />} />
            
@@ -143,6 +146,13 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 
             <Route path='/PlacesTest' element={<PlacesTest/>}/>
+
+
+
+
+
+
+            <Route path='/TravelPlannerofBadget' element={<TravelPlannerofBadget/>}/>
           </Routes>
       </BrowserRouter>
   )
