@@ -58,7 +58,7 @@ import TravelPlannerofBadget from './components/BudgetFriendlyTravel/TravelPlann
 
 import GoogleMapComponent from './components/live journy/googleapicall.jsx';
 function App() {
-const isAuthenticated = !!localStorage.getItem("access_token");
+const isAuthenticated =localStorage.getItem("access_token");
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 

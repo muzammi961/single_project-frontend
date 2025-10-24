@@ -1,45 +1,89 @@
-import React, { useEffect, useRef } from "react";
+import React, { useState } from "react";
+import axios from "axios";
 
 const PlacesTest = () => {
-  const inputRef = useRef(null);
+  const [location, setLocation] = useState("28.6139,77.2090"); // Default Delhi
+  const [type, setType] = useState("restaurant");
+  const [radius, setRadius] = useState(1000);
+  const [places, setPlaces] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyC597c7IUWMMTT_zezGbsQGlTEMpJA-JKM&libraries=places`;
-    script.async = true;
-    script.onload = () => {
-      if (window.google && window.google.maps && window.google.maps.places) {
-        // Create the autocomplete element
-        const autocompleteElement = new window.google.maps.places.UnrestrictedPlaceAutocompleteElement();
+  const handleSearch = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await axios.get("http://127.0.0.1:8006/api/search_places", {
+        params: {
+          location,
+          type,
+          radius,
+        },
+      });
 
-        // Bind your input field
-        autocompleteElement.bindElement(inputRef.current);
-
-        // Listen for place selection
-        autocompleteElement.addEventListener("place_changed", () => {
-          const place = autocompleteElement.getPlace();
-          console.log("Selected Place:", place);
-
-          if (place.geometry) {
-            console.log("Latitude:", place.geometry.location.lat());
-            console.log("Longitude:", place.geometry.location.lng());
-          }
-        });
+      if (res.data.results) {
+        setPlaces(res.data.results);
+      } else {
+        setPlaces([]);
       }
-    };
-
-    document.body.appendChild(script);
-  }, []);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to fetch places. Make sure your backend is running.");
+    }
+    setLoading(false);
+  };
 
   return (
     <div style={{ padding: "20px" }}>
-      <h2>Google Places API Test</h2>
-      <input
-        ref={inputRef}
-        type="text"
-        placeholder="Type a place name..."
-        style={{ width: "300px", padding: "8px" }}
-      />
+      <h2>Places Test</h2>
+
+      <div style={{ marginBottom: "10px" }}>
+        <label>
+          Location (lat,lng):{" "}
+          <input
+            type="text"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+          />
+        </label>
+      </div>
+
+      <div style={{ marginBottom: "10px" }}>
+        <label>
+          Type:{" "}
+          <select value={type} onChange={(e) => setType(e.target.value)}>
+            <option value="restaurant">Restaurant</option>
+            <option value="hotel">Hotel</option>
+            <option value="cafe">Cafe</option>
+            <option value="tourist_attraction">Tourist Attraction</option>
+          </select>
+        </label>
+      </div>
+
+      <div style={{ marginBottom: "10px" }}>
+        <label>
+          Radius (meters):{" "}
+          <input
+            type="number"
+            value={radius}
+            onChange={(e) => setRadius(e.target.value)}
+          />
+        </label>
+      </div>
+
+      <button onClick={handleSearch} disabled={loading}>
+        {loading ? "Loading..." : "Search Places"}
+      </button>
+
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
+      <ul style={{ marginTop: "20px" }}>
+        {places.map((place) => (
+          <li key={place.place_id}>
+            <strong>{place.name}</strong> — {place.vicinity}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };
