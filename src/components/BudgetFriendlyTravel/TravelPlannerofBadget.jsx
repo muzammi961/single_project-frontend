@@ -1,10 +1,12 @@
 import axios from 'axios';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import '../stylecomponent/livelocationbutton.css'
 
 const TravelPlannerofBadget = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [loadingLocation, setLoadingLocation] = useState(false);
   const [errors, setErrors] = useState({});
 
   const [budget, setBudget] = useState('');
@@ -12,8 +14,51 @@ const TravelPlannerofBadget = () => {
   const [travelMode, setTravelMode] = useState('bike');
   const [selectedTripTypes, setSelectedTripTypes] = useState(['adventure']);
   const [selectedBudgetCategories, setSelectedBudgetCategories] = useState('');
+  const [locationlonandlat,Setlocationlonandlat]=useState({'lat':null,'lon':null})
 
   const access_token = localStorage.getItem("access_token");
+
+  const handleGetLocation = () => {
+    if (navigator.geolocation) {
+      setLoadingLocation(true);
+
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          
+          Setlocationlonandlat({lat:lat,lon:lon})
+          try {
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
+            );
+            const data = await response.json();
+            const placeName = data.display_name || "Unknown location";
+
+            // Set the location in the input field
+            setLocation(placeName);
+            
+            // Clear location error if any
+            if (errors.location) {
+              setErrors(prev => ({ ...prev, location: '' }));
+            }
+          } catch (error) {
+            console.error("Error fetching place name:", error);
+            setLocation("Unable to get location name");
+          }
+
+          setLoadingLocation(false);
+        },
+        (err) => {
+          console.error("Location error:", err);
+          alert("Unable to access location. Please allow permission.");
+          setLoadingLocation(false);
+        }
+      );
+    } else {
+      alert("Geolocation not supported in your browser.");
+    }
+  };
 
   const validateForm = () => {
     const newErrors = {};
@@ -69,7 +114,8 @@ const TravelPlannerofBadget = () => {
           location: location,
           travelMode: travelMode,
           selectedTripTypes: selectedTripTypes,
-          selectedBudgetCategories: selectedBudgetCategories
+          selectedBudgetCategories: selectedBudgetCategories,
+          locationlonandlat:locationlonandlat
         },
         {
           headers: { Authorization: `Bearer ${access_token}` },
@@ -169,14 +215,23 @@ const TravelPlannerofBadget = () => {
                     Starting Location *
                   </p>
                   <div className="relative">
-                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                      location_on
-                    </span>
+                    <button
+                      type="button"
+                      onClick={handleGetLocation}
+                      disabled={loadingLocation || loading}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                    >
+                      {loadingLocation ? (
+                        <div className="loader w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+                      ) : (
+                        <span className="material-symbols-outlined">location_on</span>
+                      )}
+                    </button>
                     <input
                       className={`form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-black focus:outline-0 focus:ring-2 focus:ring-black/50 border ${
                         errors.location ? 'border-red-500' : 'border-gray-300'
                       } bg-white/50 h-14 placeholder:text-gray-400 pl-12 pr-4 text-base font-normal leading-normal font-display`}
-                      placeholder="New York, NY"
+                      placeholder="New York, NY or click location icon"
                       value={location}
                       onChange={handleLocationChange}
                       disabled={loading}
@@ -320,6 +375,7 @@ const TravelPlannerofBadget = () => {
                   {loading ? 'Searching...' : 'Find My Trips'}
                 </button>
               </div>
+              
               <div
                 className={`w-full max-w-4xl mt-8 flex flex-col items-center justify-center gap-4 ${loading ? 'flex' : 'hidden'}`}
               >
@@ -363,6 +419,18 @@ const TravelPlannerofBadget = () => {
           }
           .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+          }
+          .loader {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #666;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+          }
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
           }
         `}</style>
       </div>
