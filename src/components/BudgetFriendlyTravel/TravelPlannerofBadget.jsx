@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 const TravelPlannerofBadget = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-
+  const [errors, setErrors] = useState({});
 
   const [budget, setBudget] = useState('');
   const [location, setLocation] = useState('');
@@ -13,16 +13,46 @@ const TravelPlannerofBadget = () => {
   const [selectedTripTypes, setSelectedTripTypes] = useState(['adventure']);
   const [selectedBudgetCategories, setSelectedBudgetCategories] = useState('');
 
-const access_token=localStorage.getItem("access_token");
+  const access_token = localStorage.getItem("access_token");
 
+  const validateForm = () => {
+    const newErrors = {};
 
-  const handleFindTrips =async (e) => {
-    e.preventDefault();
-    await axios.post('http://127.0.0.1:8006/CreateTripofBudget/',{'budget':budget,'location':location,'travelMode':travelMode,'selectedTripTypes':selectedTripTypes,'selectedBudgetCategories':selectedBudgetCategories},{
-       headers: { Authorization: `Bearer ${access_token}` },
-
+    // Budget validation
+    if (!budget.trim()) {
+      newErrors.budget = 'Budget is required';
+    } else if (isNaN(budget) || Number(budget) <= 0) {
+      newErrors.budget = 'Budget must be a valid number';
+    } else if (Number(budget) < 1000) {
+      newErrors.budget = 'Budget must be 1000 Rs or more';
     }
-  )
+
+    // Location validation
+    if (!location.trim()) {
+      newErrors.location = 'Location is required';
+    }
+
+    // Trip Type validation
+    if (selectedTripTypes.length === 0) {
+      newErrors.tripTypes = 'At least one trip type is required';
+    }
+
+    // Budget Category validation
+    if (!selectedBudgetCategories) {
+      newErrors.budgetCategories = 'Budget category is required';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleFindTrips = async (e) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
     if (loading) return;
     setLoading(true);
 
@@ -31,12 +61,30 @@ const access_token=localStorage.getItem("access_token");
       if (el.innerText !== 'Find My Trips') el.disabled = true;
     });
 
-    setTimeout(() => {
-      setLoading(false);
-      formElements.forEach((el) => {
-        el.disabled = false;
-      });
-    }, 4000); // Simulate a 4-second search
+    try {
+      await axios.post(
+        'http://127.0.0.1:8006/CreateTripofBudget/',
+        {
+          budget: budget,
+          location: location,
+          travelMode: travelMode,
+          selectedTripTypes: selectedTripTypes,
+          selectedBudgetCategories: selectedBudgetCategories
+        },
+        {
+          headers: { Authorization: `Bearer ${access_token}` },
+        }
+      );
+    } catch (error) {
+      console.error('Error creating trip:', error);
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+        formElements.forEach((el) => {
+          el.disabled = false;
+        });
+      }, 4000);
+    }
   };
 
   const toggleTripType = (type) => {
@@ -45,11 +93,35 @@ const access_token=localStorage.getItem("access_token");
         ? prev.filter((t) => t !== type)
         : [...prev, type]
     );
+    // Clear trip type error when user selects one
+    if (errors.tripTypes) {
+      setErrors(prev => ({ ...prev, tripTypes: '' }));
+    }
   };
 
-const toggleBudgetCategory = (category) => {
-  setSelectedBudgetCategories((prev) => (prev === category ? '' : category));
-};
+  const toggleBudgetCategory = (category) => {
+    setSelectedBudgetCategories((prev) => (prev === category ? '' : category));
+    // Clear budget category error when user selects one
+    if (errors.budgetCategories) {
+      setErrors(prev => ({ ...prev, budgetCategories: '' }));
+    }
+  };
+
+  const handleBudgetChange = (e) => {
+    const value = e.target.value;
+    setBudget(value);
+    if (errors.budget) {
+      setErrors(prev => ({ ...prev, budget: '' }));
+    }
+  };
+
+  const handleLocationChange = (e) => {
+    const value = e.target.value;
+    setLocation(value);
+    if (errors.location) {
+      setErrors(prev => ({ ...prev, location: '' }));
+    }
+  };
 
   return (
     <div>
@@ -68,7 +140,7 @@ const toggleBudgetCategory = (category) => {
               <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
                 <label className="flex flex-col">
                   <p className="text-black text-base font-medium leading-normal pb-2 font-display">
-                    Your Budget
+                    Your Budget *
                   </p>
                   <div className="relative">
                     <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
@@ -76,32 +148,43 @@ const toggleBudgetCategory = (category) => {
                     </span>
                     <input
                       required
-                      max={999}
-                      type='nu'
-                      className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-black focus:outline-0 focus:ring-2 focus:ring-black/50 border border-gray-300 bg-white/50 h-14 placeholder:text-gray-400 pl-12 pr-4 text-base font-normal leading-normal font-display"
-                      placeholder="Enter budget less than 100"
+                      type="number"
+                      min="1000"
+                      step="1"
+                      className={`form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-black focus:outline-0 focus:ring-2 focus:ring-black/50 border ${
+                        errors.budget ? 'border-red-500' : 'border-gray-300'
+                      } bg-white/50 h-14 placeholder:text-gray-400 pl-12 pr-4 text-base font-normal leading-normal font-display`}
+                      placeholder="Enter budget (min 1000 Rs)"
                       value={budget}
-                      onChange={(e) => setBudget(e.target.value)}
+                      onChange={handleBudgetChange}
                       disabled={loading}
                     />
                   </div>
+                  {errors.budget && (
+                    <p className="text-red-500 text-sm mt-1">{errors.budget}</p>
+                  )}
                 </label>
                 <label className="flex flex-col">
                   <p className="text-black text-base font-medium leading-normal pb-2 font-display">
-                    Starting Location
+                    Starting Location *
                   </p>
                   <div className="relative">
                     <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
                       location_on
                     </span>
                     <input
-                      className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-black focus:outline-0 focus:ring-2 focus:ring-black/50 border border-gray-300 bg-white/50 h-14 placeholder:text-gray-400 pl-12 pr-4 text-base font-normal leading-normal font-display"
+                      className={`form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-black focus:outline-0 focus:ring-2 focus:ring-black/50 border ${
+                        errors.location ? 'border-red-500' : 'border-gray-300'
+                      } bg-white/50 h-14 placeholder:text-gray-400 pl-12 pr-4 text-base font-normal leading-normal font-display`}
                       placeholder="New York, NY"
                       value={location}
-                      onChange={(e) => setLocation(e.target.value)}
+                      onChange={handleLocationChange}
                       disabled={loading}
                     />
                   </div>
+                  {errors.location && (
+                    <p className="text-red-500 text-sm mt-1">{errors.location}</p>
+                  )}
                 </label>
                 <label className="flex flex-col">
                   <p className="text-black text-base font-medium leading-normal pb-2 font-display">
@@ -130,10 +213,11 @@ const toggleBudgetCategory = (category) => {
               <div className="w-full max-w-4xl mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <p className="text-black text-base font-medium leading-normal pb-2 font-display">
-                    Trip Type (Optional)
+                    Trip Type *
                   </p>
                   <div className="flex gap-3 flex-wrap">
                     <button
+                      type="button"
                       className={`flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-lg px-4 text-sm font-medium leading-normal font-display transition-colors ${
                         selectedTripTypes.includes('adventure')
                           ? 'bg-gray-700 text-white hover:bg-black/30 '
@@ -146,6 +230,7 @@ const toggleBudgetCategory = (category) => {
                       <p>Adventure</p>
                     </button>
                     <button
+                      type="button"
                       className={`flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-lg px-4 text-sm font-medium leading-normal font-display transition-colors ${
                         selectedTripTypes.includes('relaxation')
                           ? 'bg-gray-700 text-white hover:bg-black/30 '
@@ -158,6 +243,7 @@ const toggleBudgetCategory = (category) => {
                       <p>Relaxation</p>
                     </button>
                     <button
+                      type="button"
                       className={`flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-lg px-4 text-sm font-medium leading-normal font-display transition-colors ${
                         selectedTripTypes.includes('cultural')
                           ?'bg-gray-700 text-white hover:bg-black/30 '
@@ -170,15 +256,19 @@ const toggleBudgetCategory = (category) => {
                       <p>Cultural</p>
                     </button>
                   </div>
+                  {errors.tripTypes && (
+                    <p className="text-red-500 text-sm mt-1">{errors.tripTypes}</p>
+                  )}
                 </div>
                 <div>
                   <p className="text-black text-base font-medium leading-normal pb-2 font-display">
-                    Budget Category (Optional)
+                    Budget Category *
                   </p>
                   <div className="flex gap-3 flex-wrap">
                     <button
+                      type="button"
                       className={`flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-lg px-4 text-sm font-medium leading-normal font-display transition-colors ${
-                        selectedBudgetCategories.includes('budget')
+                        selectedBudgetCategories === 'budget'
                           ? 'bg-gray-700 text-white hover:bg-black/30 '
                           : 'bg-gray-200 text-black hover:bg-gray-300'
                       }`}
@@ -189,8 +279,9 @@ const toggleBudgetCategory = (category) => {
                       <p>Budget</p>
                     </button>
                     <button
+                      type="button"
                       className={`flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-lg px-4 text-sm font-medium leading-normal font-display transition-colors ${
-                        selectedBudgetCategories.includes('midrange')
+                        selectedBudgetCategories === 'midrange'
                           ? 'bg-gray-700 text-white hover:bg-black/30 '
                           : 'bg-gray-200 text-black hover:bg-gray-300'
                       }`}
@@ -201,8 +292,9 @@ const toggleBudgetCategory = (category) => {
                       <p>Mid-range</p>
                     </button>
                     <button
+                      type="button"
                       className={`flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-lg px-4 text-sm font-medium leading-normal font-display transition-colors ${
-                        selectedBudgetCategories.includes('luxury')
+                        selectedBudgetCategories === 'luxury'
                           ? 'bg-gray-700 text-white hover:bg-black/30 '
                           : 'bg-gray-200 text-black hover:bg-gray-300'
                       }`}
@@ -213,10 +305,14 @@ const toggleBudgetCategory = (category) => {
                       <p>Luxury</p>
                     </button>
                   </div>
+                  {errors.budgetCategories && (
+                    <p className="text-red-500 text-sm mt-1">{errors.budgetCategories}</p>
+                  )}
                 </div>
               </div>
               <div className="w-full max-w-sm mt-8">
                 <button
+                  type="submit"
                   className="flex items-center justify-center w-full h-14 rounded-lg bg-black text-white text-lg font-bold hover:bg-black/90 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={handleFindTrips}
                   disabled={loading}
@@ -272,26 +368,18 @@ const toggleBudgetCategory = (category) => {
       </div>
       <footer className="sticky bottom-0 bg-gray-50/80 backdrop-blur-lg border-t border-teal-500/50 shadow-lg shadow-teal-500/20">
         <nav className="flex justify-around items-center p-4">
-
-
-
-          <a onClick={() => navigate('/ExperienceSide')} className="flex flex-col items-center gap-1 text-gray-600 hover:text-teal-500 transition-colors duration-200" href="#">
+          <a onClick={() => navigate('/ExperienceSide')} className="flex flex-col items-center gap-1 text-gray-600 hover:text-teal-500 transition-colors duration-200 cursor-pointer">
             <span className="material-symbols-outlined text-2xl">explore</span>
             <span className="text-sm font-medium">Experience</span>
           </a>
-
-
-          <a onClick={() => navigate('/TravelPlannerofBadget')} className="flex flex-col items-center gap-1 text-teal-600 hover:text-gray-500 transition-colors duration-200" href="#">
+          <a onClick={() => navigate('/TravelPlannerofBadget')} className="flex flex-col items-center gap-1 text-teal-600 hover:text-gray-500 transition-colors duration-200 cursor-pointer">
             <span className="material-symbols-outlined text-2xl">receipt_long</span>
             <span className="text-sm font-medium">Expense</span>
           </a>
-
-
-          <a onClick={() => navigate('/TripPlannerofCustome')} className="flex flex-col items-center gap-1 text-gray-600 hover:text-gray-500 transition-colors duration-200" href="#">
+          <a onClick={() => navigate('/TripPlannerofCustome')} className="flex flex-col items-center gap-1 text-gray-600 hover:text-gray-500 transition-colors duration-200 cursor-pointer">
             <span className="material-symbols-outlined text-2xl">tune</span>
             <span className="text-sm font-medium">Customize</span>
           </a>
-
         </nav>
       </footer>
     </div>
@@ -299,30 +387,3 @@ const toggleBudgetCategory = (category) => {
 };
 
 export default TravelPlannerofBadget;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
