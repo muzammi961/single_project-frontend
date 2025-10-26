@@ -107,7 +107,7 @@ const TravelPlannerofBadget = () => {
     });
 
     try {
-      await axios.post(
+     const valueortp= await axios.post(
         'http://127.0.0.1:8006/CreateTripofBudget/',
         {
           budget: budget,
@@ -121,6 +121,7 @@ const TravelPlannerofBadget = () => {
           headers: { Authorization: `Bearer ${access_token}` },
         }
       );
+      console.log('valueortp',valueortp.data)
     } catch (error) {
       console.error('Error creating trip:', error);
     } finally {
@@ -455,3 +456,42 @@ const TravelPlannerofBadget = () => {
 };
 
 export default TravelPlannerofBadget;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
