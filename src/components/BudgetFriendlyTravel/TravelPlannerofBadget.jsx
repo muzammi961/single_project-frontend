@@ -1,9 +1,12 @@
 import axios from 'axios';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import '../stylecomponent/livelocationbutton.css'
+import { setCalculateTripData } from '../actioncreate';
 
 const TravelPlannerofBadget = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [loadingLocation, setLoadingLocation] = useState(false);
@@ -121,6 +124,7 @@ const TravelPlannerofBadget = () => {
           headers: { Authorization: `Bearer ${access_token}` },
         }
       );
+      dispatch(setCalculateTripData(valueortp.data)); 
       console.log('valueortp',valueortp.data)
     } catch (error) {
       console.error('Error creating trip:', error);

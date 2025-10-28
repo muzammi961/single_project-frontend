@@ -6,7 +6,8 @@ const appSlice = createSlice({
     darkMode: true, 
     user: null, 
     autherazeduserId:null,
-    messageandprofileviewid: null 
+    messageandprofileviewid: null, 
+    tripDatacalculate:null,
   },
   reducers: {
     setMessageandProfileViewid: (state, action) => {
@@ -20,9 +21,13 @@ const appSlice = createSlice({
     },
     setUser: (state, action) => {
       state.user = action.payload;
+
     },
+    setCalculateTripData: (state, action) => {
+      state.tripDatacalculate = action.payload;
+        }
   },
 });
 
-export const { toggleDarkMode, setUser,setMessageandProfileViewid,AutherazedUserId} = appSlice.actions;
+export const { toggleDarkMode, setUser,setMessageandProfileViewid,AutherazedUserId,setCalculateTripData} = appSlice.actions;
 export default appSlice.reducer;

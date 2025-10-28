@@ -25,6 +25,12 @@ import FollowingMembers from './components/socialmedia/FollowingMembers .jsx'
 import FollowersMembers from './components/socialmedia/FollowersMembers.jsx'
 
 
+
+
+
+
+
+
 // ExpenseTracker 
 
 
@@ -52,9 +58,9 @@ import PlacesTest from './components/plasesarch.jsx';
 
 
 import TravelPlannerofBadget from './components/BudgetFriendlyTravel/TravelPlannerofBadget.jsx';
-
-
-
+import DashboardLayout from './components/BudgetFriendlyTravel/TravelDashboard/dashboard_layout.jsx'
+import TripSummary from './components/BudgetFriendlyTravel/TravelDashboard/TripSummary.jsx'
+import Accommodations from './components/BudgetFriendlyTravel/TravelDashboard/Accommodations.jsx'
 
 import GoogleMapComponent from './components/live journy/googleapicall.jsx';
 function App() {
@@ -153,6 +159,9 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 
             <Route path='/TravelPlannerofBadget' element={<TravelPlannerofBadget/>}/>
+            <Route path='/DashboardLayout' element={<DashboardLayout/>}/>
+            <Route path='/TripSummary' element={<TripSummary/>}/>
+            <Route path='/Accommodations' element ={<Accommodations/>}/>
           </Routes>
       </BrowserRouter>
   )
