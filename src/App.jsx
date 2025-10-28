@@ -61,6 +61,11 @@ import TravelPlannerofBadget from './components/BudgetFriendlyTravel/TravelPlann
 import DashboardLayout from './components/BudgetFriendlyTravel/TravelDashboard/dashboard_layout.jsx'
 import TripSummary from './components/BudgetFriendlyTravel/TravelDashboard/TripSummary.jsx'
 import Accommodations from './components/BudgetFriendlyTravel/TravelDashboard/Accommodations.jsx'
+import TravelPlannerRestaurants from './components/BudgetFriendlyTravel/TravelDashboard/TravelPlannerRestaurants.jsx'
+import Attractions from './components/BudgetFriendlyTravel/TravelDashboard/Attractions .jsx'
+import DailyItinerary from './components/BudgetFriendlyTravel/TravelDashboard/DailyItinerary.jsx'
+import TravelMap from './components/BudgetFriendlyTravel/TravelDashboard/TravelMap.jsx'
+import Navbar from './components/BudgetFriendlyTravel/TravelDashboard/Navbar.jsx'
 
 import GoogleMapComponent from './components/live journy/googleapicall.jsx';
 function App() {
@@ -161,7 +166,12 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
             <Route path='/TravelPlannerofBadget' element={<TravelPlannerofBadget/>}/>
             <Route path='/DashboardLayout' element={<DashboardLayout/>}/>
             <Route path='/TripSummary' element={<TripSummary/>}/>
-            <Route path='/Accommodations' element ={<Accommodations/>}/>
+            <Route path='/Accommodations' element={<Accommodations/>}/>
+            <Route path='/TravelPlannerRestaurants' element={<TravelPlannerRestaurants/>}/>
+            <Route path='/Attractions' element={<Attractions/>}/>
+            <Route path='/DailyItinerary' element={<DailyItinerary/>}/>
+            <Route path='/TravelMap' element={<TravelMap/>}/>
+            <Route path='/Navbar' element={<Navbar/>}/>
           </Routes>
       </BrowserRouter>
   )

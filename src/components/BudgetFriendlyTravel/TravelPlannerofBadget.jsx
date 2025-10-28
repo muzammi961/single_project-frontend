@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import '../stylecomponent/livelocationbutton.css'
+import '../stylecomponent/budgetboxstyle.css'
 import { setCalculateTripData } from '../actioncreate';
 
 const TravelPlannerofBadget = () => {
@@ -110,9 +111,7 @@ const TravelPlannerofBadget = () => {
     });
 
     try {
-     const valueortp= await axios.post(
-        'http://127.0.0.1:8006/CreateTripofBudget/',
-        {
+     const valueortp= await axios.post('http://127.0.0.1:8006/CreateTripofBudget/',{
           budget: budget,
           location: location,
           travelMode: travelMode,
@@ -124,8 +123,9 @@ const TravelPlannerofBadget = () => {
           headers: { Authorization: `Bearer ${access_token}` },
         }
       );
-      dispatch(setCalculateTripData(valueortp.data)); 
+     dispatch(setCalculateTripData(valueortp.data));  d
       console.log('valueortp',valueortp.data)
+      navigate('/DashboardLayout')
     } catch (error) {
       console.error('Error creating trip:', error);
     } finally {

@@ -1,0 +1,156 @@
+/* From Uiverse.io by gohar_7145 */ 
+.outline {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.rect {
+  stroke-dashoffset: 5;
+  stroke-dasharray: 0 0 10 40 10 40;
+  transition: 0.5s;
+  stroke: #e4ae0b;
+}
+
+.nav {
+  position: relative;
+  width: 400px;
+  height: 60px;
+  border-radius: 40px;
+  margin: 20px auto;
+  background: rgba(0, 0, 0, 0.8);
+  /* Center at the top */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.container:hover .outline .rect {
+  transition: 999999s;
+  /* Must specify these values here as something *different* just so that the transition works properly */
+  stroke-dashoffset: 1;
+  stroke-dasharray: 0;
+}
+
+.container {
+  position: absolute;
+  inset: 0;
+  background: rgba(16, 16, 16, 0.4);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between; /* Changed from space-around to space-between for equal spacing */
+  align-items: center;
+  padding: 0.5em;
+  border-radius: 40px;
+}
+
+.btn {
+  padding: 0.5em 1.5em;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.1s;
+  position: relative;
+  z-index: 1;
+  font-family: 'Arial', sans-serif;
+  font-weight: 500;
+  text-align: center;
+  min-width: 60px;
+  flex: 1; /* Make buttons take equal space */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn:hover {
+  background: #e4ae0b;
+  border-radius: 10px;
+  color: #000;
+}
+
+.btn.active {
+  background: #e4ae0b;
+  border-radius: 10px;
+  color: #000;
+}
+
+.btn:nth-child(1):hover ~ svg .rect {
+  stroke-dashoffset: 0;
+  stroke-dasharray: 0 2 8 73.3 8 10.7;
+}
+
+.btn:nth-child(2):hover ~ svg .rect {
+  stroke-dashoffset: 0;
+  stroke-dasharray: 0 12.6 9.5 49.3 9.5 31.6;
+}
+
+.btn:nth-child(3):hover ~ svg .rect {
+  stroke-dashoffset: 0;
+  stroke-dasharray: 0 24.5 8.5 27.5 8.5 55.5;
+}
+
+.btn:nth-child(4):hover ~ svg .rect {
+  stroke-dashoffset: 0;
+  stroke-dasharray: 0 34.7 6.9 10.2 6.9 76;
+}
+
+.btn:hover ~ .outline .rect {
+  stroke-dashoffset: 0;
+  stroke-dasharray: 0 0 10 40 10 40;
+  transition: 0.5s !important;
+}
+
+/* Active state animations */
+.btn.active ~ svg .rect {
+  stroke-dashoffset: 0;
+  transition: 0.5s;
+}
+
+.btn:nth-child(1).active ~ svg .rect {
+  stroke-dasharray: 0 2 8 73.3 8 10.7;
+}
+
+.btn:nth-child(2).active ~ svg .rect {
+  stroke-dasharray: 0 12.6 9.5 49.3 9.5 31.6;
+}
+
+.btn:nth-child(3).active ~ svg .rect {
+  stroke-dasharray: 0 24.5 8.5 27.5 8.5 55.5;
+}
+
+.btn:nth-child(4).active ~ svg .rect {
+  stroke-dasharray: 0 34.7 6.9 10.2 6.9 76;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .nav {
+    width: 350px;
+    height: 55px;
+  }
+  
+  .btn {
+    padding: 0.4em 1.2em;
+    font-size: 0.9em;
+  }
+}
+
+@media (max-width: 380px) {
+  .nav {
+    width: 300px;
+    height: 50px;
+  }
+  
+  .btn {
+    padding: 0.3em 1em;
+    font-size: 0.8em;
+  }
+}
+
+/* Additional positioning for top center */
+.nav-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  padding-top: 20px;
+}
