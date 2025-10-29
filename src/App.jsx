@@ -66,7 +66,7 @@ import Attractions from './components/BudgetFriendlyTravel/TravelDashboard/Attra
 import DailyItinerary from './components/BudgetFriendlyTravel/TravelDashboard/DailyItinerary.jsx'
 import TravelMap from './components/BudgetFriendlyTravel/TravelDashboard/TravelMap.jsx'
 import Navbar from './components/BudgetFriendlyTravel/TravelDashboard/Navbar.jsx'
-
+import TravelPlannerItinerary from './components/BudgetFriendlyTravel/TravelDashboard/TravelPlannerItinerary.jsx'
 import GoogleMapComponent from './components/live journy/googleapicall.jsx';
 function App() {
 const isAuthenticated =localStorage.getItem("access_token");
@@ -163,15 +163,26 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 
 
+
             <Route path='/TravelPlannerofBadget' element={<TravelPlannerofBadget/>}/>
-            <Route path='/DashboardLayout' element={<DashboardLayout/>}/>
+
+
+            <Route path='/Navbar' element={<Navbar/>}/>
             <Route path='/TripSummary' element={<TripSummary/>}/>
+
+            <Route path='/DashboardLayout' element={<DashboardLayout/>}/>
+    
+
+
+
             <Route path='/Accommodations' element={<Accommodations/>}/>
             <Route path='/TravelPlannerRestaurants' element={<TravelPlannerRestaurants/>}/>
             <Route path='/Attractions' element={<Attractions/>}/>
             <Route path='/DailyItinerary' element={<DailyItinerary/>}/>
             <Route path='/TravelMap' element={<TravelMap/>}/>
-            <Route path='/Navbar' element={<Navbar/>}/>
+
+
+            <Route path='/TravelPlannerItinerary' element={<TravelPlannerItinerary/>}/>
           </Routes>
       </BrowserRouter>
   )

@@ -25,9 +25,12 @@ const appSlice = createSlice({
     },
     setCalculateTripData: (state, action) => {
       state.tripDatacalculate = action.payload;
-        }
+    },
+    clearTripData: (state) => {
+    state.tripDatacalculate = null;
+    },
   },
 });
 
-export const { toggleDarkMode, setUser,setMessageandProfileViewid,AutherazedUserId,setCalculateTripData} = appSlice.actions;
+export const { toggleDarkMode, setUser,setMessageandProfileViewid,AutherazedUserId,setCalculateTripData,clearTripData} = appSlice.actions;
 export default appSlice.reducer;

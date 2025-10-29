@@ -1,4 +1,5 @@
 import React from 'react';
+import Navbar from './Navbar';
 
 const Attractions = () => {
   const attractions = [
@@ -90,62 +91,9 @@ const Attractions = () => {
   return (
     <div className="font-display bg-background-light dark:bg-background-dark">
       <div className="relative flex min-h-screen w-full flex-col group/design-root">
+      <Navbar/>
         <div className="flex flex-1">
-          {/* SideNavBar */}
-          <aside className="sticky top-0 h-screen w-72 shrink-0 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-background-dark hidden lg:flex flex-col">
-            <div className="flex h-full flex-col justify-between p-4">
-              <div className="flex flex-col gap-4">
-                <div className="flex items-center gap-3 px-3">
-                  <div 
-                    className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" 
-                    data-alt="User avatar for Alex Miller"
-                    style={{backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuBMPGYPJDva5GUx_wGNwn5bIhx3PxW4lQKUcFfMxTfq9pUhPi2NWjj3TOt2RvO31zIaQvWCQNYZ7F-rusPzerBv259PENIUEv0nwEAWA_-pPu0b6QGGMQXDd2Ig0zNXNnaPbj5ZZevH5zCaMZbFyNkItwy1394ezdZ4Xuq6yzPHLZG67avKfeqcD_Mg14KdP1dMyibpG9ff5GfwG4mdpVxlK5IMB79co0O3S_-fvUHFCpXq8_dKyc9ORt0zFVJoq6DU_gh80VqtYhM")'}}
-                  ></div>
-                  <div className="flex flex-col">
-                    <h1 className="text-[#111418] dark:text-white text-base font-medium leading-normal">Alex Miller</h1>
-                    <p className="text-[#637188] dark:text-gray-400 text-sm font-normal leading-normal">alex.miller@email.com</p>
-                  </div>
-                </div>
-                <nav className="flex flex-col gap-2 mt-4">
-                  <a className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10" href="#">
-                    <span className="material-symbols-outlined text-[#111418] dark:text-white">dashboard</span>
-                    <p className="text-[#111418] dark:text-white text-sm font-medium leading-normal">Dashboard</p>
-                  </a>
-                  <a className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10" href="#">
-                    <span className="material-symbols-outlined text-[#111418] dark:text-white">card_travel</span>
-                    <p className="text-[#111418] dark:text-white text-sm font-medium leading-normal">My Trips</p>
-                  </a>
-                  <a className="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 dark:bg-primary/20" href="#">
-                    <span className="material-symbols-outlined text-primary dark:text-primary-300" style={{fontVariationSettings: "'FILL' 1"}}>attractions</span>
-                    <p className="text-primary dark:text-primary-300 text-sm font-bold leading-normal">Attractions</p>
-                  </a>
-                  <a className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10" href="#">
-                    <span className="material-symbols-outlined text-[#111418] dark:text-white">flight</span>
-                    <p className="text-[#111418] dark:text-white text-sm font-medium leading-normal">Flights</p>
-                  </a>
-                  <a className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10" href="#">
-                    <span className="material-symbols-outlined text-[#111418] dark:text-white">hotel</span>
-                    <p className="text-[#111418] dark:text-white text-sm font-medium leading-normal">Hotels</p>
-                  </a>
-                </nav>
-              </div>
-              <div className="flex flex-col gap-4">
-                <button className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90">
-                  <span className="truncate">New Trip</span>
-                </button>
-                <div className="flex flex-col gap-1">
-                  <a className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10" href="#">
-                    <span className="material-symbols-outlined text-[#111418] dark:text-white">settings</span>
-                    <p className="text-[#111418] dark:text-white text-sm font-medium leading-normal">Settings</p>
-                  </a>
-                  <a className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10" href="#">
-                    <span className="material-symbols-outlined text-[#111418] dark:text-white">logout</span>
-                    <p className="text-[#111418] dark:text-white text-sm font-medium leading-normal">Logout</p>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </aside>
+    
 
           {/* Main Content */}
           <main className="flex-1 p-4 sm:p-6 lg:p-8">

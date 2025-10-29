@@ -1,225 +1,210 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
+import Navbar from './Navbar';
 
 const DailyItinerary = () => {
-  const days = [
-    {
-      id: 1,
-      date: "Oct 25, 2024",
-      location: "Paris, France",
-      distance: "5km",
-      activityCount: 4,
-      open: false,
-      activities: []
-    },
-    {
-      id: 2,
-      date: "Oct 26, 2024",
-      location: "Paris, France",
-      distance: "15km",
-      activityCount: 5,
-      open: true,
-      activities: [
-        {
-          id: 1,
-          title: "Breakfast at Du Pain",
-          time: "09:00 - 10:00 (1h)",
-          cost: "€15",
-          color: "orange"
-        },
-        {
-          id: 2,
-          title: "Louvre Museum Visit",
-          time: "10:00 - 13:00 (3h)",
-          cost: "€17",
-          color: "green"
-        },
-        {
-          id: 3,
-          title: "Lunch at Le Bouillon",
-          time: "13:00 - 14:00 (1h)",
-          cost: "€25",
-          color: "orange"
-        },
-        {
-          id: 4,
-          title: "Eiffel Tower Tour",
-          time: "14:30 - 16:30 (2h)",
-          cost: "€25",
-          color: "green"
-        },
-        {
-          id: 5,
-          title: "Seine River Cruise",
-          time: "17:00 - 18:00 (1h)",
-          cost: "€20",
-          color: "blue"
-        }
-      ]
-    },
-    {
-      id: 3,
-      date: "Oct 27, 2024",
-      location: "Versailles, France",
-      distance: "30km",
-      activityCount: 3,
-      open: false,
-      activities: []
-    }
-  ];
+  const calculateTripData = useSelector((state) => state.app.tripDatacalculate);
+  
+  // Get daily itineraries from trip data
+  const dailyItineraries = calculateTripData?.daily_itineraries || [];
 
-  const getColorClasses = (color) => {
+  const getColorClasses = (type) => {
     const colorMap = {
-      orange: "bg-orange-500 ring-orange-500/20",
-      green: "bg-green-500 ring-green-500/20",
-      blue: "bg-blue-500 ring-blue-500/20"
+      morning_routine: "bg-orange-500 ring-orange-500/20",
+      travel: "bg-blue-500 ring-blue-500/20",
+      meal: "bg-green-500 ring-green-500/20",
+      attraction: "bg-purple-500 ring-purple-500/20",
+      leisure: "bg-pink-500 ring-pink-500/20",
+      accommodation: "bg-indigo-500 ring-indigo-500/20",
+      planning: "bg-gray-500 ring-gray-500/20"
     };
-    return colorMap[color] || colorMap.blue;
+    return colorMap[type] || colorMap.blue;
+  };
+
+  // Function to get activity type display name
+  const getActivityTypeName = (type) => {
+    const typeMap = {
+      morning_routine: "Morning Routine",
+      travel: "Travel",
+      meal: "Meal",
+      attraction: "Attraction",
+      leisure: "Leisure",
+      accommodation: "Accommodation",
+      planning: "Planning"
+    };
+    return typeMap[type] || type;
+  };
+
+  // Function to format activity details
+  const formatActivityDetails = (activity) => {
+    if (activity.type === 'travel') {
+      return `${activity.details?.distance || 'Travel'} | Cost: ₹${activity.estimated_cost || 0}`;
+    }
+    if (activity.type === 'attraction') {
+      return `${activity.time} | Cost: ₹${activity.estimated_cost || 0}`;
+    }
+    if (activity.type === 'meal') {
+      return `${activity.time} | Cost: ₹${activity.estimated_cost || 0}`;
+    }
+    return activity.time || '';
   };
 
   return (
-    <div className="bg-background-light dark:bg-background-dark font-display text-[#111418] dark:text-white">
+    <div className="bg-white font-display text-gray-900">
       <div className="relative flex min-h-screen w-full flex-col">
+        <Navbar/>
         <div className="flex h-full flex-1">
-          {/* SideNavBar */}
-          <aside className="flex w-72 flex-col gap-8 border-r border-[#dcdfe5] dark:border-gray-700 bg-white dark:bg-background-dark p-6 sticky top-0 h-screen">
-            <div className="flex items-center gap-3">
-              <div 
-                className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" 
-                data-alt="User's profile picture, Alex Doe"
-                style={{backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuBnkNqzDYkJAPefHiZdPMau2qbp-FnItZRrEWYNRJjZWAoDljzeUd1wUOm9BGOUpDUIkn2K7_JWQSjw60o0c6JyIk59_NMW00oO4VPEGIqZyBRT7cty7kBoggZ7VKA8dUwyEaZ-zB3JtWlb6NAHoxrn9F_o20Oxbw_-zd0bnuIn6j_Xvok8l8W_LYVB4Gvf9BrnE1QfpI9I4lJgolG_NTAFy264crLbCkr4pbyS7_240GxTradwxU3zyY7IjzSkc7unSdmLZeP_Ipk")'}}
-              ></div>
-              <div className="flex flex-col">
-                <h1 className="text-base font-medium leading-normal text-[#111418] dark:text-white">Alex Doe</h1>
-                <p className="text-sm font-normal leading-normal text-[#637188] dark:text-gray-400">alex.doe@email.com</p>
-              </div>
-            </div>
-            <nav className="flex flex-1 flex-col justify-between">
-              <div className="flex flex-col gap-2">
-                <a className="flex items-center gap-3 px-3 py-2 text-[#637188] dark:text-gray-400 hover:text-[#111418] dark:hover:text-white" href="#">
-                  <span className="material-symbols-outlined">dashboard</span>
-                  <p className="text-sm font-medium leading-normal">Dashboard</p>
-                </a>
-                <a className="flex items-center gap-3 px-3 py-2 text-[#637188] dark:text-gray-400 hover:text-[#111418] dark:hover:text-white" href="#">
-                  <span className="material-symbols-outlined">luggage</span>
-                  <p className="text-sm font-medium leading-normal">My Trips</p>
-                </a>
-                <a className="flex items-center gap-3 rounded-lg bg-primary/10 dark:bg-primary/20 px-3 py-2 text-primary" href="#">
-                  <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1"}}>calendar_month</span>
-                  <p className="text-sm font-medium leading-normal">Itinerary</p>
-                </a>
-                <a className="flex items-center gap-3 px-3 py-2 text-[#637188] dark:text-gray-400 hover:text-[#111418] dark:hover:text-white" href="#">
-                  <span className="material-symbols-outlined">account_balance_wallet</span>
-                  <p className="text-sm font-medium leading-normal">Budget</p>
-                </a>
-                <a className="flex items-center gap-3 px-3 py-2 text-[#637188] dark:text-gray-400 hover:text-[#111418] dark:hover:text-white" href="#">
-                  <span className="material-symbols-outlined">explore</span>
-                  <p className="text-sm font-medium leading-normal">Explore</p>
-                </a>
-              </div>
-              <div className="flex flex-col gap-2">
-                <button className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em]">
-                  <span className="truncate">New Trip</span>
-                </button>
-                <div className="border-t border-[#dcdfe5] dark:border-gray-700 my-2"></div>
-                <a className="flex items-center gap-3 px-3 py-2 text-[#637188] dark:text-gray-400 hover:text-[#111418] dark:hover:text-white" href="#">
-                  <span className="material-symbols-outlined">settings</span>
-                  <p className="text-sm font-medium leading-normal">Settings</p>
-                </a>
-                <a className="flex items-center gap-3 px-3 py-2 text-[#637188] dark:text-gray-400 hover:text-[#111418] dark:hover:text-white" href="#">
-                  <span className="material-symbols-outlined">logout</span>
-                  <p className="text-sm font-medium leading-normal">Log Out</p>
-                </a>
-              </div>
-            </nav>
-          </aside>
-
           {/* Main Content */}
           <main className="flex-1 p-6 lg:p-10">
             <div className="mx-auto max-w-4xl">
               {/* PageHeading */}
               <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
                 <div className="flex flex-col gap-1">
-                  <p className="text-[#111418] dark:text-white text-3xl font-black leading-tight tracking-[-0.033em]">Daily Itinerary</p>
-                  <p className="text-[#637188] dark:text-gray-400 text-base font-normal leading-normal">Your day-by-day plan for the trip to Paris.</p>
+                  <p className="text-gray-900 text-3xl font-black leading-tight tracking-[-0.033em]">Daily Itinerary</p>
+                  <p className="text-gray-600 text-base font-normal leading-normal">
+                    Your day-by-day plan for the trip to {calculateTripData?.destination?.address || 'Destination'}.
+                  </p>
                 </div>
-                <button className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 gap-2 bg-white dark:bg-gray-700 text-[#111418] dark:text-white text-sm font-bold leading-normal tracking-[0.015em] border border-[#dcdfe5] dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
+                {/* <button className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 gap-2 bg-white text-gray-900 text-sm font-bold leading-normal tracking-[0.015em] border border-gray-300 hover:bg-gray-50">
                   <span className="material-symbols-outlined text-base">add</span>
                   <span className="truncate">Add New Day</span>
-                </button>
+                </button> */}
               </div>
 
               {/* Accordions */}
               <div className="flex flex-col gap-4">
-                {days.map((day) => (
-                  <details 
-                    key={day.id} 
-                    className="flex flex-col rounded-xl border border-[#dcdfe5] dark:border-gray-700 bg-white dark:bg-gray-800 p-4 group"
-                    open={day.open}
-                  >
-                    <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
-                      <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-                        <p className="text-[#111418] dark:text-white text-base font-bold leading-normal">Day {day.id}: {day.date}</p>
-                        <div className="flex flex-wrap items-center gap-2 md:gap-3 text-sm text-[#637188] dark:text-gray-400">
-                          <span className="flex items-center gap-1.5">
-                            <span className="material-symbols-outlined text-sm">location_on</span>
-                            {day.location}
-                          </span>
-                          <span className="hidden md:inline">·</span>
-                          <span className="flex items-center gap-1.5">
-                            <span className="material-symbols-outlined text-sm">directions_walk</span>
-                            {day.distance}
-                          </span>
-                          <span className="hidden md:inline">·</span>
-                          <span className="flex items-center gap-1.5">
-                            <span className="material-symbols-outlined text-sm">local_activity</span>
-                            {day.activityCount} Activities
-                          </span>
+                {dailyItineraries.length > 0 ? (
+                  dailyItineraries.map((day) => (
+                    <details 
+                      key={day.day} 
+                      className="flex flex-col rounded-xl border border-gray-300 bg-white p-4 group"
+                      open={day.day === 1} // Open first day by default
+                    >
+                      <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
+                        <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
+                          <p className="text-gray-900 text-base font-bold leading-normal">
+                            Day {day.day}: {day.date} ({day.trip_phase === 'going' ? 'Going' : 'Returning'})
+                          </p>
+                          <div className="flex flex-wrap items-center gap-2 md:gap-3 text-sm text-gray-600">
+                            <span className="flex items-center gap-1.5">
+                              <span className="material-symbols-outlined text-sm">location_on</span>
+                              {day.current_location?.lat ? `${day.current_location.lat.toFixed(2)}, ${day.current_location.lng.toFixed(2)}` : 'Travel Day'}
+                            </span>
+                            <span className="hidden md:inline">·</span>
+                            <span className="flex items-center gap-1.5">
+                              <span className="material-symbols-outlined text-sm">directions_car</span>
+                              {day.daily_travel_distance} km
+                            </span>
+                            <span className="hidden md:inline">·</span>
+                            <span className="flex items-center gap-1.5">
+                              <span className="material-symbols-outlined text-sm">local_activity</span>
+                              {day.total_activities || 0} Activities
+                            </span>
+                          </div>
                         </div>
+                        <span className="material-symbols-outlined text-gray-900 group-open:rotate-180 transition-transform">expand_more</span>
+                      </summary>
+                      
+                      <div className="mt-4 border-t border-gray-300 pt-4">
+                        {!day.schedule || day.schedule.length === 0 ? (
+                          // Empty State
+                          <div className="text-center py-8">
+                            <p className="text-gray-600">No activities planned for this day yet.</p>
+                            <button className="mt-4 flex mx-auto min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 gap-2 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em]">
+                              <span className="material-symbols-outlined text-base">add</span>
+                              <span className="truncate">Add Activity</span>
+                            </button>
+                          </div>
+                        ) : (
+                          // Timeline
+                          <div className="grid grid-cols-[auto_1fr_auto] items-start gap-x-4 gap-y-6">
+                            {day.schedule.map((activity, index) => (
+                              <React.Fragment key={index}>
+                                {/* Timeline dot and line */}
+                                <div className="flex h-full flex-col items-center">
+                                  <div className={`size-3 rounded-full ring-4 ${getColorClasses(activity.type)}`}></div>
+                                  <div className={`w-px grow ${index === day.schedule.length - 1 ? 'bg-transparent' : 'bg-gray-300'}`}></div>
+                                </div>
+                                
+                                {/* Activity details */}
+                                <div className="flex flex-col gap-0.5">
+                                  <div className="flex items-center gap-2">
+                                    <p className="font-semibold text-gray-900">{activity.activity}</p>
+                                    <span className={`text-xs px-2 py-1 rounded-full ${
+                                      activity.type === 'travel' ? 'bg-blue-100 text-blue-800' :
+                                      activity.type === 'attraction' ? 'bg-purple-100 text-purple-800' :
+                                      activity.type === 'meal' ? 'bg-green-100 text-green-800' :
+                                      activity.type === 'accommodation' ? 'bg-indigo-100 text-indigo-800' :
+                                      'bg-gray-100 text-gray-800'
+                                    }`}>
+                                      {getActivityTypeName(activity.type)}
+                                    </span>
+                                  </div>
+                                  <p className="text-sm text-gray-600">
+                                    {formatActivityDetails(activity)}
+                                  </p>
+                                  {activity.details && typeof activity.details === 'object' && (
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      {activity.details.travel_mode && (
+                                        <span>Mode: {activity.details.travel_mode}</span>
+                                      )}
+                                      {activity.details.from && activity.details.to && (
+                                        <div className="mt-1">
+                                          <div>From: {typeof activity.details.from === 'object' ? `${activity.details.from.lat?.toFixed(2)}, ${activity.details.from.lng?.toFixed(2)}` : activity.details.from}</div>
+                                          <div>To: {typeof activity.details.to === 'object' ? `${activity.details.to.lat?.toFixed(2)}, ${activity.details.to.lng?.toFixed(2)}` : activity.details.to}</div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                {/* Edit button */}
+                                <button className="flex items-center justify-center size-9 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 text-gray-600">
+                                  <span className="material-symbols-outlined text-lg">edit_calendar</span>
+                                </button>
+                              </React.Fragment>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      <span className="material-symbols-outlined text-[#111418] dark:text-white group-open:rotate-180 transition-transform">expand_more</span>
-                    </summary>
-                    
-                    <div className="mt-4 border-t border-[#dcdfe5] dark:border-gray-700 pt-4">
-                      {day.activities.length === 0 ? (
-                        // Empty State
-                        <div className="text-center py-8">
-                          <p className="text-[#637188] dark:text-gray-400">No activities planned for this day yet.</p>
-                          <button className="mt-4 flex mx-auto min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 gap-2 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em]">
-                            <span className="material-symbols-outlined text-base">add</span>
-                            <span className="truncate">Add Activity</span>
-                          </button>
-                        </div>
-                      ) : (
-                        // Timeline
-                        <div className="grid grid-cols-[auto_1fr_auto] items-start gap-x-4 gap-y-6">
-                          {day.activities.map((activity, index) => (
-                            <React.Fragment key={activity.id}>
-                              {/* Timeline dot and line */}
-                              <div className="flex h-full flex-col items-center">
-                                <div className={`size-3 rounded-full ring-4 ${getColorClasses(activity.color)}`}></div>
-                                <div className={`w-px grow ${index === day.activities.length - 1 ? 'bg-transparent' : 'bg-[#dcdfe5] dark:bg-gray-600'}`}></div>
-                              </div>
-                              
-                              {/* Activity details */}
-                              <div className="flex flex-col gap-0.5">
-                                <p className="font-semibold text-[#111418] dark:text-white">{activity.title}</p>
-                                <p className="text-sm text-[#637188] dark:text-gray-400">
-                                  {activity.time} | Cost: {activity.cost}
-                                </p>
-                              </div>
-                              
-                              {/* Edit button */}
-                              <button className="flex items-center justify-center size-9 rounded-lg bg-white dark:bg-gray-700 border border-[#dcdfe5] dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 text-[#637188] dark:text-gray-400">
-                                <span className="material-symbols-outlined text-lg">edit_calendar</span>
-                              </button>
-                            </React.Fragment>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </details>
-                ))}
+                    </details>
+                  ))
+                ) : (
+                  // Empty state when no itineraries
+                  <div className="text-center py-16">
+                    <span className="material-symbols-outlined text-6xl text-gray-300 mb-4">
+                      calendar_today
+                    </span>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      No Itinerary Found
+                    </h3>
+                    <p className="text-gray-600 max-w-md mx-auto">
+                      We couldn't find any daily itineraries for your trip. Your travel plan might still be processing.
+                    </p>
+                  </div>
+                )}
               </div>
+
+              {/* Trip Summary */}
+              {dailyItineraries.length > 0 && (
+                <div className="mt-8 p-6 bg-gray-50 rounded-xl border border-gray-300">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">Trip Summary</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div className="flex flex-col">
+                      <span className="text-gray-600">Total Days</span>
+                      <span className="text-gray-900 font-semibold">{calculateTripData?.summary?.trip_duration_days || dailyItineraries.length} days</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-gray-600">Total Distance</span>
+                      <span className="text-gray-900 font-semibold">{calculateTripData?.summary?.total_round_trip_distance_km || 0} km</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-gray-600">Total Activities</span>
+                      <span className="text-gray-900 font-semibold">{calculateTripData?.summary?.total_scheduled_activities || 0} scheduled</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </main>
         </div>

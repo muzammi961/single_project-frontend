@@ -123,7 +123,7 @@ const TravelPlannerofBadget = () => {
           headers: { Authorization: `Bearer ${access_token}` },
         }
       );
-     dispatch(setCalculateTripData(valueortp.data));  d
+     dispatch(setCalculateTripData(valueortp.data));  
       console.log('valueortp',valueortp.data)
       navigate('/DashboardLayout')
     } catch (error) {

@@ -1,554 +1,12 @@
-// import React, { useState } from 'react';
-// import { useSelector } from "react-redux";
-
-// const DashboardLayout = () => {
-//   const [visibility, setVisibility] = useState('private');
-//   const [email, setEmail] = useState('');
-
-//   const budgetData = {
-//     totalBudget: 4000,
-//     totalSpent: 2500,
-//     remaining: 1500,
-//     categories: [
-//       { name: "Transport", spent: 800, budget: 2000, color: "#3b82f6" },
-//       { name: "Accommodation", spent: 1100, budget: 1500, color: "#8b5cf6" },
-//       { name: "Food", spent: 350, budget: 700, color: "#f59e0b" },
-//       { name: "Activities", spent: 150, budget: 500, color: "#10b981" }
-//     ]
-//   };
-
-//   const getProgressPercentage = (spent, budget) => {
-//     return (spent / budget) * 100;
-//   };
-
-//   const getOverallProgress = () => {
-//     return (budgetData.totalSpent / budgetData.totalBudget) * 100;
-//   };
-
-//   // Calculate individual category percentages for the circle
-//   const getCategoryCircleData = () => {
-//     const totalSpent = budgetData.categories.reduce((sum, category) => sum + category.spent, 0);
-    
-//     return budgetData.categories.map(category => ({
-//       ...category,
-//       percentage: (category.spent / totalSpent) * 100,
-//       startAngle: 0,
-//       endAngle: 0
-//     }));
-//   };
-
-//   const calculateTripData = useSelector((state) => state.app.tripDatacalculate);
-//   console.log('calculate trip data ::  ', calculateTripData);
-
-//   const categoryCircleData = getCategoryCircleData();
-  
-//   // Calculate angles for the circle segments
-//   let currentAngle = -90; // Start from top
-//   const circleSegments = categoryCircleData.map(category => {
-//     const angle = (category.percentage / 100) * 360;
-//     const segment = {
-//       ...category,
-//       startAngle: currentAngle,
-//       endAngle: currentAngle + angle
-//     };
-//     currentAngle += angle;
-//     return segment;
-//   });
-
-//   // Function to calculate SVG path for circle segments
-//   const getCircleSegmentPath = (cx, cy, radius, startAngle, endAngle) => {
-//     const start = polarToCartesian(cx, cy, radius, endAngle);
-//     const end = polarToCartesian(cx, cy, radius, startAngle);
-//     const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
-    
-//     return [
-//       "M", cx, cy,
-//       "L", start.x, start.y,
-//       "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y,
-//       "Z"
-//     ].join(" ");
-//   };
-
-//   const polarToCartesian = (cx, cy, radius, angleInDegrees) => {
-//     const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
-//     return {
-//       x: cx + (radius * Math.cos(angleInRadians)),
-//       y: cy + (radius * Math.sin(angleInRadians))
-//     };
-//   };
-
-//   return (
-//     <div className="font-display bg-white text-black min-h-screen">
-//       <div className="flex flex-col min-h-screen">
-//         {/* Top Navigation Bar */}
-//         <nav className="w-full flex-shrink-0 bg-white border-b border-gray-200 flex flex-col lg:flex-row items-start lg:items-center justify-between p-4 lg:px-6 lg:py-4">
-//           <div className="flex items-center gap-3 mb-4 lg:mb-0">
-//             <div className="bg-blue-100 text-blue-600 p-2 rounded-lg">
-//               <span className="material-symbols-outlined">travel_explore</span>
-//             </div>
-//             <h1 className="text-xl font-bold">TripPlanner</h1>
-//           </div>
-          
-//           <div className="flex flex-row gap-2 w-full lg:w-auto overflow-x-auto lg:overflow-x-visible">
-//             <a className="flex items-center gap-3 px-3 py-2 rounded-lg bg-blue-100 text-blue-600 whitespace-nowrap" href="#">
-//               <span className="material-symbols-outlined">dashboard</span>
-//               <p className="text-sm font-medium">Dashboard</p>
-//             </a>
-//             <a className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 whitespace-nowrap" href="#">
-//               <span className="material-symbols-outlined">list_alt</span>
-//               <p className="text-sm font-medium">Itinerary</p>
-//             </a>
-//             <a className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 whitespace-nowrap" href="#">
-//               <span className="material-symbols-outlined">account_balance_wallet</span>
-//               <p className="text-sm font-medium">Budget</p>
-//             </a>
-//             <a className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 whitespace-nowrap" href="#">
-//               <span className="material-symbols-outlined">map</span>
-//               <p className="text-sm font-medium">Explore</p>
-//             </a>
-//             <a className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 whitespace-nowrap" href="#">
-//               <span className="material-symbols-outlined">group</span>
-//               <p className="text-sm font-medium">Manage Trip</p>
-//             </a>
-//           </div>
-//         </nav>
-
-//         {/* Main Content */}
-//         <main className="flex-1 p-4 lg:p-8 overflow-y-auto">
-//           {/* Header Section */}
-//           <header className="mb-6 lg:mb-8">
-//             {/* PageHeading */}
-//             <div className="flex flex-col lg:flex-row lg:flex-wrap justify-between items-start lg:items-center gap-4 mb-6">
-//               <div className="flex flex-col gap-1">
-//                 <h1 className="text-2xl lg:text-4xl font-black leading-tight tracking-tight">European Adventure: Paris to Rome</h1>
-//                 <p className="text-sm lg:text-base font-normal text-gray-500">July 15, 2024 - July 29, 2024</p>
-//               </div>
-//               <div className="flex items-center gap-2 w-full lg:w-auto">
-//                 <button className="flex-1 lg:flex-none flex items-center justify-center rounded-lg h-10 px-4 border border-gray-300 text-sm font-bold gap-2 hover:bg-gray-100">
-//                   <span className="material-symbols-outlined text-base">share</span>
-//                   <span className="truncate">Share</span>
-//                 </button>
-//                 <button className="flex-1 lg:flex-none flex items-center justify-center rounded-lg h-10 px-4 bg-blue-600 text-white text-sm font-bold gap-2">
-//                   <span className="material-symbols-outlined text-base">edit</span>
-//                   <span className="truncate">Edit Trip</span>
-//                 </button>
-//               </div>
-//             </div>
-            
-//             {/* Stats & Charts */}
-//             <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6">
-//               <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-//                 <div className="flex flex-col gap-2 rounded-lg p-4 lg:p-6 bg-white border border-gray-200">
-//                   <p className="text-sm lg:text-base font-medium">Total Budget</p>
-//                   <p className="text-xl lg:text-3xl font-bold tracking-tight">€{budgetData.totalSpent} <span className="text-sm lg:text-lg font-medium text-gray-400">/ €{budgetData.totalBudget}</span></p>
-//                 </div>
-//                 <div className="flex flex-col gap-2 rounded-lg p-4 lg:p-6 bg-white border border-gray-200">
-//                   <p className="text-sm lg:text-base font-medium">Total Distance</p>
-//                   <p className="text-xl lg:text-3xl font-bold tracking-tight">1,430 km</p>
-//                 </div>
-//                 <div className="flex flex-col gap-2 rounded-lg p-4 lg:p-6 bg-white border border-gray-200">
-//                   <p className="text-sm lg:text-base font-medium">Trip Duration</p>
-//                   <p className="text-xl lg:text-3xl font-bold tracking-tight">15 Days</p>
-//                 </div>
-//               </div>
-//               <div className="rounded-lg p-4 lg:p-6 bg-white border border-gray-200 flex items-center justify-between gap-4">
-//                 <div className="flex flex-col">
-//                   <p className="text-sm lg:text-base font-medium">Weather (Paris)</p>
-//                   <p className="text-xl lg:text-3xl font-bold">24°C</p>
-//                 </div>
-//                 <span className="material-symbols-outlined text-3xl lg:text-5xl text-yellow-500">partly_cloudy_day</span>
-//               </div>
-//             </div>
-//           </header>
-
-//           {/* Main Content (Two-Column Layout) */}
-//           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8 mb-6 lg:mb-8">
-//             {/* Left Column */}
-//             <div className="xl:col-span-2 flex flex-col gap-6 lg:gap-8">
-//               {/* Interactive Map */}
-//               <div className="bg-white border border-gray-200 rounded-lg p-3 lg:p-4">
-//                 <div 
-//                   className="w-full bg-center bg-no-repeat aspect-[4/3] lg:aspect-[16/10] bg-cover rounded-lg" 
-//                   style={{backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuCSN5bipgGfbxfxs0gw5NKwmQ3zuGcKJOc-D3TJVxuBD0C3BjgZM1UWH5QjIMN2ZUrdDnc4YrdVnqU-NVz2xbt1Wa6D-kLcrsMfVB1ztaEs2TPW7MbxEczKkDGn70xrk6Re43ht-5YCpzELxqODj_FVEnH8SaUR402T5Q4oKscdhhQZS72lanIRStyyk8ZEdKD17ED3RUtdDuu-M4GlBYITlcL96ZYCmH50qyFvNCkw9nPe4qDpQmXnPJLu1VBxR7WEDcZqvAv7ptk")'}}
-//                 ></div>
-//               </div>
-              
-//               {/* Budget Tracker - Segmented Circle Design */}
-//               <div className="bg-white border border-gray-200 rounded-lg p-4 lg:p-6">
-//                 <h3 className="text-lg lg:text-xl font-bold mb-4">Budget Tracker</h3>
-//                 <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-8">
-//                   {/* Segmented Circle Progress */}
-//                   <div className="relative w-48 h-48 flex-shrink-0">
-//                     <svg className="w-full h-full" viewBox="0 0 100 100">
-//                       {/* Background Circle */}
-//                       <circle
-//                         cx="50"
-//                         cy="50"
-//                         r="45"
-//                         fill="none"
-//                         stroke="#e5e7eb"
-//                         strokeWidth="8"
-//                       />
-                      
-//                       {/* Segmented Circles for each category */}
-//                       {circleSegments.map((segment, index) => (
-//                         <path
-//                           key={segment.name}
-//                           d={getCircleSegmentPath(50, 50, 45, segment.startAngle, segment.endAngle)}
-//                           fill={segment.color}
-//                           stroke={segment.color}
-//                           strokeWidth="2"
-//                         />
-//                       ))}
-                      
-//                       {/* Center white circle */}
-//                       <circle
-//                         cx="50"
-//                         cy="50"
-//                         r="30"
-//                         fill="white"
-//                       />
-//                     </svg>
-                    
-//                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-//                       <span className="text-2xl lg:text-3xl font-bold text-blue-600">
-//                         {getOverallProgress().toFixed(0)}%
-//                       </span>
-//                       <span className="text-sm text-gray-500">Used</span>
-//                     </div>
-//                   </div>
-                  
-//                   {/* Budget Details */}
-//                   <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
-//                     <div className="text-center">
-//                       <p className="text-2xl lg:text-3xl font-bold text-blue-600">€{budgetData.totalSpent}</p>
-//                       <p className="text-sm text-gray-500">Total Spent</p>
-//                     </div>
-//                     <div className="text-center">
-//                       <p className="text-2xl lg:text-3xl font-bold text-green-500">€{budgetData.remaining}</p>
-//                       <p className="text-sm text-gray-500">Remaining</p>
-//                     </div>
-//                     <div className="text-center">
-//                       <p className="text-2xl lg:text-3xl font-bold text-black">€{budgetData.totalBudget}</p>
-//                       <p className="text-sm text-gray-500">Total Budget</p>
-//                     </div>
-//                     <div className="text-center">
-//                       <p className="text-2xl lg:text-3xl font-bold text-orange-500">
-//                         €{Math.round(budgetData.remaining / 15)}
-//                       </p>
-//                       <p className="text-sm text-gray-500">Daily Budget</p>
-//                     </div>
-//                   </div>
-//                 </div>
-                
-//                 {/* Category Breakdown with Color Indicators */}
-//                 <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-//                   {budgetData.categories.map((category, index) => (
-//                     <div key={index} className="flex flex-col gap-2">
-//                       <div className="flex justify-between text-sm items-center">
-//                         <div className="flex items-center gap-2">
-//                           <div 
-//                             className="w-3 h-3 rounded-full"
-//                             style={{ backgroundColor: category.color }}
-//                           ></div>
-//                           <span className="font-medium">{category.name}</span>
-//                         </div>
-//                         <span>€{category.spent} / €{category.budget}</span>
-//                       </div>
-//                       <div className="w-full bg-gray-200 rounded-full h-2">
-//                         <div 
-//                           className="h-2 rounded-full"
-//                           style={{ 
-//                             width: `${getProgressPercentage(category.spent, category.budget)}%`,
-//                             backgroundColor: category.color
-//                           }}
-//                         ></div>
-//                       </div>
-//                     </div>
-//                   ))}
-//                 </div>
-//               </div>
-//             </div>
-            
-//             {/* Right Column */}
-//             <div className="xl:col-span-1 bg-white border border-gray-200 rounded-lg p-4 lg:p-6">
-//               <h3 className="text-lg lg:text-xl font-bold mb-4">Daily Itinerary</h3>
-//               <div className="space-y-4 lg:space-y-6 max-h-[500px] lg:max-h-[800px] overflow-y-auto pr-2">
-//                 {/* Day 1 */}
-//                 <div>
-//                   <p className="font-bold text-sm lg:text-base mb-2">Day 1: July 15 - Arrival in Paris</p>
-//                   <div className="relative pl-6 lg:pl-8 space-y-3 lg:space-y-4 border-l-2 border-gray-200">
-//                     <div className="absolute -left-[9px] lg:-left-[11px] top-1 h-4 w-4 lg:h-5 lg:w-5 rounded-full bg-blue-600 ring-2 lg:ring-4 ring-white"></div>
-//                     <div className="flex justify-between items-start">
-//                       <div>
-//                         <p className="text-xs lg:text-sm font-semibold">14:00 - Flight to CDG</p>
-//                         <p className="text-xs text-gray-500">Air France AF123</p>
-//                       </div>
-//                       <span className="text-xs lg:text-sm font-bold text-blue-500">€350</span>
-//                     </div>
-//                     <div className="flex justify-between items-start">
-//                       <div>
-//                         <p className="text-xs lg:text-sm font-semibold">16:00 - Check-in: Hotel Lumière</p>
-//                         <p className="text-xs text-gray-500">Confirmation: #H4567</p>
-//                       </div>
-//                       <span className="text-xs lg:text-sm font-bold text-purple-500">€180</span>
-//                     </div>
-//                     <div className="flex justify-between items-start">
-//                       <div>
-//                         <p className="text-xs lg:text-sm font-semibold">19:30 - Dinner at Le Petit Comptoir</p>
-//                         <p className="text-xs text-gray-500">Reservation for 2</p>
-//                       </div>
-//                       <span className="text-xs lg:text-sm font-bold text-orange-500">€75</span>
-//                     </div>
-//                   </div>
-//                 </div>
-                
-//                 {/* Day 2 */}
-//                 <div>
-//                   <p className="font-bold text-sm lg:text-base mb-2">Day 2: July 16 - Parisian Wonders</p>
-//                   <div className="relative pl-6 lg:pl-8 space-y-3 lg:space-y-4 border-l-2 border-gray-200">
-//                     <div className="absolute -left-[9px] lg:-left-[11px] top-1 h-4 w-4 lg:h-5 lg:w-5 rounded-full bg-blue-600 ring-2 lg:ring-4 ring-white"></div>
-//                     <div className="flex justify-between items-start">
-//                       <div>
-//                         <p className="text-xs lg:text-sm font-semibold">10:00 - Eiffel Tower Visit</p>
-//                         <p className="text-xs text-gray-500">Tickets booked</p>
-//                       </div>
-//                       <span className="text-xs lg:text-sm font-bold text-green-500">€25</span>
-//                     </div>
-//                     <div className="flex justify-between items-start">
-//                       <div>
-//                         <p className="text-xs lg:text-sm font-semibold">13:00 - Lunch near Louvre</p>
-//                       </div>
-//                       <span className="text-xs lg:text-sm font-bold text-orange-500">€40</span>
-//                     </div>
-//                   </div>
-//                 </div>
-                
-//                 {/* Day 3 */}
-//                 <div>
-//                   <p className="font-bold text-sm lg:text-base mb-2">Day 3: July 17 - Travel to Lyon</p>
-//                   <div className="relative pl-6 lg:pl-8 space-y-3 lg:space-y-4 border-l-2 border-gray-200">
-//                     <div className="absolute -left-[9px] lg:-left-[11px] top-1 h-4 w-4 lg:h-5 lg:w-5 rounded-full bg-blue-600 ring-2 lg:ring-4 ring-white"></div>
-//                     <div className="flex justify-between items-start">
-//                       <p className="text-xs lg:text-sm font-semibold">09:00 - Train to Lyon</p>
-//                       <span className="text-xs lg:text-sm font-bold text-blue-500">€80</span>
-//                     </div>
-//                   </div>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-
-//           {/* Bottom Section */}
-//           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-//             {/* Places Explorer */}
-//             <div className="lg:col-span-2 bg-white border border-gray-200 rounded-lg p-4 lg:p-6">
-//               <h3 className="text-lg lg:text-xl font-bold mb-4">Places Explorer</h3>
-//               <div className="border-b border-gray-200 mb-4">
-//                 <nav className="-mb-px flex space-x-4 lg:space-x-6 overflow-x-auto">
-//                   <a className="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm border-blue-600 text-blue-600" href="#">
-//                     Attractions
-//                   </a>
-//                   <a className="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" href="#">
-//                     Accommodations
-//                   </a>
-//                   <a className="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" href="#">
-//                     Restaurants
-//                   </a>
-//                 </nav>
-//               </div>
-//               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-//                 <div className="rounded-lg overflow-hidden border border-gray-200">
-//                   <div 
-//                     className="w-full bg-center bg-no-repeat aspect-video bg-cover" 
-//                     style={{backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuCRNm0OBWS7xTAAaen03dvXssiO1N0GBKD59honhSAtQ730zf_xLz05IzPZbEmkheGf-DzolueIL_If83MNS9uJ2Z7VAt9L6zEQnlhQFlO5sMh90neLBDB4eg3NmWpGezhQrxxllm4qhZEo1VJdwqd7c0xD7QgDkvH-bYtBVGSaBy--n9KIpt4zrwF_BMoeMERKu4xuA5ts5cIc4Yf115er2WUweqIdytSISDyTGdUy2C3GC01kPA4wi_OBH0iHJ2H_baBlqBgiqEQ")'}}
-//                   ></div>
-//                   <div className="p-3 lg:p-4">
-//                     <h4 className="font-bold text-sm lg:text-base">Louvre Museum</h4>
-//                     <div className="flex items-center text-xs lg:text-sm text-gray-500 mt-1">
-//                       <span className="material-symbols-outlined text-base text-yellow-500">star</span>
-//                       <span className="ml-1">4.7 (150k reviews)</span>
-//                     </div>
-//                   </div>
-//                 </div>
-                
-//                 <div className="rounded-lg overflow-hidden border border-gray-200">
-//                   <div 
-//                     className="w-full bg-center bg-no-repeat aspect-video bg-cover" 
-//                     style={{backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDN_0q3YwTINQLEQuNJt0svNpuZmig8Bs6pJ-WEdpP2Rz4BmuPISv5faoLflE3AKutccUqZ1Kv4p7Ph1lK6pO1nnwT4g-TQ8REocdhj7Ud5aR3bafd7MN1ilRBuBlQ2vcHml5whI7T9y9DyqDTPp8nhW897DNYfbtLO6z4Jhb2AYh3RAfoJ-pN7HN_N0H6Rw4uvOkWDURg5liot8-KG-z1mQV4U9VaA-X1b5qBXEUCd_ANJqbgynzu6rySXyUH5miqgFCSxpGrfEpU")'}}
-//                   ></div>
-//                   <div className="p-3 lg:p-4">
-//                     <h4 className="font-bold text-sm lg:text-base">Colosseum</h4>
-//                     <div className="flex items-center text-xs lg:text-sm text-gray-500 mt-1">
-//                       <span className="material-symbols-outlined text-base text-yellow-500">star</span>
-//                       <span className="ml-1">4.8 (200k reviews)</span>
-//                     </div>
-//                   </div>
-//                 </div>
-                
-//                 <div className="rounded-lg overflow-hidden border border-gray-200">
-//                   <div 
-//                     className="w-full bg-center bg-no-repeat aspect-video bg-cover" 
-//                     style={{backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuCqK4KP-6m267fmPclGh4UhgjMW_CnBxnUiXD1LoecdyP9i0X1hANvuNSAGFUVYptx1sTkvYe2rPQWWuqMm6V7OJ7TxJsOQElCb8BiWtrI39DxdZZS21cepkrvyvcnuUu7tY4-mkwmV5aqUzKycYykff-i7P9tsDsVAtU_R1w8Z6km4j-o6fh4d0CG0BqXf77VRycJkj7cnvJw4YtTIfQisiRIEv8CuLm0uYj9nTfod_2JECTHDttnnTCBWwslVLPag1DkJkUSHOzo")'}}
-//                   ></div>
-//                   <div className="p-3 lg:p-4">
-//                     <h4 className="font-bold text-sm lg:text-base">Florence Cathedral</h4>
-//                     <div className="flex items-center text-xs lg:text-sm text-gray-500 mt-1">
-//                       <span className="material-symbols-outlined text-base text-yellow-500">star</span>
-//                       <span className="ml-1">4.9 (90k reviews)</span>
-//                     </div>
-//                   </div>
-//                 </div>
-//               </div>
-//             </div>
-            
-//             {/* Trip Management */}
-//             <div className="bg-white border border-gray-200 rounded-lg p-4 lg:p-6">
-//               <h3 className="text-lg lg:text-xl font-bold mb-4">Trip Management</h3>
-//               <div className="space-y-4">
-//                 <div>
-//                   <label className="font-medium text-sm lg:text-base mb-3 block">Visibility Settings</label>
-//                   <div className="space-y-2">
-//                     <label className="flex items-center gap-3 cursor-pointer">
-//                       <input
-//                         type="radio"
-//                         name="visibility"
-//                         value="private"
-//                         checked={visibility === 'private'}
-//                         onChange={(e) => setVisibility(e.target.value)}
-//                         className="h-4 w-4 text-blue-600 focus:ring-blue-500"
-//                       />
-//                       <div className="flex items-center gap-2">
-//                         <span className="material-symbols-outlined text-base">lock</span>
-//                         <span className="text-sm">Private (Only invited collaborators)</span>
-//                       </div>
-//                     </label>
-                    
-//                     <label className="flex items-center gap-3 cursor-pointer">
-//                       <input
-//                         type="radio"
-//                         name="visibility"
-//                         value="invite-only"
-//                         checked={visibility === 'invite-only'}
-//                         onChange={(e) => setVisibility(e.target.value)}
-//                         className="h-4 w-4 text-blue-600 focus:ring-blue-500"
-//                       />
-//                       <div className="flex items-center gap-2">
-//                         <span className="material-symbols-outlined text-base">link</span>
-//                         <span className="text-sm">Invite Only</span>
-//                       </div>
-//                     </label>
-                    
-//                     <label className="flex items-center gap-3 cursor-pointer">
-//                       <input
-//                         type="radio"
-//                         name="visibility"
-//                         value="public"
-//                         checked={visibility === 'public'}
-//                         onChange={(e) => setVisibility(e.target.value)}
-//                         className="h-4 w-4 text-blue-600 focus:ring-blue-500"
-//                       />
-//                       <div className="flex items-center gap-2">
-//                         <span className="material-symbols-outlined text-base">public</span>
-//                         <span className="text-sm">Public (Anyone with link)</span>
-//                       </div>
-//                     </label>
-//                   </div>
-                  
-//                   {/* Share Link - Only show for invite-only and public */}
-//                   {(visibility === 'invite-only' || visibility === 'public') && (
-//                     <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-//                       <p className="text-sm font-medium text-blue-800 mb-2">Share this link:</p>
-//                       <div className="flex gap-2">
-//                         <input 
-//                           className="flex-1 text-sm bg-white border border-blue-200 rounded px-3 py-2 text-blue-600"
-//                           value="https://tripplanner.com/trip/european-adventure-2024"
-//                           readOnly
-//                         />
-//                         <button className="px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">
-//                           Copy
-//                         </button>
-//                       </div>
-//                     </div>
-//                   )}
-//                 </div>
-                
-//                 <div>
-//                   <label className="font-medium text-sm lg:text-base">Invite Collaborators</label>
-//                   <div className="flex flex-col sm:flex-row gap-2 mt-1">
-//                     <input 
-//                       className="w-full rounded-md border-gray-300 bg-transparent text-sm focus:ring-blue-600 focus:border-blue-600" 
-//                       placeholder="friend@email.com" 
-//                       type="email"
-//                       value={email}
-//                       onChange={(e) => setEmail(e.target.value)}
-//                     />
-//                     <button className="flex-shrink-0 rounded-md h-10 px-4 bg-green-500 text-white text-sm font-bold whitespace-nowrap">
-//                       Invite
-//                     </button>
-//                   </div>
-//                 </div>
-                
-//                 <div>
-//                   <label className="font-medium text-sm lg:text-base">Postpone Trip</label>
-//                   <input 
-//                     className="w-full mt-1 rounded-md border-gray-300 bg-transparent text-sm focus:ring-blue-600 focus:border-blue-600" 
-//                     type="date"
-//                   />
-//                 </div>
-                
-//                 <div>
-//                   <button className="w-full flex items-center justify-center rounded-lg h-10 px-4 border border-red-500 text-red-500 text-sm font-bold gap-2 hover:bg-red-50">
-//                     <span className="material-symbols-outlined text-base">delete</span>
-//                     <span className="truncate">Cancel Trip</span>
-//                   </button>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-//         </main>
-//       </div>
-//     </div>
-//   );  
-// };
-
-// export default DashboardLayout;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from "react-redux";
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import Navbar from './Navbar';
+import axios from 'axios';
+import { useDispatch } from "react-redux";
+import { clearTripData } from '../../actioncreate.jsx'
+import { useNavigate } from 'react-router-dom';
 
 // Fix for default markers in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -559,7 +17,10 @@ L.Icon.Default.mergeOptions({
 });
 
 const DashboardLayout = () => {
+  const dispatch = useDispatch();
+  const token=localStorage.getItem('access_token')
   const [visibility, setVisibility] = useState('private');
+  const navigate=useNavigate()
   const [email, setEmail] = useState('');
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
@@ -875,6 +336,50 @@ const DashboardLayout = () => {
     return address;
   };
 
+ const SaveTravaldatafunc=async()=>{
+
+
+  console.log('calculateTripData',)
+  console.log('calculateTripData',calculateTripData)
+  const originlat =calculateTripData.origin.coordinates.lat
+  const originlng =calculateTripData.origin.coordinates.lng
+
+
+  const destinationlat=calculateTripData.destination.coordinates.lat
+  const destinationlng=calculateTripData.destination.coordinates.lng
+  
+ console.log('destinaion locaion    ',originlat,'   ',originlng)
+ console.log('starting location  ',destinationlat,'     ',destinationlng)
+
+  try{
+    await axios.post('http://127.0.0.1:8006/TripSaveAPIVie',{'calculateTripData':calculateTripData},{
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  console.log('trip data has stored in the db')
+  }catch(e){
+   console.log('trip data does not save in the db ')
+  }
+ }
+
+  const handleClearTrip = () => {
+    dispatch(clearTripData());
+    console.log('your trip is deleted......')
+    navigate('/TravelPlannerofBadget')
+  };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   if (!calculateTripData) {
     return (
       <div className="font-display bg-white text-black min-h-screen flex items-center justify-center">
@@ -908,26 +413,7 @@ const DashboardLayout = () => {
     <div className="font-display bg-white text-black min-h-screen">
       <div className="flex flex-col min-h-screen">
         {/* Top Navigation Bar */}
-        <nav className="w-full flex-shrink-0 bg-white border-b border-gray-200 flex flex-col lg:flex-row items-start lg:items-center justify-between p-4 lg:px-6 lg:py-4">
-          <div className="flex items-center gap-3 mb-4 lg:mb-0">
-            <div className="bg-blue-100 text-blue-600 p-2 rounded-lg">
-              <span className="material-symbols-outlined">travel_explore</span>
-            </div>
-            <h1 className="text-xl font-bold">TripPlanner</h1>
-          </div>
-         
-          <div className="flex flex-row gap-2 w-full lg:w-auto overflow-x-auto lg:overflow-x-visible">
-            <a className="flex items-center gap-3 px-3 py-2 rounded-lg bg-blue-100 text-blue-600 whitespace-nowrap" href="#">
-              <span className="material-symbols-outlined">dashboard</span>
-              <p className="text-sm font-medium">Dashboard</p>
-            </a>
-            <a className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 whitespace-nowrap" href="#">
-              <span className="material-symbols-outlined">list_alt</span>
-              <p className="text-sm font-medium">Itinerary</p>
-            </a>
-          </div>
-        </nav>
-
+        <Navbar/>
         {/* Main Content */}
         <main className="flex-1 p-4 lg:p-8 overflow-y-auto">
           {/* Header Section */}
@@ -946,10 +432,22 @@ const DashboardLayout = () => {
                 </p>
               </div>
               <div className="flex items-center gap-2 w-full lg:w-auto">
-                <button className="flex-1 lg:flex-none flex items-center justify-center rounded-lg h-10 px-4 border border-gray-300 text-sm font-bold gap-2 hover:bg-gray-100">
-                  <span className="material-symbols-outlined text-base">share</span>
-                  <span className="truncate">Share</span>
+                <button onClick={SaveTravaldatafunc} className="flex-1 lg:flex-none flex items-center justify-center rounded-lg h-10 px-4 border border-gray-300 text-sm font-bold gap-2 hover:bg-gray-100">
+                  <span className="material-symbols-outlined text-base">save</span>
+                  <span className="truncate">Save</span>
                 </button>
+                  <button className="flex-1 lg:flex-none flex items-center justify-center rounded-lg h-10 px-4 border border-gray-300 text-sm font-bold gap-2 hover:bg-gray-100">
+                  <span className="material-symbols-outlined text-base">edit</span>
+                  <span className="truncate">Edit</span>
+                </button>
+                  
+
+
+
+                       <button onClick={handleClearTrip} className="w-full flex items-center justify-center rounded-lg h-10 px-4 border border-red-500 text-red-500 text-sm font-bold gap-2 hover:bg-red-50">
+                      <span className="material-symbols-outlined text-base">delete</span>
+                      <span className="truncate">Cancel Trip</span>
+                    </button>
               </div>
             </div>
            
@@ -1410,19 +908,16 @@ const DashboardLayout = () => {
                     </div>
                   </div>
                   
-                  <div>
+                  {/* <div>
                     <label className="font-medium text-sm lg:text-base">Postpone Trip</label>
                     <input 
                       className="w-full mt-1 rounded-md border-gray-300 bg-transparent text-sm focus:ring-blue-600 focus:border-blue-600" 
                       type="date"
                     />
                   </div>
-                  
+                   */}
                   <div>
-                    <button className="w-full flex items-center justify-center rounded-lg h-10 px-4 border border-red-500 text-red-500 text-sm font-bold gap-2 hover:bg-red-50">
-                      <span className="material-symbols-outlined text-base">delete</span>
-                      <span className="truncate">Cancel Trip</span>
-                    </button>
+  
                   </div>
                 </div>
               </div>
