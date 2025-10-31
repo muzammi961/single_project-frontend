@@ -37,15 +37,6 @@ const TimeDisplay = () => {
 const WeatherDisplay = () => {
   const navigate = useNavigate();
   return (
-    // <div className="bg-black rounded-lg p-3 flex flex-col items-center space-y-1 min-w-0 w-32 cursor-pointer hover:bg-gray-800 transition-colors" >
-    //   <div className="flex items-center space-x-1">
-    //     <div className="text-lg font-bold text-white">24°</div>
-    //     <div className="text-2xl">☀️</div>
-    //   </div>
-    //   <div className="text-xs text-white text-center">New York</div>
-    //   <div className="text-xs text-gray-300 text-center">Partly cloudy</div>
-    // </div>
-   
 <div className="container" onClick={()=>navigate('/WeatherCard')}>
   <div className="cloud front">
     <span className="left-front"></span>
@@ -245,7 +236,7 @@ const PathFinderLoader = ({ size = 64, label = "PathFinder loading" }) => {
         <img 
           src={imgSrc} 
           alt={experience.title || experience.place_name}
-          className="w-full h-96 object-cover transition-transform duration-500 ease-in-out group-hover:scale-110 animate-pulse"
+          className="w-full h-96 object-cover transition-transform  ease-in-out group-hover:scale-110"
         />
       );
     } else {
@@ -338,10 +329,8 @@ const PathFinderLoader = ({ size = 64, label = "PathFinder loading" }) => {
       <header className="sticky top-0 z-50 bg-gray-500 shadow-sm border-b border-b-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-800">PathFinder</h1>
-          <div className="flex flex-col items-end space-y-1">
-            <TimeDisplay />
-          </div>
-          <WeatherDisplay className="absolute top-20 right-4 z-10" />
+            <TimeDisplay className="flex flex-col items-end space-y-1"/>
+          <WeatherDisplay className="absolute top-20 right-4 z-10 flex" />
         </div>
           
       </header>

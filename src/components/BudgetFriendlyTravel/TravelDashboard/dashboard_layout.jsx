@@ -352,7 +352,7 @@ const DashboardLayout = () => {
  console.log('starting location  ',destinationlat,'     ',destinationlng)
 
   try{
-    await axios.post('http://127.0.0.1:8006/TripSaveAPIVie',{'calculateTripData':calculateTripData},{
+    await axios.post('http://127.0.0.1:8006/TripSaveAPIView/',{'calculateTripData':calculateTripData},{
     headers: { Authorization: `Bearer ${token}` },
   })
   console.log('trip data has stored in the db')
