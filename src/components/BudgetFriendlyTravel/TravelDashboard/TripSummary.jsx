@@ -25,27 +25,56 @@ const TripSummary = () => {
     accommodations,
     restaurants,
     attractions,
-    destination
+    destination,
+    return_destination,
+    origin,
+    daily_itineraries,
+    travel_mode,
+    budget_category
   } = calculateTripData;
 
-  // Calculate total days and format dates
-  const totalDays = summary?.trip_duration_days || 0;
-  const goingDays = summary?.going_days || 0;
-  const returnDays = summary?.return_days || 0;
-
-  // Format currency
-  const formatCurrency = (amount) => {
-    return `₹${amount?.toLocaleString() || '0'}`;
-  };
-
-  // Calculate budget usage
+  // Calculate totals from actual data
+  const totalDays = summary?.trip_duration_days || daily_itineraries?.length || 0;
+  const totalTravelCost = travel_plan?.total_travel_cost || summary?.total_travel_cost || 0;
+  const totalActivities = attractions?.length || 0;
+  const totalAccommodations = accommodations?.length || 0;
+  const totalRestaurants = restaurants?.length || 0;
+  
+  // Calculate budget usage based on divided_budget
   const totalSpent = (divided_budget?.travel || 0) + 
                     (divided_budget?.hotel || 0) + 
                     (divided_budget?.food || 0) + 
                     (divided_budget?.activities || 0);
   
-  const totalBudget = summary?.total_budget || 0;
+  const totalBudget = summary?.total_budget || totalSpent;
   const remainingBudget = totalBudget - totalSpent;
+
+  // Format currency
+  const formatCurrency = (amount) => {
+    if (amount === null || amount === undefined) return '₹0';
+    return `₹${Math.round(amount).toLocaleString()}`;
+  };
+
+  // Get vehicle display name
+  const getVehicleName = (mode) => {
+    const vehicleMap = {
+      'bike': 'Motorcycle',
+      'car': 'Car',
+      'bus': 'Bus'
+    };
+    return vehicleMap[mode] || 'Vehicle';
+  };
+
+  // Calculate scheduled activities from itineraries
+  const totalScheduledActivities = daily_itineraries?.reduce((total, day) => {
+    return total + (day.total_activities || 0);
+  }, 0) || 0;
+
+  // Get region display name
+  const getRegionName = (region) => {
+    if (!region) return 'Unknown';
+    return region.charAt(0).toUpperCase() + region.slice(1).toLowerCase();
+  };
 
   return (
     <div className="font-display bg-white text-black min-h-screen">
@@ -57,7 +86,12 @@ const TripSummary = () => {
               
               {/* Page Heading */}
               <div className="flex flex-wrap justify-between gap-3 p-4">
-                <p className="text-4xl font-black leading-tight tracking-[-0.033em] min-w-72">Trip Summary</p>
+                <div>
+                  <p className="text-4xl font-black leading-tight tracking-[-0.033em] min-w-72">Trip Summary</p>
+                  <p className="text-gray-600 mt-2">
+                    {destination?.name || 'Destination'} • {totalDays} Days • {budget_category?.charAt(0).toUpperCase() + budget_category?.slice(1)} Budget
+                  </p>
+                </div>
               </div>
 
               {/* Main Content Grid */}
@@ -66,26 +100,80 @@ const TripSummary = () => {
                 {/* Left Column (Span 2) */}
                 <div className="lg:col-span-2 flex flex-col gap-6">
                   
-                  {/* Trip Info Card */}
+                  {/* Trip Overview Card */}
                   <div className="flex flex-col items-stretch justify-start rounded-xl shadow-[0_0_4px_rgba(0,0,0,0.1)] bg-white border border-gray-200">
                     <div 
                       className="w-full bg-center bg-no-repeat aspect-[4/1] bg-cover rounded-t-xl"
                       style={{
                         backgroundImage: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
                       }}
-                    ></div>
-                    <div className="flex w-full min-w-72 grow flex-col items-stretch justify-center gap-1 p-6">
-                      <p className="text-gray-600 text-sm font-normal leading-normal">
-                        {summary?.trip_type?.replace(/_/g, ' ') || 'Round Trip'} - {summary?.different_return_route ? 'Different Routes' : 'Same Route'}
-                      </p>
-                      <div className="flex items-end gap-3 justify-between">
-                        <p className="text-2xl font-bold leading-tight tracking-[-0.015em]">
-                          {destination?.address || 'Destination'}
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <span className="material-symbols-outlined text-blue-600 text-2xl">calendar_month</span>
-                          <p className="text-xl font-bold leading-tight tracking-[-0.015em]">{totalDays} Days</p>
+                    >
+                      <div className="h-full flex items-center justify-center text-white bg-black bg-opacity-30 rounded-t-xl">
+                        <div className="text-center">
+                          <h1 className="text-2xl md:text-3xl font-bold">{destination?.name || 'Your Trip'}</h1>
+                          <p className="text-lg opacity-90">{totalDays} Day Adventure</p>
                         </div>
+                      </div>
+                    </div>
+                    <div className="flex w-full min-w-72 grow flex-col items-stretch justify-center gap-3 p-6">
+                      <div className="flex flex-wrap justify-between items-center gap-4">
+                        <div>
+                          <p className="text-gray-600 text-sm font-normal leading-normal mb-1">
+                            {summary?.trip_type?.replace(/_/g, ' ') || 'Round Trip'} • {summary?.different_return_route ? 'Different Routes' : 'Same Route'}
+                          </p>
+                          <p className="text-xl font-bold leading-tight">
+                            {destination?.address || 'Destination'}
+                          </p>
+                          {return_destination && (
+                            <p className="text-sm text-gray-600 mt-1">
+                              Return via: {return_destination.name}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="text-center">
+                            <div className="flex items-center gap-1">
+                              <span className="material-symbols-outlined text-blue-600">calendar_month</span>
+                              <span className="text-lg font-bold">{totalDays} Days</span>
+                            </div>
+                            <p className="text-xs text-gray-600">Duration</p>
+                          </div>
+                          <div className="text-center">
+                            <div className="flex items-center gap-1">
+                              <span className="material-symbols-outlined text-green-600">payments</span>
+                              <span className="text-lg font-bold">{formatCurrency(totalBudget)}</span>
+                            </div>
+                            <p className="text-xs text-gray-600">Total Budget</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Regions Info */}
+                      <div className="flex flex-wrap gap-4 mt-2">
+                        {origin && (
+                          <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-gray-600 text-sm">location_on</span>
+                            <span className="text-sm">
+                              From: <span className="font-medium">{getRegionName(summary?.geographical_regions?.origin_region)}</span>
+                            </span>
+                          </div>
+                        )}
+                        {destination && (
+                          <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-blue-600 text-sm">flag</span>
+                            <span className="text-sm">
+                              To: <span className="font-medium">{getRegionName(destination.region)}</span>
+                            </span>
+                          </div>
+                        )}
+                        {return_destination && (
+                          <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-purple-600 text-sm">swap_horiz</span>
+                            <span className="text-sm">
+                              Return via: <span className="font-medium">{getRegionName(return_destination.region)}</span>
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -97,18 +185,23 @@ const TripSummary = () => {
                       {[
                         { 
                           icon: 'directions_bike', 
-                          label: 'Vehicle', 
-                          value: travel_plan?.travel_mode === 'bike' ? 'Motorcycle' : 'Car' 
+                          label: 'Travel Mode', 
+                          value: getVehicleName(travel_mode) 
                         },
                         { 
                           icon: 'multiple_stop', 
                           label: 'Going Distance', 
-                          value: `${summary?.going_distance_km || 0} km` 
+                          value: `${travel_plan?.going_distance_km || summary?.going_distance_km || 0} km` 
                         },
                         { 
                           icon: 'route', 
                           label: 'Return Distance', 
-                          value: `${summary?.return_distance_km || 0} km` 
+                          value: `${travel_plan?.return_distance_km || summary?.return_distance_km || 0} km` 
+                        },
+                        { 
+                          icon: 'speed', 
+                          label: 'Total Distance', 
+                          value: `${travel_plan?.total_round_trip_distance_km || summary?.total_round_trip_distance_km || 0} km` 
                         },
                         { 
                           icon: 'local_gas_station', 
@@ -123,7 +216,17 @@ const TripSummary = () => {
                         { 
                           icon: 'payments', 
                           label: 'Total Travel Cost', 
-                          value: formatCurrency(summary?.total_travel_cost) 
+                          value: formatCurrency(totalTravelCost) 
+                        },
+                        { 
+                          icon: 'schedule', 
+                          label: 'Going Days', 
+                          value: `${travel_plan?.going_days || summary?.going_days || 0} days` 
+                        },
+                        { 
+                          icon: 'schedule', 
+                          label: 'Return Days', 
+                          value: `${travel_plan?.return_days || summary?.return_days || 0} days` 
                         }
                       ].map((item, index) => (
                         <div key={index} className="flex gap-4 items-center">
@@ -149,17 +252,22 @@ const TripSummary = () => {
                         {[
                           { 
                             icon: 'hotel', 
-                            label: 'Total Accommodations', 
-                            value: accommodations?.length || 0 
+                            label: 'Available Accommodations', 
+                            value: totalAccommodations 
                           },
                           { 
                             icon: 'bed', 
                             label: 'Total Nights', 
-                            value: totalDays - 1 
+                            value: totalDays > 0 ? totalDays - 1 : 0 
+                          },
+                          { 
+                            icon: 'star', 
+                            label: 'Top Rated Stay', 
+                            value: accommodations?.[0]?.name || 'Not available' 
                           },
                           { 
                             icon: 'wallet', 
-                            label: 'Hotel Cost', 
+                            label: 'Accommodation Budget', 
                             value: formatCurrency(divided_budget?.hotel) 
                           }
                         ].map((item, index) => (
@@ -181,13 +289,23 @@ const TripSummary = () => {
                         {[
                           { 
                             icon: 'restaurant', 
-                            label: 'Total Restaurants', 
-                            value: restaurants?.length || 0 
+                            label: 'Available Restaurants', 
+                            value: totalRestaurants 
+                          },
+                          { 
+                            icon: 'star', 
+                            label: 'Top Rated Restaurant', 
+                            value: restaurants?.[0]?.name || 'Not available' 
                           },
                           { 
                             icon: 'fastfood', 
-                            label: 'Estimated Food Cost', 
+                            label: 'Food Budget', 
                             value: formatCurrency(divided_budget?.food) 
+                          },
+                          { 
+                            icon: 'lunch_dining', 
+                            label: 'Daily Food Budget', 
+                            value: formatCurrency(daily_budgets?.food) 
                           }
                         ].map((item, index) => (
                           <div key={index} className="flex justify-between items-center">
@@ -233,10 +351,20 @@ const TripSummary = () => {
                     <div className="flex justify-center my-4">
                       <div className="relative w-48 h-48">
                         <svg className="w-full h-full" viewBox="0 0 36 36">
+                          {/* Background circle */}
                           <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#e6e6e6" strokeWidth="3"></path>
+                          
+                          {/* Travel segment */}
                           <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831" fill="none" stroke="#4c51bf" strokeDasharray={`${(divided_budget?.travel / totalBudget) * 100}, 100`} strokeWidth="3"></path>
+                          
+                          {/* Hotel segment */}
                           <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831" fill="none" stroke="#6574cd" strokeDasharray={`${(divided_budget?.hotel / totalBudget) * 100}, 100`} strokeDashoffset={`-${(divided_budget?.travel / totalBudget) * 100}`} strokeWidth="3"></path>
+                          
+                          {/* Food segment */}
                           <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831" fill="none" stroke="#979ec9" strokeDasharray={`${(divided_budget?.food / totalBudget) * 100}, 100`} strokeDashoffset={`-${((divided_budget?.travel + divided_budget?.hotel) / totalBudget) * 100}`} strokeWidth="3"></path>
+                          
+                          {/* Activities segment */}
+                          <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831" fill="none" stroke="#48bb78" strokeDasharray={`${(divided_budget?.activities / totalBudget) * 100}, 100`} strokeDashoffset={`-${((divided_budget?.travel + divided_budget?.hotel + divided_budget?.food) / totalBudget) * 100}`} strokeWidth="3"></path>
                         </svg>
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
                           <p className="text-xs text-gray-600">Total Spent</p>
@@ -251,7 +379,7 @@ const TripSummary = () => {
                         { color: '#979ec9', label: 'Food Cost', value: formatCurrency(divided_budget?.food) },
                         { color: '#4c51bf', label: 'Travel Cost', value: formatCurrency(divided_budget?.travel) },
                         { color: '#48bb78', label: 'Activities Cost', value: formatCurrency(divided_budget?.activities) },
-                        { color: '#d1d5db', label: 'Remaining', value: formatCurrency(remainingBudget) }
+                        { color: remainingBudget > 0 ? '#d1d5db' : '#f56565', label: 'Remaining', value: formatCurrency(remainingBudget) }
                       ].map((item, index) => (
                         <div key={index} className="flex justify-between items-center">
                           <span className="flex items-center gap-2 text-black">
@@ -274,49 +402,66 @@ const TripSummary = () => {
                       {[
                         { 
                           icon: 'local_activity', 
-                          value: summary?.total_scheduled_activities || 0, 
-                          label: 'Activities' 
+                          value: totalScheduledActivities, 
+                          label: 'Scheduled Activities' 
                         },
                         { 
                           icon: 'attractions', 
-                          value: attractions?.length || 0, 
-                          label: 'Attractions' 
+                          value: totalActivities, 
+                          label: 'Available Attractions' 
                         },
                         { 
-                          icon: 'shopping_bag', 
-                          value: formatCurrency(divided_budget?.activities), 
-                          label: 'Activity Cost' 
+                          icon: 'star', 
+                          value: attractions?.[0]?.name?.split(' ').slice(0, 2).join(' ') || 'N/A', 
+                          label: 'Top Attraction' 
                         }
                       ].map((item, index) => (
                         <div key={index} className="flex flex-col items-center justify-center p-3 rounded-lg bg-blue-50 border border-blue-100">
                           <span className="material-symbols-outlined text-blue-600 text-3xl">{item.icon}</span>
-                          <p className="mt-2 text-lg font-bold text-black">{item.value}</p>
-                          <p className="text-xs text-gray-600">{item.label}</p>
+                          <p className="mt-2 text-sm font-bold text-black text-center leading-tight">{item.value}</p>
+                          <p className="text-xs text-gray-600 mt-1">{item.label}</p>
                         </div>
                       ))}
                     </div>
+                    <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-100">
+                      <div className="flex justify-between items-center">
+                        <span className="text-green-800 text-sm">Activities Budget</span>
+                        <span className="font-bold text-green-800">{formatCurrency(divided_budget?.activities)}</span>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Route Details */}
+                  {/* Trip Features */}
                   <div className="rounded-xl shadow-[0_0_4px_rgba(0,0,0,0.1)] bg-white border border-gray-200 p-6">
-                    <h2 className="text-xl font-bold leading-tight tracking-[-0.015em] mb-4">Route Details</h2>
+                    <h2 className="text-xl font-bold leading-tight tracking-[-0.015em] mb-4">Trip Features</h2>
                     <div className="flex flex-col gap-3">
                       {[
                         { 
                           label: 'Different Return Route', 
-                          value: summary?.different_return_route 
+                          value: summary?.different_return_route,
+                          description: 'Return journey takes a different route'
                         },
                         { 
                           label: 'Round Trip', 
-                          value: summary?.is_round_trip 
+                          value: summary?.is_round_trip,
+                          description: 'Journey starts and ends at origin'
                         },
                         { 
                           label: 'Unique Destination', 
-                          value: summary?.unique_destination 
+                          value: summary?.unique_destination,
+                          description: 'Visiting unique locations'
+                        },
+                        { 
+                          label: 'Multi-Region', 
+                          value: summary?.geographical_regions?.going_region !== summary?.geographical_regions?.origin_region,
+                          description: 'Traveling across different regions'
                         }
                       ].map((item, index) => (
-                        <div key={index} className="flex justify-between items-center">
-                          <p className="text-gray-600">{item.label}</p>
+                        <div key={index} className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <p className="text-gray-600 text-sm">{item.label}</p>
+                            <p className="text-xs text-gray-500">{item.description}</p>
+                          </div>
                           <span className={`inline-flex items-center px-3 py-1 text-xs font-medium rounded-full ${
                             item.value 
                               ? 'text-green-700 bg-green-100'
@@ -329,31 +474,38 @@ const TripSummary = () => {
                     </div>
                   </div>
 
-                  {/* Trip Phases */}
-                  <div className="rounded-xl shadow-[0_0_4px_rgba(0,0,0,0.1)] bg-white border border-gray-200 p-6">
-                    <h2 className="text-xl font-bold leading-tight tracking-[-0.015em] mb-4">Trip Phases</h2>
-                    <div className="flex flex-col gap-3">
-                      {[
-                        { 
-                          label: 'Going Days', 
-                          value: `${goingDays} days` 
-                        },
-                        { 
-                          label: 'Return Days', 
-                          value: `${returnDays} days` 
-                        },
-                        { 
-                          label: 'Total Distance', 
-                          value: `${summary?.total_round_trip_distance_km || 0} km` 
-                        }
-                      ].map((item, index) => (
-                        <div key={index} className="flex justify-between items-center">
-                          <p className="text-gray-600">{item.label}</p>
-                          <span className="font-bold text-black">{item.value}</span>
-                        </div>
-                      ))}
+                  {/* Weather Information */}
+                  {(destination?.weather || return_destination?.weather) && (
+                    <div className="rounded-xl shadow-[0_0_4px_rgba(0,0,0,0.1)] bg-white border border-gray-200 p-6">
+                      <h2 className="text-xl font-bold leading-tight tracking-[-0.015em] mb-4">Weather</h2>
+                      <div className="flex flex-col gap-3">
+                        {destination?.weather && (
+                          <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                            <div>
+                              <p className="font-medium text-sm">{destination.name}</p>
+                              <p className="text-xs text-gray-600 capitalize">{destination.weather.description}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-bold">{Math.round(destination.weather.temperature)}°C</p>
+                              <p className="text-xs text-gray-600">{destination.weather.humidity}% humidity</p>
+                            </div>
+                          </div>
+                        )}
+                        {return_destination?.weather && (
+                          <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                            <div>
+                              <p className="font-medium text-sm">{return_destination.name}</p>
+                              <p className="text-xs text-gray-600 capitalize">{return_destination.weather.description}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-bold">{Math.round(return_destination.weather.temperature)}°C</p>
+                              <p className="text-xs text-gray-600">{return_destination.weather.humidity}% humidity</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             </div>
