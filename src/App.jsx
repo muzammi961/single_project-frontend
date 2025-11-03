@@ -68,6 +68,8 @@ import TravelMap from './components/BudgetFriendlyTravel/TravelDashboard/TravelM
 import Navbar from './components/BudgetFriendlyTravel/TravelDashboard/Navbar.jsx'
 import TravelPlannerItinerary from './components/BudgetFriendlyTravel/TravelDashboard/TravelPlannerItinerary.jsx'
 import GoogleMapComponent from './components/live journy/googleapicall.jsx';
+
+import   MyMap from './components/componone.jsx'
 function App() {
 const isAuthenticated =localStorage.getItem("access_token");
 const baseURL = import.meta.env.VITE_API_BASE_URL;
@@ -183,6 +185,9 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 
             <Route path='/TravelPlannerItinerary' element={<TravelPlannerItinerary/>}/>
+
+
+            <Route path='/MyMap' element={<MyMap/>}/>
           </Routes>
       </BrowserRouter>
   )
