@@ -1928,6 +1928,7 @@ const UpcomingTripsSection = () => {
   const [triplist, setTriplist] = useState([]);
   const [loading, setLoading] = useState(false);
   const token = localStorage.getItem("access_token");
+   const navigate = useNavigate();
 
   const fetchTriplist = async () => {
     try {
@@ -1999,6 +2000,11 @@ const UpcomingTripsSection = () => {
           
           return (
             <div 
+    
+          onClick={() => navigate(`/Pt_Bd_DashboardLayout/${trip.trip_id}`)}
+
+
+            
               key={trip.trip_id} 
               className="bg-gray-800 rounded-2xl overflow-hidden shadow-lg relative text-white hover:shadow-teal-500/20 transition-all duration-300 hover:scale-105"
             >
@@ -2033,15 +2039,15 @@ const UpcomingTripsSection = () => {
                 {/* Additional trip info */}
                 <div className="mt-4 text-sm text-gray-400 space-y-2">
                   <div className="flex justify-between items-center">
-                    <span>Duration:</span>
+                    <span>Duration :</span>
                     <span className="font-medium text-white">{trip.trip_duration_days} days</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span>Budget:</span>
+                    <span>Budget :</span>
                     <span className="font-medium text-green-400">₹{trip.total_budget}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span>Status:</span>
+                    <span>Status :</span>
                     <span className={`font-semibold ${
                       trip.trip_status === 'upcoming' ? 'text-yellow-400' : 
                       trip.trip_status === 'ongoing' ? 'text-green-400' : 

@@ -69,6 +69,19 @@ import Navbar from './components/BudgetFriendlyTravel/TravelDashboard/Navbar.jsx
 import TravelPlannerItinerary from './components/BudgetFriendlyTravel/TravelDashboard/TravelPlannerItinerary.jsx'
 import GoogleMapComponent from './components/live journy/googleapicall.jsx';
 
+
+import Pt_Bd_DashboardLayout from './components/profile/pr_bd_Tripdeshbord/pr_bd_dashboard_layout.jsx'
+import PrTpNavbar from './components/profile/pr_bd_Tripdeshbord/PrTpNavbar.jsx'
+import Pt_Bd_Accommodations from './components/profile/pr_bd_Tripdeshbord/Pt_Bd_Accommodations.jsx'
+import Pt_Bd_Attractions from './components/profile/pr_bd_Tripdeshbord/Pt_Bd_Attractions.jsx'
+
+
+
+
+
+
+
+
 import   MyMap from './components/componone.jsx'
 function App() {
 const isAuthenticated =localStorage.getItem("access_token");
@@ -167,27 +180,27 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 
             <Route path='/TravelPlannerofBadget' element={<TravelPlannerofBadget/>}/>
-
-
             <Route path='/Navbar' element={<Navbar/>}/>
             <Route path='/TripSummary' element={<TripSummary/>}/>
-
             <Route path='/DashboardLayout' element={<DashboardLayout/>}/>
-    
-
-
-
             <Route path='/Accommodations' element={<Accommodations/>}/>
             <Route path='/TravelPlannerRestaurants' element={<TravelPlannerRestaurants/>}/>
             <Route path='/Attractions' element={<Attractions/>}/>
             <Route path='/DailyItinerary' element={<DailyItinerary/>}/>
             <Route path='/TravelMap' element={<TravelMap/>}/>
-
-
             <Route path='/TravelPlannerItinerary' element={<TravelPlannerItinerary/>}/>
 
 
             <Route path='/MyMap' element={<MyMap/>}/>
+
+
+
+
+            <Route path='/PrTpNavbar' element={<PrTpNavbar/>}/>
+            <Route path="/Pt_Bd_DashboardLayout/:trip_id" element={<Pt_Bd_DashboardLayout />}/>
+            <Route path='/Pt_Bd_Accommodations' element={<Pt_Bd_Accommodations/>}/>
+            <Route path='/Pt_Bd_Attractions' element={<Pt_Bd_Attractions/>}/>
+
           </Routes>
       </BrowserRouter>
   )
