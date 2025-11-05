@@ -1,16 +1,11 @@
 import React from 'react';
 import '../../stylecomponent/navabaresyle.css';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useDispatch, useSelector } from "react-redux";
-
-
-
-
-
-const PrTpNavbar = () => {
-  const tripId = useSelector((state) => state.app.prtpidcode);
+import { useParams } from "react-router-dom";
+const INvateTripNavbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { invatetripid } = useParams();
 
   const handleNavigation = (path) => {
     navigate(path);
@@ -33,15 +28,15 @@ const PrTpNavbar = () => {
      
       <div className="navbar-menu">
         <button 
-          onClick={() => handleNavigation(`/Pt_Bd_DashboardLayout`)} 
-          className={`nav-button ${isActive('/Pt_Bd_DashboardLayout') ? 'active' : ''}`}
+          onClick={() => handleNavigation(`/invitetrip/${invatetripid}`)} 
+          className={`nav-button ${isActive('/DashboardLayout') ? 'active' : ''}`}
         >
           <span className="material-symbols-outlined">dashboard</span>
           <p className="button-text">Dashboard</p>
         </button>
         
         <button 
-          onClick={() => handleNavigation('/TripSummary')} 
+          onClick={() => handleNavigation(`/TripSummarylayoutinvate/${invatetripid}`)} 
           className={`nav-button ${isActive('/TripSummary') ? 'active' : ''}`}
         >
           <span className="material-symbols-outlined">summarize</span>
@@ -49,17 +44,15 @@ const PrTpNavbar = () => {
         </button>
         
         <button 
-
-        // onClick={() => handleNavigation(`/Pt_Bd_Accommodations`)} 
-        onClick={() => navigate(`/Pt_Bd_Accommodations`)} 
-          className={`nav-button ${isActive(`/Pt_Bd_Accommodations`) ? 'active' : ''}`}
+          onClick={() => handleNavigation(`/Accommodationslayoutinvate/${invatetripid}`)} 
+          className={`nav-button ${isActive('/Accommodations') ? 'active' : ''}`}
         >
           <span className="material-symbols-outlined">hotel</span>
           <p className="button-text">Accommodations</p>
         </button>
         
         <button 
-          onClick={() => handleNavigation('/TravelPlannerRestaurants')} 
+          onClick={() => handleNavigation(`/TravelPlannerRestaurantslayoutinvate/${invatetripid}`)} 
           className={`nav-button ${isActive('/TravelPlannerRestaurants') ? 'active' : ''}`}
         >
           <span className="material-symbols-outlined">restaurant</span>
@@ -67,38 +60,32 @@ const PrTpNavbar = () => {
         </button>
          
         <button 
-          onClick={() => handleNavigation(`/Pt_Bd_Attractions`)} 
-          className={`nav-button ${isActive('/Pt_Bd_Attractions') ? 'active' : ''}`}
+          onClick={() => handleNavigation(`/Attractionslayoutinvate/${invatetripid}`)} 
+          className={`nav-button ${isActive('/Attractions') ? 'active' : ''}`}
         >
           <span className="material-symbols-outlined">attractions</span>
           <p className="button-text">Attractions</p>
         </button>
           
         <button 
-          onClick={() => handleNavigation('/Pt_Bd_DailyItinerary')} 
-          className={`nav-button ${isActive('/Pt_Bd_DailyItinerary') ? 'active' : ''}`}
+          onClick={() => handleNavigation(`/DailyItinerarylayoutinvate/${invatetripid}`)} 
+          className={`nav-button ${isActive('/DailyItinerary') ? 'active' : ''}`}
         >
           <span className="material-symbols-outlined">calendar_today</span>
           <p className="button-text">Daily Itinerary</p>
         </button>
           
         <button 
-          onClick={() => handleNavigation('/TravelMap')} 
+          onClick={() => handleNavigation(`/TravelMaplayoutInvited/${invatetripid}`)} 
           className={`nav-button ${isActive('/TravelMap') ? 'active' : ''}`}
         >
           <span className="material-symbols-outlined">map</span>
           <p className="button-text">Travel Map</p>
         </button>
-          
-        <button 
-          onClick={() => handleNavigation('/TravelPlannerItinerary')} 
-          className={`nav-button ${isActive('/TravelPlannerItinerary') ? 'active' : ''}`}
-        >
-          <span className="material-symbols-outlined">route</span>
-          <p className="button-text">Travel Planner</p>
-        </button>
+        
       </div>
     </nav>
   );
 };
-export default PrTpNavbar;
+
+export default INvateTripNavbar;

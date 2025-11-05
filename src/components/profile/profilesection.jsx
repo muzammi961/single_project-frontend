@@ -1831,7 +1831,8 @@
 import axios from "axios";
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
+import { useDispatch, useSelector } from "react-redux";
+import {PrTpId } from '../actioncreate'
 // ========== WebSocket Manager ==========
 class WebSocketManager {
   constructor() {
@@ -1925,6 +1926,7 @@ const wsManager = new WebSocketManager();
 
 // ========== Upcoming Trips Section Component ==========
 const UpcomingTripsSection = () => {
+  const dispatch = useDispatch();
   const [triplist, setTriplist] = useState([]);
   const [loading, setLoading] = useState(false);
   const token = localStorage.getItem("access_token");
@@ -2001,7 +2003,8 @@ const UpcomingTripsSection = () => {
           return (
             <div 
     
-          onClick={() => navigate(`/Pt_Bd_DashboardLayout/${trip.trip_id}`)}
+          // onClick={() => navigate(`/Pt_Bd_DashboardLayout/${trip.trip_id}`);dispatch(PrTpId(trip.trip_id))}
+             onClick={() => {dispatch(PrTpId(trip.trip_id));navigate(`/Pt_Bd_DashboardLayout`);}}
 
 
             

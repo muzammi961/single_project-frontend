@@ -74,6 +74,7 @@ import Pt_Bd_DashboardLayout from './components/profile/pr_bd_Tripdeshbord/pr_bd
 import PrTpNavbar from './components/profile/pr_bd_Tripdeshbord/PrTpNavbar.jsx'
 import Pt_Bd_Accommodations from './components/profile/pr_bd_Tripdeshbord/Pt_Bd_Accommodations.jsx'
 import Pt_Bd_Attractions from './components/profile/pr_bd_Tripdeshbord/Pt_Bd_Attractions.jsx'
+import Pt_Bd_DailyItinerary from  './components/profile/pr_bd_Tripdeshbord/Pt_Bd_DailyItinerary.jsx'
 
 
 
@@ -81,6 +82,17 @@ import Pt_Bd_Attractions from './components/profile/pr_bd_Tripdeshbord/Pt_Bd_Att
 
 
 
+
+
+
+import DashboardLayoutinvateorpublic from './components/BudgetFriendlyTravel/invateorpublictripwithbudget/dashboard_layoutinvateorpublic.jsx'
+import INvateTripNavbar from './components/BudgetFriendlyTravel/invateorpublictripwithbudget/invatetripNavbar.jsx'
+import Attractionslayoutinvate from './components/BudgetFriendlyTravel/invateorpublictripwithbudget/Attractions_layoutinvate.jsx'
+import Accommodationslayoutinvate from './components/BudgetFriendlyTravel/invateorpublictripwithbudget/Accommodations_layoutinvate.jsx'
+import DailyItinerarylayoutinvate from './components/BudgetFriendlyTravel/invateorpublictripwithbudget/DailyItinerary_layoutinvate.jsx'
+import TravelMaplayoutInvited from './components/BudgetFriendlyTravel/invateorpublictripwithbudget/TravelMap_layoutinvate.jsx'
+import TravelPlannerRestaurantslayoutinvate from './components/BudgetFriendlyTravel/invateorpublictripwithbudget/TravelPlannerRestaurants_layoutinvate.jsx'
+import TripSummarylayoutinvate from './components/BudgetFriendlyTravel/invateorpublictripwithbudget/TripSummarylayoutinvate.jsx'
 
 import   MyMap from './components/componone.jsx'
 function App() {
@@ -197,10 +209,26 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 
             <Route path='/PrTpNavbar' element={<PrTpNavbar/>}/>
-            <Route path="/Pt_Bd_DashboardLayout/:trip_id" element={<Pt_Bd_DashboardLayout />}/>
-            <Route path='/Pt_Bd_Accommodations' element={<Pt_Bd_Accommodations/>}/>
+            <Route path="/Pt_Bd_DashboardLayout" element={<Pt_Bd_DashboardLayout />}/>
             <Route path='/Pt_Bd_Attractions' element={<Pt_Bd_Attractions/>}/>
+            <Route path='/Pt_Bd_Accommodations' element={<Pt_Bd_Accommodations/>}/>
+            <Route path='/Pt_Bd_DailyItinerary' element={<Pt_Bd_DailyItinerary/>}/>
 
+
+
+
+
+
+
+
+            <Route path='/invitetrip/:invatetripid' element={<DashboardLayoutinvateorpublic/>}/>
+            <Route path='/INvateTripNavbar/:invatetripid' element={<INvateTripNavbar/>}/>
+            <Route path='/Attractionslayoutinvate/:invatetripid' element={<Attractionslayoutinvate/>}/>
+            <Route path='/Accommodationslayoutinvate/:invatetripid' element={<Accommodationslayoutinvate/>}/>
+            <Route path='/DailyItinerarylayoutinvate/:invatetripid' element={<DailyItinerarylayoutinvate/>}/>
+            <Route path='/TravelMaplayoutInvited/:invatetripid' element={<TravelMaplayoutInvited/>}/>
+            <Route path='/TravelPlannerRestaurantslayoutinvate/:invatetripid' element={<TravelPlannerRestaurantslayoutinvate/>}/>
+            <Route path='/TripSummarylayoutinvate/:invatetripid' element={<TripSummarylayoutinvate/>}/>
           </Routes>
       </BrowserRouter>
   )

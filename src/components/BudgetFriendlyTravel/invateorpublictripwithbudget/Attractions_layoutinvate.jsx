@@ -1,36 +1,38 @@
-import axios from "axios";
-import React, { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useParams } from "react-router-dom";
-import PrTpNavbar from './PrTpNavbar'
-import { useDispatch, useSelector } from "react-redux";
-function Pt_Bd_Attractions() {
-  const [tripdata, setTripData] = useState([]);
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import INvateTripNavbar from './invatetripNavbar'
+const Attractionslayoutinvate = () => {
+  const { invatetripid } = useParams();
+  const [tripData, setTripData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const token = localStorage.getItem("access_token");
-  const navigate = useNavigate();
-
-  const trip_id = useSelector((state) => state.app.prtpidcode);
-  const fetchspecifictripdata = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`http://127.0.0.1:8006/TripSpecificAPIView/${trip_id}/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setTripData(response.data || []);
-      console.log('trip data', response.data);
-    } catch (error) {
-      console.error("❌ Error fetching trips:", error);
-      setError("Failed to load trip data");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
-    fetchspecifictripdata();
-  }, [token, trip_id]);
+    const fetchTripData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`http://127.0.0.1:8006/TripSpecificAPIViewWithoutuserIdPublicorinvateonly/${invatetripid}`);
+        const data = await response.json();
+        setTripData(data);
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to load trip data');
+        setLoading(false);
+      }
+    };
+
+    if (invatetripid) {
+      fetchTripData();
+    }
+  }, [invatetripid]);
+
+  // Get attractions data from trip data
+  const attractionsData = tripData?.attractions || [];
+
+  // Remove duplicates based on attraction ID
+  const uniqueAttractions = attractionsData.filter((attraction, index, self) =>
+    index === self.findIndex((a) => a.id === attraction.id)
+  );
 
   // Function to render star ratings
   const renderStars = (rating) => {
@@ -93,10 +95,10 @@ function Pt_Bd_Attractions() {
     if (types.includes('zoo')) return 'Zoo';
     if (types.includes('aquarium')) return 'Aquarium';
     if (types.includes('art_gallery')) return 'Art Gallery';
-    if (types.includes('church') || types.includes('hindu_temple') || types.includes('mosque') || types.includes('place_of_worship')) return 'Religious Site';
-    if (types.includes('beach')) return 'Beach';
-    if (types.includes('garden')) return 'Garden';
+    if (types.includes('church') || types.includes('hindu_temple') || types.includes('mosque')) return 'Religious Site';
     if (types.includes('historical_place')) return 'Historical Place';
+    if (types.includes('garden')) return 'Garden';
+    if (types.includes('sculpture')) return 'Sculpture';
     
     return 'Attraction';
   };
@@ -114,9 +116,9 @@ function Pt_Bd_Attractions() {
       'Aquarium': 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300',
       'Art Gallery': 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300',
       'Religious Site': 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300',
-      'Beach': 'bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300',
-      'Garden': 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300',
-      'Historical Place': 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'
+      'Historical Place': 'bg-rose-100 text-rose-800 dark:bg-rose-900/50 dark:text-rose-300',
+      'Garden': 'bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-300',
+      'Sculpture': 'bg-violet-100 text-violet-800 dark:bg-violet-900/50 dark:text-violet-300'
     };
     return colorMap[type] || 'bg-gray-100 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300';
   };
@@ -144,8 +146,8 @@ function Pt_Bd_Attractions() {
 
   // Get destination name for display
   const getDestinationName = () => {
-    return tripdata?.destination?.name || 
-           tripdata?.destination?.address?.split('(')[0] || 
+    return tripData?.destination?.name || 
+           tripData?.destination?.address?.split(',')[0] || 
            'Your Destination';
   };
 
@@ -156,41 +158,60 @@ function Pt_Bd_Attractions() {
     return parts.slice(0, 2).join(',');
   };
 
-  // Get attractions data from trip data
-  const attractionsData = tripdata?.attractions || [];
-
-  // Remove duplicates based on attraction ID
-  const uniqueAttractions = useMemo(() => {
-    return attractionsData.filter((attraction, index, self) =>
-      index === self.findIndex((a) => a.id === attraction.id)
-    );
-  }, [attractionsData]);
-
+  // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading attractions...</p>
+      <div className="bg-white text-gray-900 font-display min-h-screen">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading attractions...</p>
+          </div>
         </div>
       </div>
     );
   }
 
+  // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <span className="material-symbols-outlined text-red-500 text-4xl mb-4">
-            error
-          </span>
-          <p className="text-red-600 mb-4">{error}</p>
-          <button 
-            onClick={fetchspecifictripdata}
-            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
-          >
-            Try Again
-          </button>
+      <div className="bg-white text-gray-900 font-display min-h-screen">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <span className="material-symbols-outlined text-red-500 text-6xl mb-4">
+              error
+            </span>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Data</h3>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-primary text-white font-semibold hover:bg-primary/90 transition-colors"
+            >
+              <span className="material-symbols-outlined">refresh</span>
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // No trip data state
+  if (!tripData) {
+    return (
+      <div className="bg-white text-gray-900 font-display min-h-screen">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6 mx-auto">
+              <span className="material-symbols-outlined text-gray-400 text-4xl">
+                explore
+              </span>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Trip Found</h3>
+            <p className="text-gray-600 max-w-md mb-6">
+              We couldn't find the trip you're looking for. Please check the link and try again.
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -198,30 +219,21 @@ function Pt_Bd_Attractions() {
 
   return (
     <div className="bg-white text-gray-900 font-display min-h-screen">
-      <PrTpNavbar/>
-      <nav className="bg-white border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => navigate(-1)}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
-            >
-              <span className="material-symbols-outlined">arrow_back</span>
-              Back
-            </button>
-            <h1 className="text-xl font-bold text-gray-900">Trip Attractions</h1>
-          </div>
-          <div className="text-sm text-gray-600">
-            Trip to {getDestinationName()}
-          </div>
-        </div>
-      </nav>
-
+      <INvateTripNavbar/>
       <div className="relative flex min-h-screen w-full">
         {/* Main Content */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
           <div className="mx-auto max-w-7xl">
-            {/* Page Heading */}
+            {/* Breadcrumbs */}
+            <div className="flex flex-wrap gap-2 px-4 pb-6">
+              <a className="text-gray-500 hover:text-primary text-sm font-medium leading-normal" href="#">
+                Trip to {getDestinationName()}
+              </a>
+              <span className="text-gray-500 text-sm font-medium leading-normal">/</span>
+              <span className="text-gray-800 text-sm font-medium leading-normal">Attractions</span>
+            </div>
+
+            {/* PageHeading */}
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6 p-4">
               <div className="flex flex-col gap-2">
                 <h1 className="text-3xl md:text-4xl font-black leading-tight tracking-tight text-gray-900">
@@ -267,7 +279,7 @@ function Pt_Bd_Attractions() {
 
             {/* Search and Filters */}
             <div className="flex flex-col md:flex-row gap-4 mb-8 p-4">
-              {/* Search Bar */}
+              {/* SearchBar */}
               <div className="flex-grow">
                 <label className="flex flex-col min-w-40 h-12 w-full">
                   <div className="flex w-full flex-1 items-stretch rounded-lg h-full border border-gray-300 bg-white focus-within:ring-2 focus-within:ring-primary focus-within:border-primary">
@@ -444,6 +456,6 @@ function Pt_Bd_Attractions() {
       </div>
     </div>
   );
-}
+};
 
-export default Pt_Bd_Attractions;
+export default Attractionslayoutinvate;
