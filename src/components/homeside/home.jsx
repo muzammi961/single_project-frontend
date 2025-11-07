@@ -65,6 +65,7 @@ const PathFinderLoader = ({ size = 64, label = "PathFinder loading" }) => {
 
   const [experiences, setExperiences] = useState([]);
   const [profiles, setProfiles] = useState({});
+  const [privatedatas,SetPrivatedatas]=useState({})
 
   // Fetch profile and dispatch user ID
   useEffect(() => {
@@ -123,6 +124,22 @@ const PathFinderLoader = ({ size = 64, label = "PathFinder loading" }) => {
       }
     };
 
+
+
+    // const getprivatefunc= async () => {
+    //   try {
+    //     const res = await axios.get("http://127.0.0.1:8006/Getprivatedata/");
+    //     SetPrivatedatas(res.data)
+    //   } catch (error) {
+    //     console.error("Error fetching experiences:", error);
+    //   }
+    // };
+
+
+
+
+
+    // getprivatefunc();
     fetchExperiences();
   }, [token]);
 
@@ -364,6 +381,19 @@ const PathFinderLoader = ({ size = 64, label = "PathFinder loading" }) => {
           </div>
         </div>
       </section>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
       {/* Features */}
       <section className="py-12 sm:py-16 bg-gray-50">

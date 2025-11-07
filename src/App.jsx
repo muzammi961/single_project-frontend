@@ -94,6 +94,25 @@ import TravelMaplayoutInvited from './components/BudgetFriendlyTravel/invateorpu
 import TravelPlannerRestaurantslayoutinvate from './components/BudgetFriendlyTravel/invateorpublictripwithbudget/TravelPlannerRestaurants_layoutinvate.jsx'
 import TripSummarylayoutinvate from './components/BudgetFriendlyTravel/invateorpublictripwithbudget/TripSummarylayoutinvate.jsx'
 
+
+
+
+
+
+
+
+import PublicTripNavbar from './components/BudgetFriendlyTravel/publictripwithbudget/PublicTripNavbar.jsx'
+import DashboardLayoutpublic from './components/BudgetFriendlyTravel/publictripwithbudget/dashboard_layoutpublic.jsx'
+import Accommodationslayoutpublic from './components/BudgetFriendlyTravel/publictripwithbudget/Accommodations_layoutpublic.jsx'
+import Attractionslayoutpublic from './components/BudgetFriendlyTravel/publictripwithbudget/Attractions_layoutpublic.jsx'
+import DailyItinerarylayoutpublic from './components/BudgetFriendlyTravel/publictripwithbudget/DailyItinerary_layoutpublic.jsx'
+import TravelMaplayoutpublic from './components/BudgetFriendlyTravel/publictripwithbudget/TravelMap_layoutpublic.jsx'
+import TravelPlannerRestaurantslayoutpublic from './components/BudgetFriendlyTravel/publictripwithbudget/TravelPlannerRestaurants_layoutpublic.jsx'
+import TripSummarylayoutpublic from './components/BudgetFriendlyTravel/publictripwithbudget/TripSummarylayoutpublic.jsx'
+
+
+
+
 import   MyMap from './components/componone.jsx'
 function App() {
 const isAuthenticated =localStorage.getItem("access_token");
@@ -229,6 +248,27 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
             <Route path='/TravelMaplayoutInvited/:invatetripid' element={<TravelMaplayoutInvited/>}/>
             <Route path='/TravelPlannerRestaurantslayoutinvate/:invatetripid' element={<TravelPlannerRestaurantslayoutinvate/>}/>
             <Route path='/TripSummarylayoutinvate/:invatetripid' element={<TripSummarylayoutinvate/>}/>
+
+
+
+
+
+
+            <Route path='/PublicTripNavbar/:invatetripid' element={<PublicTripNavbar/>}/>
+            <Route path='/publictrip/:invatetripid' element={<DashboardLayoutpublic/>}/>
+            <Route path='/Accommodationslayoutpublic/:invatetripid' element={<Accommodationslayoutpublic/>}/>
+            <Route path='/Attractionslayoutpublic/:invatetripid' element={<Attractionslayoutpublic/>}/>
+            <Route path='/DailyItinerarylayoutpublic/:invatetripid' element={<DailyItinerarylayoutpublic/>}/>
+            <Route path='/TravelMaplayoutpublic/:invatetripid' element={<TravelMaplayoutpublic/>}/>
+            <Route path='/TravelPlannerRestaurantslayoutpublic/:invatetripid' element={<TravelPlannerRestaurantslayoutpublic/>}/>
+            <Route path='/TripSummarylayoutpublic/:invatetripid' element={<TripSummarylayoutpublic/>}/>
+
+
+
+
+
+
+
           </Routes>
       </BrowserRouter>
   )
