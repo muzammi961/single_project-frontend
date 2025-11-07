@@ -93,7 +93,7 @@ import DailyItinerarylayoutinvate from './components/BudgetFriendlyTravel/invate
 import TravelMaplayoutInvited from './components/BudgetFriendlyTravel/invateorpublictripwithbudget/TravelMap_layoutinvate.jsx'
 import TravelPlannerRestaurantslayoutinvate from './components/BudgetFriendlyTravel/invateorpublictripwithbudget/TravelPlannerRestaurants_layoutinvate.jsx'
 import TripSummarylayoutinvate from './components/BudgetFriendlyTravel/invateorpublictripwithbudget/TripSummarylayoutinvate.jsx'
-
+import Joinintheinvatetrip from './components/BudgetFriendlyTravel/invateorpublictripwithbudget/Joinintheinvatetrip.jsx'
 
 
 
@@ -109,7 +109,7 @@ import DailyItinerarylayoutpublic from './components/BudgetFriendlyTravel/public
 import TravelMaplayoutpublic from './components/BudgetFriendlyTravel/publictripwithbudget/TravelMap_layoutpublic.jsx'
 import TravelPlannerRestaurantslayoutpublic from './components/BudgetFriendlyTravel/publictripwithbudget/TravelPlannerRestaurants_layoutpublic.jsx'
 import TripSummarylayoutpublic from './components/BudgetFriendlyTravel/publictripwithbudget/TripSummarylayoutpublic.jsx'
-
+import Joininthepublictrip from './components/BudgetFriendlyTravel/publictripwithbudget/Joininthepublictrip.jsx'
 
 
 
@@ -248,8 +248,7 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
             <Route path='/TravelMaplayoutInvited/:invatetripid' element={<TravelMaplayoutInvited/>}/>
             <Route path='/TravelPlannerRestaurantslayoutinvate/:invatetripid' element={<TravelPlannerRestaurantslayoutinvate/>}/>
             <Route path='/TripSummarylayoutinvate/:invatetripid' element={<TripSummarylayoutinvate/>}/>
-
-
+            <Route path='Joinintheinvatetrip/:invatetripid' element={<Joinintheinvatetrip/>}/>
 
 
 
@@ -262,7 +261,7 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
             <Route path='/TravelMaplayoutpublic/:invatetripid' element={<TravelMaplayoutpublic/>}/>
             <Route path='/TravelPlannerRestaurantslayoutpublic/:invatetripid' element={<TravelPlannerRestaurantslayoutpublic/>}/>
             <Route path='/TripSummarylayoutpublic/:invatetripid' element={<TripSummarylayoutpublic/>}/>
-
+            <Route path='Joininthepublictrip/:invatetripid' element={<Joininthepublictrip/>}/>
 
 
 
