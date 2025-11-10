@@ -808,6 +808,80 @@ const DashboardLayoutpublic = () => {
                    
 
                   </div>
+
+
+
+
+
+
+
+<div role="alert" aria-live="assertive" className="max-w-md mx-auto">
+  <div className="flex items-start gap-3 bg-red-50 border border-red-200 text-red-800 rounded-lg p-4 shadow-sm">
+    {/* Icon */}
+    <div className="flex-shrink-0 mt-0.5">
+      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-red-100 text-red-700">
+        <svg
+          className="w-4 h-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M6 6l12 12M18 6L6 18"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </span>
+    </div>
+
+    {/* Text Content */}
+    <div className="flex-1">
+      <h3 className="text-sm font-semibold">
+        Action Required to Join the Trip
+      </h3>
+      <ul className="mt-2 ml-0 space-y-1 text-sm">
+        <li className="flex items-start gap-2">
+          <span
+            className="mt-0.5 inline-block w-2 h-2 rounded-full bg-red-700/90 flex-shrink-0"
+            aria-hidden="true"
+          ></span>
+          <span>
+            To join the trip, you must complete the payment after submitting
+            your information.
+          </span>
+        </li>
+        <li className="flex items-start gap-2">
+          <span
+            className="mt-0.5 inline-block w-2 h-2 rounded-full bg-red-700/90 flex-shrink-0"
+            aria-hidden="true"
+          ></span>
+          <span>
+            A secure payment link will be sent to your registered email address.
+          </span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                  
                    <button onClick={()=>navigate(`/Joininthepublictrip/${summary.invite_code}/`)} className="flex items-center justify-center w-full  rounded-lg text-white text-sm font-medium  py-2.5 transition-all hover:bg-primary/90 dark:bg-black dark:text-primary dark:hover:bg-gray-500">Travel Book</button>
                 </div>
               </div>

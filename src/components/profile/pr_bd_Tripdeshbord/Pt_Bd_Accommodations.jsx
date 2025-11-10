@@ -404,7 +404,7 @@ import axios from "axios";
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import PrTpNavbar from './PrTpNavbar'
+import Pt_Bd_Navbar from './Pt_Bd_Navbar'
 
 function Pt_Bd_Accommodations() {
   const [tripdata, setTripData] = useState({});
@@ -568,7 +568,7 @@ function Pt_Bd_Accommodations() {
 
   return (
     <div className="font-display bg-white min-h-screen">
-      <PrTpNavbar/>
+      <Pt_Bd_Navbar/>
       <div className="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
         <div className="layout-container flex h-full grow flex-col">
           {/* Navigation */}

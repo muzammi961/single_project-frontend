@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import PrTpNavbar from './PrTpNavbar';
+import Pt_Bd_Navbar from './Pt_Bd_Navbar';
 import { useDispatch, useSelector } from "react-redux";
 function Pt_Bd_DailyItinerary() {
   const [tripData, setTripData] = useState(null);
@@ -140,7 +140,6 @@ function Pt_Bd_DailyItinerary() {
   if (loading) {
     return (
       <div className="bg-white font-display text-gray-900 min-h-screen">
-        <PrTpNavbar />
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
@@ -154,7 +153,6 @@ function Pt_Bd_DailyItinerary() {
   if (error) {
     return (
       <div className="bg-white font-display text-gray-900 min-h-screen">
-        <PrTpNavbar />
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <span className="material-symbols-outlined text-6xl text-red-300 mb-4">
@@ -178,7 +176,7 @@ function Pt_Bd_DailyItinerary() {
   return (
     <div className="bg-white font-display text-gray-900 min-h-screen">
       <div className="relative flex min-h-screen w-full flex-col">
-        <PrTpNavbar/>
+        <Pt_Bd_Navbar/>
         <div className="flex h-full flex-1">
           {/* Main Content */}
           <main className="flex-1 p-4 sm:p-6 lg:p-8">

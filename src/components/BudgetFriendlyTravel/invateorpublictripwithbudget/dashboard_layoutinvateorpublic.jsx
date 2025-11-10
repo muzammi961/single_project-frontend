@@ -4,7 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import INvateTripNavbar from './invatetripNavbar'
-
+import { useNavigate } from 'react-router-dom';
 // Fix for default markers in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -14,6 +14,7 @@ L.Icon.Default.mergeOptions({
 });
 
 const DashboardLayoutinvateorpublic = () => {
+  const navigate=useNavigate()
   const [tripData, setTripData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -803,7 +804,7 @@ const DashboardLayoutinvateorpublic = () => {
                       <span className="font-medium">{summary.is_round_trip ? 'Yes' : 'No'}</span>
                     </div>
                   </div>
-            <button onClick={()=>navigate(`/Joininthepublictrip/${summary.invite_code}/`)} className="flex items-center justify-center w-full  rounded-lg text-white text-sm font-medium  py-2.5 transition-all hover:bg-primary/90 dark:bg-black dark:text-primary dark:hover:bg-gray-500">Travel Book</button>
+            <button onClick={()=>navigate(`/Joinintheinvatetrip/${summary.invite_code}/`)} className="flex items-center justify-center w-full  rounded-lg text-white text-sm font-medium  py-2.5 transition-all hover:bg-primary/90 dark:bg-black dark:text-primary dark:hover:bg-gray-500">Travel Book</button>
                 </div>
               </div>
             </div>

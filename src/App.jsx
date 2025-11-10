@@ -70,15 +70,17 @@ import TravelPlannerItinerary from './components/BudgetFriendlyTravel/TravelDash
 import GoogleMapComponent from './components/live journy/googleapicall.jsx';
 
 
+
+
 import Pt_Bd_DashboardLayout from './components/profile/pr_bd_Tripdeshbord/pr_bd_dashboard_layout.jsx'
-import PrTpNavbar from './components/profile/pr_bd_Tripdeshbord/PrTpNavbar.jsx'
+import Pt_Bd_Navbar from './components/profile/pr_bd_Tripdeshbord/Pt_Bd_Navbar.jsx'
 import Pt_Bd_Accommodations from './components/profile/pr_bd_Tripdeshbord/Pt_Bd_Accommodations.jsx'
 import Pt_Bd_Attractions from './components/profile/pr_bd_Tripdeshbord/Pt_Bd_Attractions.jsx'
 import Pt_Bd_DailyItinerary from  './components/profile/pr_bd_Tripdeshbord/Pt_Bd_DailyItinerary.jsx'
-
-
-
-
+import Pr_bd_TripManagementDashboard from './components/profile/pr_bd_Tripdeshbord/pr_bd_Tripmanage.jsx'
+import Pr_bd_Summarylayout from './components/profile/pr_bd_Tripdeshbord/pr_bd_Summarylayout.jsx'
+import Pr_bd_Restaurantslayout from './components/profile/pr_bd_Tripdeshbord/pr_bd_Restaurantslayout.jsx'
+import Pr_bd_TravelMaplayout from './components/profile/pr_bd_Tripdeshbord/Pr_bd_TravelMaplayout.jsx'
 
 
 
@@ -227,12 +229,15 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 
 
-            <Route path='/PrTpNavbar' element={<PrTpNavbar/>}/>
+            <Route path='/Pt_Bd_Navbar' element={<Pt_Bd_Navbar/>}/>
             <Route path="/Pt_Bd_DashboardLayout" element={<Pt_Bd_DashboardLayout />}/>
             <Route path='/Pt_Bd_Attractions' element={<Pt_Bd_Attractions/>}/>
             <Route path='/Pt_Bd_Accommodations' element={<Pt_Bd_Accommodations/>}/>
             <Route path='/Pt_Bd_DailyItinerary' element={<Pt_Bd_DailyItinerary/>}/>
-
+            <Route path='/Pr_bd_TripManagementDashboard' element={<Pr_bd_TripManagementDashboard/>}/>
+            <Route path='/Pr_bd_Summarylayout' element={<Pr_bd_Summarylayout/>}/>
+            <Route path='/Pr_bd_Restaurantslayout' element={<Pr_bd_Restaurantslayout/>}/>
+            <Route path='/Pr_bd_TravelMaplayout' element={<Pr_bd_TravelMaplayout/>}/>
 
 
 
