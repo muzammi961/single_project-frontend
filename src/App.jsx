@@ -1,5 +1,9 @@
 import './App.css'
 import { useEffect } from "react";
+
+
+
+
 import LoginPage from './components/authentication/login.jsx'
 import HomeSide from './components/homeside/home.jsx'
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -67,7 +71,7 @@ import DailyItinerary from './components/BudgetFriendlyTravel/TravelDashboard/Da
 import TravelMap from './components/BudgetFriendlyTravel/TravelDashboard/TravelMap.jsx'
 import Navbar from './components/BudgetFriendlyTravel/TravelDashboard/Navbar.jsx'
 import TravelPlannerItinerary from './components/BudgetFriendlyTravel/TravelDashboard/TravelPlannerItinerary.jsx'
-import GoogleMapComponent from './components/live journy/googleapicall.jsx';
+
 
 
 
@@ -114,6 +118,14 @@ import TripSummarylayoutpublic from './components/BudgetFriendlyTravel/publictri
 import Joininthepublictrip from './components/BudgetFriendlyTravel/publictripwithbudget/Joininthepublictrip.jsx'
 
 
+
+
+
+
+import BtLiveJournymap from './components/Bt_live journy/Bt_live_journymap.jsx'
+import BtliveTripItinerary from './components/Bt_live journy/Bt_live_journyTripitinerary.jsx'
+import BtliveTripChat from './components/Bt_live journy/Bt_live_journyTripchat.jsx'
+import LiveTripMap from './components/Bt_live journy/Bt_live_locaction.jsx'
 
 import   MyMap from './components/componone.jsx'
 function App() {
@@ -192,7 +204,7 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
 
             <Route path='/Calendar' element={<Calendar/>}/>
 
-            <Route path='/GoogleMapComponent' element={<GoogleMapComponent/>}/>
+            
 
 
 
@@ -271,8 +283,15 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 
 
+            <Route path='BtLiveJournymap/:trip_id/live/' element={<BtLiveJournymap/>}/>
+            <Route path='BtliveTripItinerary/' element={<BtliveTripItinerary/>}/>
+            <Route path='BtliveTripChat/:trip_id/live/:invateuserid' element={<BtliveTripChat/>}/>
+            <Route path='LiveTripMap/:trip_id/' element={<LiveTripMap/>}/>
+
+               
 
 
+{/* http://localhost:5173/BtliveTripChat/{trip.unique_trip_id}/live/ */}
           </Routes>
       </BrowserRouter>
   )
