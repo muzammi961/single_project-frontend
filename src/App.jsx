@@ -118,7 +118,7 @@ import TripSummarylayoutpublic from './components/BudgetFriendlyTravel/publictri
 import Joininthepublictrip from './components/BudgetFriendlyTravel/publictripwithbudget/Joininthepublictrip.jsx'
 
 
-
+import PaymentPage from './components/BudgetFriendlyTravel/paymentsection.jsx'
 
 
 
@@ -280,7 +280,7 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
             <Route path='/TripSummarylayoutpublic/:invatetripid' element={<TripSummarylayoutpublic/>}/>
             <Route path='Joininthepublictrip/:invatetripid' element={<Joininthepublictrip/>}/>
 
-
+            <Route path='PaymentPage/:trip_id/payment/:userid/' element={<PaymentPage/>}/>
 
 
             <Route path='BtLiveJournymap/:trip_id/live/' element={<BtLiveJournymap/>}/>
