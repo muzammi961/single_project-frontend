@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import axios from "axios";
 import '../stylecomponent/experianceside.css';
 import '../stylecomponent/newmessageiconstyle.css'
+import '../stylecomponent/backbutton.css'
 
 const ExperienceSide = () => {
   const navigate = useNavigate();
@@ -555,7 +556,33 @@ const ExperienceSide = () => {
       <div className="flex-grow">
         {/* Header */}
         <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg shadow-sm shadow-teal-500/20 border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+
+
+
+
+          {/* <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+
+
+    <button className="button" onClick={()=>navigate(-1)}>
+        
+      <div className="button-box">
+        <span className="button-elem">
+          <svg viewBox="0 0 46 40" xmlns="http://www.w3.org/2000/svg">
+            <path d="M46 20.038c0-.7-.3-1.5-.8-2.1l-16-17c-1.1-1-3.2-1.4-4.4-.3-1.2 1.1-1.2 3.3 0 4.4l11.3 11.9H3c-1.7 0-3 1.3-3 3s1.3 3 3 3h33.1l-11.3 11.9c-1 1-1.2 3.3 0 4.4 1.2 1.1 3.3.8 4.4-.3l16-17c.5-.5.8-1.1.8-1.9z"></path>
+          </svg>
+        </span>
+        <span className="button-elem">
+          <svg viewBox="0 0 46 40">
+            <path d="M46 20.038c0-.7-.3-1.5-.8-2.1l-16-17c-1.1-1-3.2-1.4-4.4-.3-1.2 1.1-1.2 3.3 0 4.4l11.3 11.9H3c-1.7 0-3 1.3-3 3s1.3 3 3 3h33.1l-11.3 11.9c-1 1-1.2 3.3 0 4.4 1.2 1.1 3.3.8 4.4-.3l16-17c.5-.5.8-1.1.8-1.9z"></path>
+          </svg>
+        </span>
+      </div>
+    </button>
+  
+
+
+
+
             <button onClick={() => navigate('/Calendar')} className="p-2" aria-label="Calendar">
               <span className="material-symbols-outlined text-teal-600 hover:text-teal-500 transition-colors">calendar_today</span>
             </button>
@@ -575,6 +602,56 @@ const ExperienceSide = () => {
               </button>
             </div>
           </div>
+ */}
+
+             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+      
+      {/* Left side: Back Button */}
+      <button className="button" onClick={() => navigate(-1)} aria-label="Go back">
+        <div className="button-box">
+          <span className="button-elem">
+            <svg viewBox="0 0 46 40" xmlns="http://www.w3.org/2000/svg">
+              <path d="M46 20.038c0-.7-.3-1.5-.8-2.1l-16-17c-1.1-1-3.2-1.4-4.4-.3-1.2 1.1-1.2 3.3 0 4.4l11.3 11.9H3c-1.7 0-3 1.3-3 3s1.3 3 3 3h33.1l-11.3 11.9c-1 1-1.2 3.3 0 4.4 1.2 1.1 3.3.8 4.4-.3l16-17c.5-.5.8-1.1.8-1.9z" />
+            </svg>
+          </span>
+          <span className="button-elem">
+            <svg viewBox="0 0 46 40">
+              <path d="M46 20.038c0-.7-.3-1.5-.8-2.1l-16-17c-1.1-1-3.2-1.4-4.4-.3-1.2 1.1-1.2 3.3 0 4.4l11.3 11.9H3c-1.7 0-3 1.3-3 3s1.3 3 3 3h33.1l-11.3 11.9c-1 1-1.2 3.3 0 4.4 1.2 1.1 3.3.8 4.4-.3l16-17c.5-.5.8-1.1.8-1.9z" />
+            </svg>
+          </span>
+        </div>
+      </button>
+
+      {/* Center: Title */}
+      <h1 className="text-2xl font-bold text-teal-600">PathFinder</h1>
+
+      {/* Right side: Calendar, Profile, Notifications */}
+      <div className="flex items-center gap-4">
+        <button onClick={() => navigate('/Calendar')} className="p-2" aria-label="Calendar">
+          <span className="material-symbols-outlined text-teal-600 hover:text-teal-500 transition-colors">
+            calendar_today
+          </span>
+        </button>
+
+        <Link to={'/ProfilePage'} className="p-2" aria-label="Profile">
+          <span className="material-symbols-outlined text-teal-600 hover:text-teal-500 transition-colors">
+            account_circle
+          </span>
+        </Link>
+
+        <button className="relative" onClick={handleToggleNotifications} aria-label="Notifications">
+          <svg viewBox="0 0 512 512" height="20" xmlns="http://www.w3.org/2000/svg">
+            <path d="M48 64C21.5 64 0 85.5 0 112c0 15.1 7.1 29.3 19.2 38.4L236.8 313.6c11.4 8.5 27 8.5 38.4 0L492.8 150.4c12.1-9.1 19.2-23.3 19.2-38.4c0-26.5-21.5-48-48-48H48zM0 176V384c0 35.3 28.7 64 64 64H448c35.3 0 64-28.7 64-64V176L294.4 339.2c-22.8 17.1-54 17.1-76.8 0L0 176z" />
+          </svg>
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+              {unreadCount}
+            </span>
+          )}
+        </button>
+      </div>
+    </div>
+
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
             <div className="relative flex items-center">
               <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-teal-600 z-10">search</span>

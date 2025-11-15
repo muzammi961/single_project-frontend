@@ -8,7 +8,8 @@ const appSlice = createSlice({
     autherazeduserId:null,
     messageandprofileviewid: null, 
     tripDatacalculate:null,
-    prtpidcode:null
+    prtpidcode:null,
+    userexperience:null
   },
   reducers: {
     setMessageandProfileViewid: (state, action) => {
@@ -33,8 +34,11 @@ const appSlice = createSlice({
     PrTpId: (state, action) => {
       state.prtpidcode = action.payload;
     },
+    UserEp:(state,action)=>{
+      state.userexperience=action.payload;
+    },
   },
 });
 
-export const { toggleDarkMode, setUser,setMessageandProfileViewid,AutherazedUserId,setCalculateTripData,clearTripData,PrTpId} = appSlice.actions;
+export const { toggleDarkMode, setUser,setMessageandProfileViewid,AutherazedUserId,setCalculateTripData,clearTripData,PrTpId,UserEp} = appSlice.actions;
 export default appSlice.reducer;

@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import Pt_Bd_Navbar from './Pt_Bd_Navbar'
@@ -14,6 +15,7 @@ L.Icon.Default.mergeOptions({
 });
 
 function Pt_Bd_DashboardLayout() {
+  const navigate=useNavigate()
   const [newDate, setNewDate] = useState('');
   const [tripdata, setTripData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -594,6 +596,24 @@ const handlePostpone = async () => {
   }
 
 
+
+
+
+const DeleteTripFunc = async () => {
+  console.log('trip id ',trip_id)
+  try {
+    await axios.delete('http://127.0.0.1:8006/TripDeleteAPIView/', {
+      data: { trip_id: trip_id }, 
+      headers: { Authorization: `Bearer ${token}`}});
+
+    navigate(-1);
+  } catch (error) {
+    console.error("❌ Error delete trips:", error);
+  }
+};
+
+
+
   return (
     <div className="font-display bg-white text-black min-h-screen">
         <Pt_Bd_Navbar/>
@@ -615,12 +635,13 @@ const handlePostpone = async () => {
                 </p>
               </div>
 
-              {/* <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
-                <button className="flex-1 lg:flex-none flex items-center justify-center rounded-lg h-10 px-4 border border-gray-300 text-sm font-bold gap-2 hover:bg-gray-100">
-                  <span className="material-symbols-outlined text-base">edit</span>
-                  <span className="truncate">Edit</span>
+              <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+                <button  onClick={DeleteTripFunc} className="flex-1 lg:flex-none flex items-center justify-center rounded-lg h-10 px-4 border border-gray-300 text-sm font-bold gap-2 hover:bg-gray-100">
+                  <span className="material-symbols-outlined text-base">delete</span>
+                  <span className="truncate">Delete</span>
                 </button>
-              </div> */}
+              </div>
+
             </div>
            
             {/* Stats & Charts */}

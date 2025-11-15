@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { AutherazedUserId } from "../actioncreate";
+import {UserEp} from '../actioncreate'
 import '../stylecomponent/wetherstyle.css'
 import '../stylecomponent/hometitletext.css'
 
-// Separate TimeDisplay component to avoid re-renders in parent
+
 const TimeDisplay = () => {
   const [time, setTime] = useState("");
 
@@ -334,7 +335,7 @@ export default function HomeSide() {
           headers: { Authorization: `Bearer ${token}` },
         });
         setExperiences(res.data.results || []);
-        console.log(res.data.results)
+        console.log('experience',res.data.results)
       } catch (error) {
         console.error("Error fetching experiences:", error);
       }
@@ -345,7 +346,9 @@ export default function HomeSide() {
   // Navigation handler
   const goToDashboard = (value = null) => {
     const access_token = localStorage.getItem("access_token");
+  
     const refreshtoken = localStorage.getItem("refresh_token");
+    console.log(access_token,'accc toen   ',refreshtoken,'refrrrr')
     if (!access_token && !refreshtoken) {
       return navigate("/RegistrationForm");
     } else {
@@ -354,8 +357,8 @@ export default function HomeSide() {
         case "Experience":
           navigate("/ExperienceSide");
           break;
-        case "Expense":
-          navigate("/ExpenseSide");
+        case "TravelPlannerofBadget":
+          navigate("/TravelPlannerofBadget");
           break;
         case "CustomizePlace":
           navigate("/CustomizePlaceSide");
@@ -383,6 +386,8 @@ export default function HomeSide() {
     ],
     []
   );
+
+
 
   // Experience Card Component
   const ExperienceCard = ({ experience }) => {
@@ -431,7 +436,8 @@ export default function HomeSide() {
     });
 
     return (
-      <div className="flex-shrink-0 w-80 snap-center group">
+      <div className="flex-shrink-0 w-80 snap-center group"
+      onClick={() => {dispatch(UserEp(experience));navigate("/UserExperienceside");}}>
         <div className="relative overflow-hidden rounded-xl">
           {mediaElement}
           <div className="absolute inset-0 bg-gradient-to-t from-gray-800/70 to-transparent"></div>
@@ -450,12 +456,14 @@ export default function HomeSide() {
             <p className="text-sm">{experience.description}</p>
           </div>
           <div className="absolute inset-0 flex items-center justify-center bg-gray-800/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <button
+            {/* <button
               className="bg-teal-500 text-white py-2 px-4 rounded-lg hover:bg-teal-600 transition-colors duration-200"
-              onClick={() => navigate(`/experience/${experience.id}`)}
+              // onClick={() => {dispatch(UserEp(experience));navigate("/UserExperienceside");}}
+
+
             >
               View Details
-            </button>
+            </button> */}
           </div>
         </div>
       </div>
@@ -601,7 +609,7 @@ export default function HomeSide() {
               Experience
             </button>
             <button
-              onClick={() => goToDashboard("Expense")}
+              onClick={() => goToDashboard("TravelPlannerofBadget")}
               className="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg shadow-teal-500/30 hover:shadow-teal-500/50 transition-all duration-300 transform hover:scale-105"
             >
               Expense
