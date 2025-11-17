@@ -3043,12 +3043,13 @@ const ProfilePage = () => {
         <div className="max-w-7xl mx-auto">
           <ProfileCard />
         </div>
-        <section className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 max-w-7xl mx-auto w-full">
-          <StatsCard value="25" label="Trips" />
-          <StatsCard value="3" label="Upcoming" />
-          <StatsCard value="12" label="Wishlist" />
-          <StatsCard value="4.8★" label="Ratings" />
-        </section>
+       <section className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 
+                    gap-3 sm:gap-4 md:gap-6 
+                    max-w-7xl mx-auto w-full
+                    place-items-center">
+  <StatsCard value="25" label="Trips" />
+  <StatsCard value="3" label="Upcoming" />
+</section>
         <SocialCounters />
         {/* Integrated Travel Experiences Section */}
         <TravelExperiencesSection />

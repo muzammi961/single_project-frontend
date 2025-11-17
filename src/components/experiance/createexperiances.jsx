@@ -1,439 +1,9 @@
-// import React, { useState, useEffect } from "react";
-// import axios from "axios";
-
-// const AddExperience = () => {
-//   const token = localStorage.getItem("access_token");
-
-//   const [formData, setFormData] = useState({
-//     title: "",
-//     place_name: "",
-//     category: "Adventure",
-//     description: "",
-//     rating: "",
-//     privacy: "PUBLIC",
-//     latitude: "",
-//     longitude: "",
-//     tags: [],
-//     file: null,        // single file (image/video)
-//     fileType: "image", // "image" or "video"
-//     date_of_visit: "",  // new date field
-//   });
-
-//   const [selectedTag, setSelectedTag] = useState("");
-//   const [loadingLocation, setLoadingLocation] = useState(false);
-//   const [loadingSubmit, setLoadingSubmit] = useState(false);
-//   const [placeSuggestions, setPlaceSuggestions] = useState([]);
-//   const [showSuggestions, setShowSuggestions] = useState(false);
-
-//   const categories = ["Adventure", "Cultural", "Nature", "Historical", "Food", "Relaxation"];
-//   const privacyOptions = ["PUBLIC", "FRIENDS", "PRIVATE"];
-
-//   // ✅ Fetch place suggestions and auto-fill latitude & longitude
-//   useEffect(() => {
-//     const delayDebounce = setTimeout(async () => {
-//       const query = formData.place_name.trim();
-//       if (query.length > 2) {
-//         try {
-//           const res = await axios.get("https://nominatim.openstreetmap.org/search", {
-//             params: {
-//               q: query,
-//               format: "json",
-//               addressdetails: 1,
-//               limit: 5,
-//             },
-//           });
-
-//           setPlaceSuggestions(res.data);
-//           setShowSuggestions(true);
-
-//           // Auto-fill latitude and longitude from first result
-//           if (res.data.length > 0) {
-//             setFormData((prev) => ({
-//               ...prev,
-//               latitude: res.data[0].lat,
-//               longitude: res.data[0].lon,
-//             }));
-//           }
-//         } catch (err) {
-//           console.error("Error fetching location:", err);
-//         }
-//       } else {
-//         setPlaceSuggestions([]);
-//         setShowSuggestions(false);
-//         setFormData((prev) => ({ ...prev, latitude: "", longitude: "" }));
-//       }
-//     }, 500);
-
-//     return () => clearTimeout(delayDebounce);
-//   }, [formData.place_name]);
-
-//   // Handle input changes (text, date, number)
-//   const handleChange = (e) => {
-//     const { name, value } = e.target;
-//     setFormData((prev) => ({ ...prev, [name]: value }));
-//   };
-
-//   // Handle file change
-//   const handleFileChange = (e) => {
-//     const { files } = e.target;
-//     if (files.length > 0) {
-//       setFormData((prev) => ({ ...prev, file: files[0] }));
-//     }
-//   };
-
-//   // Handle file type selection (image/video)
-//   const handleFileTypeChange = (e) => {
-//     const fileType = e.target.value;
-//     setFormData((prev) => ({ ...prev, fileType, file: null })); // reset file on type change
-//   };
-
-//   // Select suggestion
-//   const handleSelectSuggestion = (place) => {
-//     setFormData((prev) => ({
-//       ...prev,
-//       place_name: place.display_name,
-//       latitude: place.lat,
-//       longitude: place.lon,
-//     }));
-//     setShowSuggestions(false);
-//   };
-
-//   // Get live location
-//   const handleGetLocation = () => {
-//     if (navigator.geolocation) {
-//       setLoadingLocation(true);
-//       navigator.geolocation.getCurrentPosition(
-//         (pos) => {
-//           const lat = pos.coords.latitude;
-//           const lon = pos.coords.longitude;
-//           setFormData((prev) => ({
-//             ...prev,
-//             latitude: lat,
-//             longitude: lon,
-//           }));
-//           setShowSuggestions(false);
-//           setLoadingLocation(false);
-//         },
-//         (err) => {
-//           console.error("Location error:", err);
-//           alert("Unable to access location. Please allow permission.");
-//           setLoadingLocation(false);
-//         }
-//       );
-//     } else {
-//       alert("Geolocation not supported in your browser.");
-//     }
-//   };
-
-//   // Add & remove tags
-//   const handleAddTag = () => {
-//     if (selectedTag && !formData.tags.includes(selectedTag)) {
-//       setFormData((prev) => ({ ...prev, tags: [...prev.tags, selectedTag] }));
-//     }
-//     setSelectedTag("");
-//   };
-
-//   const handleRemoveTag = (tagToRemove) => {
-//     setFormData((prev) => ({
-//       ...prev,
-//       tags: prev.tags.filter((tag) => tag !== tagToRemove),
-//     }));
-//   };
-
-//   // Submit form
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     if (!formData.description.trim()) return alert("Please enter a description.");
-
-//     setLoadingSubmit(true);
-
-//     try {
-//       const submitData = new FormData();
-//       Object.entries(formData).forEach(([key, value]) => {
-//         if (key === "tags") {
-//           submitData.append("tags", JSON.stringify(value));
-//         } else if (key === "file") {
-//           if (value) submitData.append(formData.fileType, value); // send as image or video
-//         } else if (value) {
-//           submitData.append(key, value);
-//         }
-//       });
-
-//       const res = await axios.post(
-//         "http://127.0.0.1:8004/TravelExperienceCreateAPIView/",
-//         submitData,
-//         {
-//           headers: {
-//             "Content-Type": "multipart/form-data",
-//             Authorization: `Bearer ${token}`,
-//           },
-//         }
-//       );
-
-//       alert("✅ Experience added successfully!");
-//       console.log("Saved:", res.data);
-
-//       // Reset form
-//       setFormData({
-//         title: "",
-//         place_name: "",
-//         category: "Adventure",
-//         description: "",
-//         rating: "",
-//         privacy: "PUBLIC",
-//         latitude: "",
-//         longitude: "",
-//         tags: [],
-//         file: null,
-//         fileType: "image",
-//         date_of_visit: "",
-//       });
-//       setPlaceSuggestions([]);
-//       setShowSuggestions(false);
-//     } catch (err) {
-//       console.error(err.response?.data || err.message);
-//       alert("❌ Error adding experience!");
-//     } finally {
-//       setLoadingSubmit(false);
-//     }
-//   };
-
-//   return (
-//     //  max-w-lg mx-auto
-//     <div className="max bg-black p-6 shadow-lg rounded-lg relative text-amber-50">
-//       <h2 className="text-2xl font-semibold mb-4 text-center">Add Travel Experience</h2>
-
-//       <form onSubmit={handleSubmit} className="space-y-4" encType="multipart/form-data">
-//         {/* Title */}
-//         <input
-//           type="text"
-//           name="title"
-//           placeholder="Title"
-//           value={formData.title}
-//           onChange={handleChange}
-//           className="w-full p-2 border rounded"
-//           required
-//         />
-
-//         {/* Place Name */}
-//         <div className="relative">
-//           <input
-//             type="text"
-//             name="place_name"
-//             placeholder="Place Name"
-//             value={formData.place_name}
-//             onChange={handleChange}
-//             className="w-full p-2 border rounded"
-//             required
-//             autoComplete="off"
-//           />
-//           {showSuggestions && placeSuggestions.length > 0 && (
-//             <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded mt-1 max-h-60 overflow-y-auto">
-//               {placeSuggestions.map((place, idx) => (
-//                 <li
-//                   key={idx}
-//                   className="p-2 hover:bg-gray-100 cursor-pointer"
-//                   onClick={() => handleSelectSuggestion(place)}
-//                 >
-//                   {place.display_name}
-//                 </li>
-//               ))}
-//             </ul>
-//           )}
-//         </div>
-
-//         {/* Description */}
-//         <textarea
-//           name="description"
-//           placeholder="Write about your experience..."
-//           value={formData.description}
-//           onChange={handleChange}
-//           className="w-full p-2 border rounded"
-//           required
-//         />
-
-//         {/* Category & Privacy */}
-//         <div className="flex gap-2">
-//           <select
-//             name="category"
-//             value={formData.category}
-//             onChange={handleChange}
-//             className="w-1/2 p-2 border rounded"
-//             required
-//           >
-//             {categories.map((cat) => (
-//               <option key={cat}>{cat}</option>
-//             ))}
-//           </select>
-
-//           <select
-//             name="privacy"
-//             value={formData.privacy}
-//             onChange={handleChange}
-//             className="w-1/2 p-2 border rounded"
-//             required
-//           >
-//             {privacyOptions.map((opt) => (
-//               <option key={opt}>{opt}</option>
-//             ))}
-//           </select>
-//         </div>
-
-//         {/* Rating */}
-//         <input
-//           type="number"
-//           step="0.1"
-//           name="rating"
-//           placeholder="Rating"
-//           value={formData.rating}
-//           onChange={handleChange}
-//           className="w-full p-2 border rounded"
-//         />
-
-//         {/* Date of Visit */}
-//         <input
-//           type="date"
-//           name="date_of_visit"
-//           value={formData.date_of_visit}
-//           onChange={handleChange}
-//           className="w-full p-2 border rounded"
-//         />
-
-//         {/* Location Button */}
-//         <button
-//           type="button"
-//           onClick={handleGetLocation}
-//           className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded"
-//           disabled={loadingLocation}
-//         >
-//           {loadingLocation ? "Detecting..." : "📍 Use My Current Location"}
-//         </button>
-
-//         {/* Choose file type */}
-//         <div className="flex gap-4 items-center mt-2">
-//           <label>
-//             <input
-//               type="radio"
-//               name="fileType"
-//               value="image"
-//               checked={formData.fileType === "image"}
-//               onChange={handleFileTypeChange}
-//             />{" "}
-//             Image
-//           </label>
-//           <label>
-//             <input
-//               type="radio"
-//               name="fileType"
-//               value="video"
-//               checked={formData.fileType === "video"}
-//               onChange={handleFileTypeChange}
-//             />{" "}
-//             Video
-//           </label>
-//         </div>
-
-//         {/* Single File Input */}
-//         <input
-//           type="file"
-//           accept={formData.fileType === "image" ? "image/*" : "video/*"}
-//           onChange={handleFileChange}
-//           className="w-full p-2 border rounded mt-2"
-//         />
-
-//         {/* Tags */}
-//         <div className="flex gap-2 mt-2">
-//           <select
-//             value={selectedTag}
-//             onChange={(e) => setSelectedTag(e.target.value)}
-//             className="w-full p-2 border rounded"
-//           >
-//             <option value="">-- Select Tag --</option>
-//             <option value="beach">beach</option>
-//             <option value="mountain">mountain</option>
-//             <option value="forest">forest</option>
-//             <option value="waterfall">waterfall</option>
-//             <option value="island">island</option>
-//             <option value="desert">desert</option>
-//             <option value="lake">lake</option>
-//           </select>
-
-//           <button
-//             type="button"
-//             onClick={handleAddTag}
-//             className="bg-blue-500 hover:bg-blue-600 text-white px-4 rounded"
-//           >
-//             Add Tag
-//           </button>
-//         </div>
-
-//         {/* Selected Tags */}
-//         <div className="flex flex-wrap gap-2 mt-2">
-//           {formData.tags.map((tag) => (
-//             <span
-//               key={tag}
-//               className="bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center gap-2"
-//             >
-//               #{tag}
-//               <button
-//                 type="button"
-//                 onClick={() => handleRemoveTag(tag)}
-//                 className="text-red-500 font-bold hover:text-red-700"
-//               >
-//                 ×
-//               </button>
-//             </span>
-//           ))}
-//         </div>
-
-//         {/* Submit */}
-//         <button
-//           type="submit"
-//           className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded"
-//           disabled={loadingSubmit}
-//         >
-//           {loadingSubmit ? "Saving..." : "Submit"}
-//         </button>
-//       </form>
-//     </div>
-//   );
-// };
-
-// export default AddExperience;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const AddExperience = () => {
+  const navigate = useNavigate();
   const token = localStorage.getItem("access_token");
 
   const [formData, setFormData] = useState({
@@ -446,9 +16,9 @@ const AddExperience = () => {
     latitude: "",
     longitude: "",
     tags: [],
-    file: null,        // single file (image/video)
-    fileType: "image", // "image" or "video"
-    date_of_visit: "",  // new date field
+    file: null,
+    fileType: "image",
+    date_of_visit: "",
   });
 
   const [selectedTag, setSelectedTag] = useState("");
@@ -460,7 +30,7 @@ const AddExperience = () => {
   const categories = ["Adventure", "Cultural", "Nature", "Historical", "Food", "Relaxation"];
   const privacyOptions = ["PUBLIC", "FRIENDS", "PRIVATE"];
 
-  // ✅ Fetch place suggestions and auto-fill latitude & longitude
+  // ✅ Fetch place suggestions
   useEffect(() => {
     const delayDebounce = setTimeout(async () => {
       const query = formData.place_name.trim();
@@ -477,29 +47,19 @@ const AddExperience = () => {
 
           setPlaceSuggestions(res.data);
           setShowSuggestions(true);
-
-          // Auto-fill latitude and longitude from first result
-          if (res.data.length > 0) {
-            setFormData((prev) => ({
-              ...prev,
-              latitude: res.data[0].lat,
-              longitude: res.data[0].lon,
-            }));
-          }
         } catch (err) {
           console.error("Error fetching location:", err);
         }
       } else {
         setPlaceSuggestions([]);
         setShowSuggestions(false);
-        setFormData((prev) => ({ ...prev, latitude: "", longitude: "" }));
       }
     }, 500);
 
     return () => clearTimeout(delayDebounce);
   }, [formData.place_name]);
 
-  // Handle input changes (text, date, number)
+  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -513,10 +73,10 @@ const AddExperience = () => {
     }
   };
 
-  // Handle file type selection (image/video)
+  // Handle file type selection
   const handleFileTypeChange = (e) => {
     const fileType = e.target.value;
-    setFormData((prev) => ({ ...prev, fileType, file: null })); // reset file on type change
+    setFormData((prev) => ({ ...prev, fileType, file: null }));
   };
 
   // Select suggestion
@@ -530,21 +90,50 @@ const AddExperience = () => {
     setShowSuggestions(false);
   };
 
-  // Get live location
+  // Get live location and reverse geocode to get place name
   const handleGetLocation = () => {
     if (navigator.geolocation) {
       setLoadingLocation(true);
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
+        async (pos) => {
           const lat = pos.coords.latitude;
           const lon = pos.coords.longitude;
-          setFormData((prev) => ({
-            ...prev,
-            latitude: lat,
-            longitude: lon,
-          }));
-          setShowSuggestions(false);
-          setLoadingLocation(false);
+          
+          try {
+            // Reverse geocode to get place name
+            const response = await axios.get(
+              "https://nominatim.openstreetmap.org/reverse",
+              {
+                params: {
+                  lat: lat,
+                  lon: lon,
+                  format: "json",
+                  addressdetails: 1,
+                },
+              }
+            );
+            
+            const placeName = response.data.display_name;
+            
+            setFormData((prev) => ({
+              ...prev,
+              latitude: lat,
+              longitude: lon,
+              place_name: placeName,
+            }));
+            
+            setShowSuggestions(false);
+          } catch (error) {
+            console.error("Error reverse geocoding:", error);
+            // Still set coordinates even if reverse geocoding fails
+            setFormData((prev) => ({
+              ...prev,
+              latitude: lat,
+              longitude: lon,
+            }));
+          } finally {
+            setLoadingLocation(false);
+          }
         },
         (err) => {
           console.error("Location error:", err);
@@ -585,7 +174,7 @@ const AddExperience = () => {
         if (key === "tags") {
           submitData.append("tags", JSON.stringify(value));
         } else if (key === "file") {
-          if (value) submitData.append(formData.fileType, value); // send as image or video
+          if (value) submitData.append(formData.fileType, value);
         } else if (value) {
           submitData.append(key, value);
         }
@@ -631,200 +220,263 @@ const AddExperience = () => {
   };
 
   return (
-    <div className="max-w-lg mx-auto bg-white p-6 shadow-lg rounded-lg relative text-black border border-gray-200">
-      <h2 className="text-2xl font-semibold mb-4 text-center text-gray-800">Add Travel Experience</h2>
+    <div className="w-full mx-auto bg-white p-6 shadow-lg rounded-lg text-black border border-gray-200">
+      <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800">Add Travel Experience</h2>
 
-      <form onSubmit={handleSubmit} className="space-y-4" encType="multipart/form-data">
-        {/* Title */}
-        <input
-          type="text"
-          name="title"
-          placeholder="Title"
-          value={formData.title}
-          onChange={handleChange}
-          className="w-full p-2 border border-gray-300 rounded text-black bg-white placeholder-gray-500"
-          required
-        />
+      <form onSubmit={handleSubmit} className="space-y-6" encType="multipart/form-data">
+        {/* First Row: Title, Place Name, Description */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+          {/* Title */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+            <input
+              type="text"
+              name="title"
+              placeholder="Enter title"
+              value={formData.title}
+              onChange={handleChange}
+              className="w-full p-3 border border-gray-300 rounded-lg text-black bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            />
+          </div>
 
-        {/* Place Name */}
-        <div className="relative">
-          <input
-            type="text"
-            name="place_name"
-            placeholder="Place Name"
-            value={formData.place_name}
-            onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded text-black bg-white placeholder-gray-500"
-            required
-            autoComplete="off"
-          />
-          {showSuggestions && placeSuggestions.length > 0 && (
-            <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded mt-1 max-h-60 overflow-y-auto">
-              {placeSuggestions.map((place, idx) => (
-                <li
-                  key={idx}
-                  className="p-2 hover:bg-gray-100 cursor-pointer text-black"
-                  onClick={() => handleSelectSuggestion(place)}
-                >
-                  {place.display_name}
-                </li>
+          {/* Place Name with suggestions */}
+          <div className="relative">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Place Name</label>
+            <input
+              type="text"
+              name="place_name"
+              placeholder="Enter place name"
+              value={formData.place_name}
+              onChange={handleChange}
+              className="w-full p-3 border border-gray-300 rounded-lg text-black bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+              autoComplete="off"
+            />
+
+            {showSuggestions && placeSuggestions.length > 0 && (
+              <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg mt-1 max-h-60 overflow-y-auto shadow-lg">
+                {placeSuggestions.map((place, idx) => (
+                  <li
+                    key={idx}
+                    className="p-3 hover:bg-gray-100 cursor-pointer text-black border-b border-gray-200 last:border-b-0"
+                    onClick={() => handleSelectSuggestion(place)}
+                  >
+                    {place.display_name}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea
+              name="description"
+              placeholder="Write about your experience..."
+              value={formData.description}
+              onChange={handleChange}
+              className="w-full p-3 border border-gray-300 rounded-lg text-black bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[120px]"
+              required
+            />
+          </div>
+        </div>
+
+        {/* Second Row: Category, Privacy, Rating, Date, Location */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
+          {/* Category */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <select
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              className="w-full p-3 border border-gray-300 rounded-lg text-black bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            >
+              {categories.map((cat) => (
+                <option key={cat} value={cat} className="text-black">{cat}</option>
               ))}
-            </ul>
-          )}
-        </div>
+            </select>
+          </div>
 
-        {/* Description */}
-        <textarea
-          name="description"
-          placeholder="Write about your experience..."
-          value={formData.description}
-          onChange={handleChange}
-          className="w-full p-2 border border-gray-300 rounded text-black bg-white placeholder-gray-500"
-          required
-        />
+          {/* Privacy */}
+          {/* <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Privacy</label>
+            <select
+              name="privacy"
+              value={formData.privacy}
+              onChange={handleChange}
+              className="w-full p-3 border border-gray-300 rounded-lg text-black bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            >
+              {privacyOptions.map((opt) => (
+                <option key={opt} value={opt} className="text-black">{opt}</option>
+              ))}
+            </select>
+          </div> */}
 
-        {/* Category & Privacy */}
-        <div className="flex gap-2">
-          <select
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            className="w-1/2 p-2 border border-gray-300 rounded text-black bg-white"
-            required
-          >
-            {categories.map((cat) => (
-              <option key={cat} className="text-black">{cat}</option>
-            ))}
-          </select>
-
-          <select
-            name="privacy"
-            value={formData.privacy}
-            onChange={handleChange}
-            className="w-1/2 p-2 border border-gray-300 rounded text-black bg-white"
-            required
-          >
-            {privacyOptions.map((opt) => (
-              <option key={opt} className="text-black">{opt}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Rating */}
-        <input
-          type="number"
-          step="0.1"
-          name="rating"
-          placeholder="Rating"
-          value={formData.rating}
-          onChange={handleChange}
-          className="w-full p-2 border border-gray-300 rounded text-black bg-white placeholder-gray-500"
-        />
-
-        {/* Date of Visit */}
-        <input
-          type="date"
-          name="date_of_visit"
-          value={formData.date_of_visit}
-          onChange={handleChange}
-          className="w-full p-2 border border-gray-300 rounded text-black bg-white"
-        />
-
-        {/* Location Button */}
-        <button
-          type="button"
-          onClick={handleGetLocation}
-          className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded"
-          disabled={loadingLocation}
-        >
-          {loadingLocation ? "Detecting..." : "📍 Use My Current Location"}
-        </button>
-
-        {/* Choose file type */}
-        <div className="flex gap-4 items-center mt-2">
-          <label className="text-black">
+          {/* Rating */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Rating</label>
             <input
-              type="radio"
-              name="fileType"
-              value="image"
-              checked={formData.fileType === "image"}
-              onChange={handleFileTypeChange}
-            />{" "}
-            Image
-          </label>
-          <label className="text-black">
+              type="number"
+              step="0.1"
+              min="0"
+              max="5"
+              name="rating"
+              placeholder="0.0 - 5.0"
+              value={formData.rating}
+              onChange={handleChange}
+              className="w-full p-3 border border-gray-300 rounded-lg text-black bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          {/* Date of Visit */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Date of Visit</label>
             <input
-              type="radio"
-              name="fileType"
-              value="video"
-              checked={formData.fileType === "video"}
-              onChange={handleFileTypeChange}
-            />{" "}
-            Video
-          </label>
+              type="date"
+              name="date_of_visit"
+              value={formData.date_of_visit}
+              onChange={handleChange}
+              className="w-full p-3 border border-gray-300 rounded-lg text-black bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          {/* Location Button */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">&nbsp;</label>
+            <button
+              type="button"
+              onClick={handleGetLocation}
+              className="w-full bg-black hover:bg-gray-800 text-white py-3 rounded-lg transition duration-200 font-medium"
+              disabled={loadingLocation}
+            >
+              {loadingLocation ? "📍 Detecting..." : "📍 Use Current Location"}
+            </button>
+          </div>
         </div>
 
-        {/* Single File Input */}
-        <input
-          type="file"
-          accept={formData.fileType === "image" ? "image/*" : "video/*"}
-          onChange={handleFileChange}
-          className="w-full p-2 border border-gray-300 rounded mt-2 text-black bg-white"
-        />
+        {/* File Type Selection and File Input */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* File Type Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">Media Type</label>
+            <div className="flex gap-6 items-center">
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="fileType"
+                  value="image"
+                  checked={formData.fileType === "image"}
+                  onChange={handleFileTypeChange}
+                  className="text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-black font-medium">Image</span>
+              </label>
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="fileType"
+                  value="video"
+                  checked={formData.fileType === "video"}
+                  onChange={handleFileTypeChange}
+                  className="text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-black font-medium">Video</span>
+              </label>
+            </div>
+          </div>
 
-        {/* Tags */}
-        <div className="flex gap-2 mt-2">
-          <select
-            value={selectedTag}
-            onChange={(e) => setSelectedTag(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded text-black bg-white"
+          {/* File Input */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {formData.fileType === "image" ? "Upload Image" : "Upload Video"}
+            </label>
+            <input
+              type="file"
+              accept={formData.fileType === "image" ? "image/*" : "video/*"}
+              onChange={handleFileChange}
+              className="w-full p-3 border border-gray-300 rounded-lg text-black bg-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-shadow-black hover:file:bg-blue-100"
+            />
+          </div>
+        </div>
+
+        {/* Tags Section */}
+        <div className="space-y-3">
+          <label className="block text-sm font-medium text-gray-700">Tags</label>
+          <div className="flex gap-2">
+            <select
+              value={selectedTag}
+              onChange={(e) => setSelectedTag(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg text-black bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="" className="text-gray-500">-- Select Tag --</option>
+              <option value="beach" className="text-black">beach</option>
+              <option value="mountain" className="text-black">mountain</option>
+              <option value="forest" className="text-black">forest</option>
+              <option value="waterfall" className="text-black">waterfall</option>
+              <option value="island" className="text-black">island</option>
+              <option value="desert" className="text-black">desert</option>
+              <option value="lake" className="text-black">lake</option>
+
+
+
+
+
+
+              
+            </select>
+
+            <button
+              type="button"
+              onClick={handleAddTag}
+              className="bg-black hover:bg-gray-700 text-white px-6 rounded-lg font-medium transition duration-200 whitespace-nowrap"
+            >
+              Add Tag
+            </button>
+          </div>
+
+          {/* Selected Tags */}
+          <div className="flex flex-wrap gap-2 mt-2">
+            {formData.tags.map((tag) => (
+              <span
+                key={tag}
+                className="bg-gray-200 px-3 py-2 rounded-full text-sm flex items-center gap-2 text-black font-medium"
+              >
+                #{tag}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveTag(tag)}
+                  className="text-red-500 font-bold hover:text-red-700 text-lg"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Submit and Cancel Buttons */}
+        <div className="flex gap-4 mt-6 pt-4 border-t border-gray-200">
+          <button
+            type="submit"
+            className="w-1/2 bg-black hover:bg-gray-700 text-white py-3 rounded-lg font-semibold transition duration-200 disabled:bg-gray-400"
+            disabled={loadingSubmit}
           >
-            <option value="" className="text-gray-500">-- Select Tag --</option>
-            <option value="beach" className="text-black">beach</option>
-            <option value="mountain" className="text-black">mountain</option>
-            <option value="forest" className="text-black">forest</option>
-            <option value="waterfall" className="text-black">waterfall</option>
-            <option value="island" className="text-black">island</option>
-            <option value="desert" className="text-black">desert</option>
-            <option value="lake" className="text-black">lake</option>
-          </select>
+            {loadingSubmit ? "Saving..." : "Submit"}
+          </button>
 
           <button
+            onClick={() => navigate(-1)}
             type="button"
-            onClick={handleAddTag}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 rounded"
+            className="w-1/2 bg-black hover:bg-gray-700 text-white py-3 rounded-lg font-semibold transition duration-200"
           >
-            Add Tag
+            Cancel
           </button>
         </div>
-
-        {/* Selected Tags */}
-        <div className="flex flex-wrap gap-2 mt-2">
-          {formData.tags.map((tag) => (
-            <span
-              key={tag}
-              className="bg-gray-200 px-3 py-1 rounded-full text-sm flex items-center gap-2 text-black"
-            >
-              #{tag}
-              <button
-                type="button"
-                onClick={() => handleRemoveTag(tag)}
-                className="text-red-500 font-bold hover:text-red-700"
-              >
-                ×
-              </button>
-            </span>
-          ))}
-        </div>
-
-        {/* Submit */}
-        <button
-          type="submit"
-          className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded"
-          disabled={loadingSubmit}
-        >
-          {loadingSubmit ? "Saving..." : "Submit"}
-        </button>
       </form>
     </div>
   );
