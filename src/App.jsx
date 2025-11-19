@@ -27,8 +27,9 @@ import FollowersandFoollowingpage from './components/socialmedia/followersandfol
 
 import ExperienceSide from './components/experiance/experianceside.jsx'
 import AddExperience from './components/experiance/createexperiances.jsx'
+import UpdateExperience from './components/experiance/updateexperience .jsx'
 import Viewphotoorvideofromprofile  from './components/profile/viewphotoorvideofromprofile.jsx'
-
+import LikesPage from './components/profile/LikesPage.jsx'
 
 
 
@@ -164,16 +165,13 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
             <Route path='/UserExperienceside' element={<UserExperienceside/>}/>
             <Route path='/ExperienceSide' element={<ExperienceSide/>}/>
             <Route path="/GoogleLoginButton" element={<GoogleLoginButton/>}/>
-
             <Route path='/RegistrationForm' element={<RegistrationForm/>}/>
             <Route path='/ForgotPassword' element={<ForgotPassword/>}/>
             {/* <Route path='/ResetPassword' element={<ResetPassword/>}/> */}
             <Route path='/CreateProfile' element={<CreateProfile/>}/>
-            <Route path='/ProfileUpdate' element={<ProfileUpdate/>}/>
-
-
-
+            <Route path='/ProfileUpdate' element={<ProfileUpdate/>}/> 
             <Route path='/ProfilePage' element={<ProfilePage/>}/>
+            <Route path='/LikesPage' element={<LikesPage/>}/>
             <Route path='/Setpaymetsetup' element={<Setpaymetsetup/>}/>
             
 
@@ -194,7 +192,7 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
 
             <Route path='Viewphotoorvideofromprofile/' element={<Viewphotoorvideofromprofile/>}/>
             <Route path='/AddExperience' element={<AddExperience/>}/>
-
+            <Route path='/UpdateExperience' element={<UpdateExperience/>}/>
 
 
 

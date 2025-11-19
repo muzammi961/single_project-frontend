@@ -377,17 +377,6 @@ const DashboardLayoutpublic = () => {
     <div className="font-display bg-white text-black min-h-screen">
       <div className="flex flex-col min-h-screen">
         <PublicTripNavbar/>
-        {/* Header */}
-        <header className="bg-white border-b border-gray-200 py-4 px-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold">TripPlanner</h1>
-            <div className="text-sm text-gray-500">
-              Shared Trip • View Only
-            </div>
-          </div>
-        </header>
-
-        {/* Main Content */}
         <main className="flex-1 p-4 lg:p-8 overflow-y-auto">
           {/* Header Section */}
           <header className="mb-6 lg:mb-8">

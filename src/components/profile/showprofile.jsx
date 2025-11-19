@@ -94,7 +94,8 @@ const useWebSocketManager = () => {
       try {
         socket.send(JSON.stringify({
           user_id: userId,
-          text: text
+          text: text,
+          parent_id: null
         }));
         return true;
       } catch (error) {

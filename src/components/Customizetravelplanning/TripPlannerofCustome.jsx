@@ -101,31 +101,7 @@ const TripPlannerofCustome = () => {
 
   return (
     <div className="relative flex min-h-screen w-full flex-col bg-white text-black font-display">
-      {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-10 flex w-full items-center justify-center border-b border-gray-200 bg-white/80 backdrop-blur-lg">
-        <div className="flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-4">
-            <div className="text-blue-500 size-7">
-              <svg fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                <path d="M4 4H17.3334V17.3334H30.6666V30.6666H44V44H4V4Z" fill="currentColor" />
-              </svg>
-            </div>
-            <h2 className="text-black text-lg font-bold">Trip Planner</h2>
-          </div>
-          <div className="flex items-center gap-4">
-            <button className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-gray-200 text-gray-700 transition-colors hover:bg-gray-300">
-              <span className="material-symbols-outlined">notifications</span>
-            </button>
-            <div
-              className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10"
-              data-alt="User avatar image"
-              style={{
-                backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDgSTJ7gM_UERF9sx0Ttw73nWnt2creQo6eCDqcwfSF3HnBZr2sjwrAgrMf4nWejlKjqew9Zs5oKoG_HUtW05vibYw8SM7jlVURKMpFO3Ejbazo5rfIQMn-jmjXtCfUcdXmKJrUQKrcLbs-x3fr3Ape1kkcZ2uzqNhyXzW4SPihaZ4w4mbwp_k_G0VgCWwNi-xsbKhYgXmGM87ZCmVCCNtozc3gO_nJRi_Jf8bhXwsQuJ0dWMjLIEM47-VrigIZJC6S3jBYsTGDzEQ")',
-              }}
-            />
-          </div>
-        </div>
-      </header>
+    
       {/* Main Content */}
       <main className="flex-1 px-4 py-4 sm:px-6 sm:py-6 lg:px-8 overflow-y-auto">
         <div className="mx-auto max-w-3xl h-full flex flex-col justify-between">

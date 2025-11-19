@@ -22,7 +22,7 @@ const PublicTripNavbar = () => {
           <div className="logo-icon">
             <span className="material-symbols-outlined">travel_explore</span>
           </div>
-          <h1 className="logo-text">TripPlanner</h1>
+          <h1 className="logo-text">TripVerse</h1>
         </div>
       </div>
      

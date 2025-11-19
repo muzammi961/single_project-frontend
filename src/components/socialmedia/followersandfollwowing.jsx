@@ -14,10 +14,13 @@ export default function ConnectionsPage() {
   const [followedUser, setFollowedUser] = useState([]);
   const [userProfiles, setUserProfiles] = useState([]);
   const [followingUserData, setFollowingUserData] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState({
     followers: false,
     following: false,
-    suggestions: false
+    suggestions: false,
+    search: false
   });
   const token = localStorage.getItem("access_token");
 
@@ -72,6 +75,42 @@ export default function ConnectionsPage() {
       setLoading(prev => ({ ...prev, following: false }));
     }
   };
+
+  // Search users function
+  const searchUsers = async (query) => {
+    if (!token || !query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    
+    setLoading(prev => ({ ...prev, search: true }));
+     console.log("Search API response:qjer", query);
+    try {
+      const res = await axios.post("http://127.0.0.1:8002/GetSpecificuserByserche/",{'username':query},{
+        headers: { Authorization: `Bearer ${token}`,},
+      });
+      console.log("Search API response:", res.data);
+      setSearchResults(res.data || []);
+    } catch (error) {
+      console.error("Failed to search users:", error?.response?.data || error?.message || error);
+      setSearchResults([]);
+    } finally {
+      setLoading(prev => ({ ...prev, search: false }));
+    }
+  };
+
+  // Handle search input change with debounce
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      const timeoutId = setTimeout(() => {
+        searchUsers(searchQuery);
+      }, 500);
+      
+      return () => clearTimeout(timeoutId);
+    } else {
+      setSearchResults([]);
+    }
+  }, [searchQuery]);
 
   // Fetch data based on current mode
   useEffect(() => {
@@ -146,6 +185,10 @@ export default function ConnectionsPage() {
       if (mode === "suggestions") {
         await fetchUserProfiles();
       }
+      // Refresh search results if we're in search mode
+      if (searchQuery.trim()) {
+        await searchUsers(searchQuery);
+      }
     } catch (error) {
       console.error("Follow error:", error?.response?.data || error?.message || error);
     }
@@ -172,6 +215,10 @@ export default function ConnectionsPage() {
         Array.isArray(prev) ? prev.filter(u => (u.user_id || u.id) !== following_id) : []
       );
       await fetchFollowingUser();
+      // Refresh search results if we're in search mode
+      if (searchQuery.trim()) {
+        await searchUsers(searchQuery);
+      }
     } catch (error) {
       console.error("Unfollow error:", error?.response?.data || error?.message || error);
     }
@@ -215,6 +262,10 @@ export default function ConnectionsPage() {
 
   // Get current dataset based on mode
   const dataset = useMemo(() => {
+    if (searchQuery.trim()) {
+      return Array.isArray(searchResults) ? searchResults : [];
+    }
+    
     switch (mode) {
       case "followers":
         return Array.isArray(followedUser) ? followedUser : [];
@@ -228,10 +279,10 @@ export default function ConnectionsPage() {
       default:
         return [];
     }
-  }, [mode, followedUser, followingUserData, userProfiles, isFollowing]);
+  }, [mode, followedUser, followingUserData, userProfiles, isFollowing, searchQuery, searchResults]);
 
   // Common button component to ensure consistency
-  const ActionButton = ({ onClick, children, variant = "primary", ...props }) => {
+  const ActionButton = ({ onClick, children, variant = "primary", disabled = false, ...props }) => {
     const baseClasses = "inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-fuchsia-500/50";
     
     const variants = {
@@ -240,13 +291,16 @@ export default function ConnectionsPage() {
       danger: "text-white bg-red-600 ring-1 ring-red-400 hover:bg-red-700"
     };
 
+    const disabledClasses = "opacity-50 cursor-not-allowed";
+
     return (
       <button
         {...props}
-        className={`${baseClasses} ${variants[variant]}`}
+        className={`${baseClasses} ${variants[variant]} ${disabled ? disabledClasses : ''}`}
+        disabled={disabled}
         onClick={(e) => {
           e.stopPropagation();
-          if (onClick) onClick(e);
+          if (onClick && !disabled) onClick(e);
         }}
       >
         {children}
@@ -274,7 +328,7 @@ export default function ConnectionsPage() {
           >
             <div className="flex items-center gap-4 flex-1">
               <img
-                src={safeUser?.profile_picture ? `http://127.0.0.1:8002/${safeUser.profile_picture}` : WHITE_DATA_URI_48}
+                src={safeUser?.profile_picture ? `http://127.0.0.1:8002${safeUser.profile_picture}` : WHITE_DATA_URI_48}
                 alt={safeUser.name}
                 className="h-12 w-12 rounded-full ring-2 ring-fuchsia-500/30 object-cover bg-white"
                 onError={(e) => {
@@ -307,14 +361,14 @@ export default function ConnectionsPage() {
           </article>
         );
       })}
-      {items.length === 0 && !loading.followers && (
+      {items.length === 0 && !loading.followers && !loading.search && (
         <div className="text-center py-8 text-gray-500">
-          No followers found
+          {searchQuery.trim() ? "No users found" : "No followers found"}
         </div>
       )}
-      {loading.followers && (
+      {(loading.followers || loading.search) && (
         <div className="text-center py-8 text-gray-500">
-          Loading followers...
+          {searchQuery.trim() ? "Searching..." : "Loading followers..."}
         </div>
       )}
     </main>
@@ -331,7 +385,7 @@ export default function ConnectionsPage() {
           user_id: p.user_id || p.id
         };
 
-        const imgSrc = safeUser?.profile_picture ? `http://127.0.0.1:8002/${safeUser.profile_picture}` : WHITE_DATA_URI_48;
+        const imgSrc = safeUser?.profile_picture ? `http://127.0.0.1:8002${safeUser.profile_picture}` : WHITE_DATA_URI_48;
 
         return (
           <article
@@ -376,14 +430,14 @@ export default function ConnectionsPage() {
           </article>
         );
       })}
-      {items.length === 0 && !loading.following && (
+      {items.length === 0 && !loading.following && !loading.search && (
         <div className="text-center py-8 text-gray-500">
-          Not following anyone yet
+          {searchQuery.trim() ? "No users found" : "Not following anyone yet"}
         </div>
       )}
-      {loading.following && (
+      {(loading.following || loading.search) && (
         <div className="text-center py-8 text-gray-500">
-          Loading following list...
+          {searchQuery.trim() ? "Searching..." : "Loading following list..."}
         </div>
       )}
     </main>
@@ -400,7 +454,7 @@ export default function ConnectionsPage() {
           user_id: p.user_id || p.id
         };
 
-        const imgSrc = safeUser?.profile_picture ? `http://127.0.0.1:8002/${safeUser.profile_picture}` : WHITE_DATA_URI_48;
+        const imgSrc = safeUser?.profile_picture ? `http://127.0.0.1:8002${safeUser.profile_picture}` : WHITE_DATA_URI_48;
 
         return (
           <article
@@ -443,14 +497,14 @@ export default function ConnectionsPage() {
           </article>
         );
       })}
-      {items.length === 0 && !loading.suggestions && (
+      {items.length === 0 && !loading.suggestions && !loading.search && (
         <div className="text-center py-8 text-gray-500">
-          No suggestions available
+          {searchQuery.trim() ? "No users found" : "No suggestions available"}
         </div>
       )}
-      {loading.suggestions && (
+      {(loading.suggestions || loading.search) && (
         <div className="text-center py-8 text-gray-500">
-          Loading suggestions...
+          {searchQuery.trim() ? "Searching..." : "Loading suggestions..."}
         </div>
       )}
     </main>
@@ -464,23 +518,21 @@ export default function ConnectionsPage() {
   return (
     <div className="min-h-screen bg-white text-gray-900">
       {/* Page header */}
-      <header className="max-w-5xl mx-auto px-4 pt-6 pb-2 ">
-                 <button className="button" onClick={() => navigate(-1)} aria-label="Go back">
-        <div className="button-box">
-          <span className="button-elem">
-            <svg viewBox="0 0 46 40" xmlns="http://www.w3.org/2000/svg">
-              <path d="M46 20.038c0-.7-.3-1.5-.8-2.1l-16-17c-1.1-1-3.2-1.4-4.4-.3-1.2 1.1-1.2 3.3 0 4.4l11.3 11.9H3c-1.7 0-3 1.3-3 3s1.3 3 3 3h33.1l-11.3 11.9c-1 1-1.2 3.3 0 4.4 1.2 1.1 3.3.8 4.4-.3l16-17c.5-.5.8-1.1.8-1.9z" />
-            </svg>
-          </span>
-          <span className="button-elem">
-            <svg viewBox="0 0 46 40">
-              <path d="M46 20.038c0-.7-.3-1.5-.8-2.1l-16-17c-1.1-1-3.2-1.4-4.4-.3-1.2 1.1-1.2 3.3 0 4.4l11.3 11.9H3c-1.7 0-3 1.3-3 3s1.3 3 3 3h33.1l-11.3 11.9c-1 1-1.2 3.3 0 4.4 1.2 1.1 3.3.8 4.4-.3l16-17c.5-.5.8-1.1.8-1.9z" />
-            </svg>
-          </span>
-        </div>
-      </button>
-       
-
+      <header className="max-w-5xl mx-auto px-4 pt-6 pb-2">
+        <button className="button" onClick={() => navigate(-1)} aria-label="Go back">
+          <div className="button-box">
+            <span className="button-elem">
+              <svg viewBox="0 0 46 40" xmlns="http://www.w3.org/2000/svg">
+                <path d="M46 20.038c0-.7-.3-1.5-.8-2.1l-16-17c-1.1-1-3.2-1.4-4.4-.3-1.2 1.1-1.2 3.3 0 4.4l11.3 11.9H3c-1.7 0-3 1.3-3 3s1.3 3 3 3h33.1l-11.3 11.9c-1 1-1.2 3.3 0 4.4 1.2 1.1 3.3.8 4.4-.3l16-17c.5-.5.8-1.1.8-1.9z" />
+              </svg>
+            </span>
+            <span className="button-elem">
+              <svg viewBox="0 0 46 40">
+                <path d="M46 20.038c0-.7-.3-1.5-.8-2.1l-16-17c-1.1-1-3.2-1.4-4.4-.3-1.2 1.1-1.2 3.3 0 4.4l11.3 11.9H3c-1.7 0-3 1.3-3 3s1.3 3 3 3h33.1l-11.3 11.9c-1 1-1.2 3.3 0 4.4 1.2 1.1 3.3.8 4.4-.3l16-17c.5-.5.8-1.1.8-1.9z" />
+              </svg>
+            </span>
+          </div>
+        </button>
 
         <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Connections</h1>
       </header>
@@ -491,57 +543,71 @@ export default function ConnectionsPage() {
           <input
             type="text"
             placeholder="Search users..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-transparent px-4 py-3 text-gray-900 placeholder-gray-500 focus:outline-none"
           />
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="max-w-5xl mx-auto px-4 mt-6">
-        <div className="inline-flex gap-2 rounded-xl bg-gray-50 p-2 ring-1 ring-gray-200">
-          <button
-            onClick={() => setMode("followers")}
-            className={`px-4 py-2 rounded-lg text-sm transition ${
-              mode === "followers"
-                ? "bg-white text-gray-900 ring-1 ring-fuchsia-500/40 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            Followers
-            <span className="ml-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-md bg-gray-200 px-1.5 text-xs text-gray-600">
-              {followersCount}
-            </span>
-          </button>
+      {/* Tabs - Hide when searching */}
+      {!searchQuery.trim() && (
+        <div className="max-w-5xl mx-auto px-4 mt-6">
+          <div className="inline-flex gap-2 rounded-xl bg-gray-50 p-2 ring-1 ring-gray-200">
+            <button
+              onClick={() => setMode("followers")}
+              className={`px-4 py-2 rounded-lg text-sm transition ${
+                mode === "followers"
+                  ? "bg-white text-gray-900 ring-1 ring-fuchsia-500/40 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Followers
+              <span className="ml-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-md bg-gray-200 px-1.5 text-xs text-gray-600">
+                {followersCount}
+              </span>
+            </button>
 
-          <button
-            onClick={() => setMode("following")}
-            className={`px-4 py-2 rounded-lg text-sm transition ${
-              mode === "following"
-                ? "bg-white text-gray-900 ring-1 ring-fuchsia-500/40 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            Following
-            <span className="ml-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-md bg-gray-200 px-1.5 text-xs text-gray-600">
-              {followingCount}
-            </span>
-          </button>
+            <button
+              onClick={() => setMode("following")}
+              className={`px-4 py-2 rounded-lg text-sm transition ${
+                mode === "following"
+                  ? "bg-white text-gray-900 ring-1 ring-fuchsia-500/40 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Following
+              <span className="ml-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-md bg-gray-200 px-1.5 text-xs text-gray-600">
+                {followingCount}
+              </span>
+            </button>
 
-          <button
-            onClick={() => setMode("suggestions")}
-            className={`px-4 py-2 rounded-lg text-sm transition ${
-              mode === "suggestions"
-                ? "bg-white text-gray-900 ring-1 ring-fuchsia-500/40 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            Suggestions
-            <span className="ml-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-md bg-gray-200 px-1.5 text-xs text-gray-600">
-              {suggestionsCount}
-            </span>
-          </button>
+            <button
+              onClick={() => setMode("suggestions")}
+              className={`px-4 py-2 rounded-lg text-sm transition ${
+                mode === "suggestions"
+                  ? "bg-white text-gray-900 ring-1 ring-fuchsia-500/40 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Suggestions
+              <span className="ml-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-md bg-gray-200 px-1.5 text-xs text-gray-600">
+                {suggestionsCount}
+              </span>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Search header */}
+      {searchQuery.trim() && (
+        <div className="max-w-5xl mx-auto px-4 mt-6">
+          <h2 className="text-lg font-semibold text-gray-900">
+            Search Results for "{searchQuery}"
+            {loading.search && <span className="ml-2 text-sm text-gray-500">(Searching...)</span>}
+          </h2>
+        </div>
+      )}
 
       {/* List: render exactly one section by mode */}
       {mode === "followers" && <List1 items={dataset} />}
@@ -549,4 +615,4 @@ export default function ConnectionsPage() {
       {mode === "suggestions" && <List3 items={dataset} />}
     </div>
   );
-}  
+}

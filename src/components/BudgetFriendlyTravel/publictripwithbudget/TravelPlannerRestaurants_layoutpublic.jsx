@@ -272,43 +272,7 @@ const TravelPlannerRestaurantslayoutpublic = () => {
               </div>
             )}
 
-            {/* Search and Filters */}
-            <div className="flex flex-col md:flex-row gap-4 mb-8 p-4">
-              {/* SearchBar */}
-              <div className="flex-grow">
-                <label className="flex flex-col min-w-40 h-12 w-full">
-                  <div className="flex w-full flex-1 items-stretch rounded-lg h-full border border-gray-300 bg-white focus-within:ring-2 focus-within:ring-primary focus-within:border-primary">
-                    <div className="text-gray-500 flex items-center justify-center pl-4">
-                      <span className="material-symbols-outlined">search</span>
-                    </div>
-                    <input 
-                      className="flex w-full min-w-0 flex-1 resize-none overflow-hidden text-gray-900 focus:outline-0 bg-transparent h-full placeholder:text-gray-500 pl-2 text-base font-normal leading-normal" 
-                      placeholder="Search restaurants by name, cuisine..." 
-                    />
-                  </div>
-                </label>
-              </div>
-              
-              {/* Filter Chips */}
-              <div className="flex gap-2 overflow-x-auto pb-2">
-                <button className="flex h-12 shrink-0 items-center justify-center gap-x-2 rounded-lg border border-gray-300 bg-white px-4 hover:bg-gray-50 transition-colors">
-                  <p className="text-sm font-medium leading-normal text-gray-900">Cuisine</p>
-                  <span className="material-symbols-outlined text-gray-500 text-base">expand_more</span>
-                </button>
-                <button className="flex h-12 shrink-0 items-center justify-center gap-x-2 rounded-lg border border-gray-300 bg-white px-4 hover:bg-gray-50 transition-colors">
-                  <p className="text-sm font-medium leading-normal text-gray-900">Price</p>
-                  <span className="material-symbols-outlined text-gray-500 text-base">expand_more</span>
-                </button>
-                <button className="flex h-12 shrink-0 items-center justify-center gap-x-2 rounded-lg border border-gray-300 bg-white px-4 hover:bg-gray-50 transition-colors">
-                  <p className="text-sm font-medium leading-normal text-gray-900">Rating</p>
-                  <span className="material-symbols-outlined text-gray-500 text-base">expand_more</span>
-                </button>
-                <button className="flex h-12 shrink-0 items-center justify-center gap-x-2 rounded-lg border border-gray-300 bg-white px-4 hover:bg-gray-50 transition-colors">
-                  <p className="text-sm font-medium leading-normal text-gray-900">Distance</p>
-                  <span className="material-symbols-outlined text-gray-500 text-base">expand_more</span>
-                </button>
-              </div>
-            </div>
+          
 
             {/* Restaurant Grid */}
             {uniqueRestaurants.length > 0 ? (
