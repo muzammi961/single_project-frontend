@@ -42,7 +42,7 @@ export default function Setpaymetsetup() {
 
     try {
 
-      const response = await axios.post('http://127.0.0.1:8006/SendEmailOTPAPIView/',{"email": formData.email },{
+      const response = await axios.post('http://127.0.0.1:8006/SendEmailOTPAPIView/',{"email": formData.email,'username':formData.userName},{
           headers: {
             'Authorization': `Bearer ${getAuthToken()}`,
             'Content-Type': 'application/json'

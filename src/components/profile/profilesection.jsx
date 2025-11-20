@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { PrTpId } from '../actioncreate'
 import '../stylecomponent/logout.css'
 import { Likeexperienceid } from '../actioncreate'
-
+import { UpdateExperienceid } from "../actioncreate";
 // ========== WebSocket Manager ==========
 class WebSocketManager {
   constructor() {
@@ -864,6 +864,7 @@ const TravelExperiencesSection = () => {
 
   // Experience Detail Modal with Correct Layout Structure
   const ExperienceDetailModal = () => {
+    const [openDeleteBox, setOpenDeleteBox] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [commentList, setCommentList] = useState([]);
@@ -960,6 +961,19 @@ const TravelExperiencesSection = () => {
       }
     };
 
+    const handleDelete = async (experienceId) => {
+        try {
+          await axios.delete(`http://127.0.0.1:8004/TravalExperienceDeleteApiview/${experienceId}/`);
+          alert("Experience deleted successfully!");
+          if (onSuccess) onSuccess();  
+        } catch (error) {
+          alert("Failed to delete experience");
+          console.log(error);
+        }
+
+        setLoading(false);
+      };
+
     if (!selectedExperience) return null;
 
     return (
@@ -1049,6 +1063,41 @@ const TravelExperiencesSection = () => {
                       >
                         View likes
                       </button>
+
+
+                       <button onClick={()=>{dispatch(UpdateExperienceid(selectedExperience.id));navigate('/UpdateExperience')}}className="rounded-lg flex items-center text-white space-x-1 px-4 py-2  bg-blue-600 hover:bg-blue-700">Update</button>
+                    <button onClick={() => setOpenDeleteBox(true)}className="bg-red-500 text-white px-4 py-2 rounded-lg">Delete</button>
+
+                            
+                      {openDeleteBox && (
+                        <div className="fixed inset- bg-opacity-40 flex justify-center items-center z-50">
+                          <div className="bg-white p-6 rounded-xl shadow-xl w-80">
+                            <h2 className="text-lg font-semibold mb-4">Are you sure?</h2>
+                            <p className="text-gray-600 mb-5">Do you want to delete this experience?</p>
+
+                            <div className="flex justify-between">
+                              
+                          
+                              <button
+                                onClick={() => setOpenDeleteBox(false)}
+                                className="flex items-center gap-1 bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded-lg"
+                              >
+                                <span className="material-symbols-outlined text-xl">close</span>
+                                Cancel
+                              </button>
+
+                          
+                              <button
+                                onClick={()=>handleDelete(experiences.id)}
+                                className="flex items-center gap-1 bg-red-600 text-white hover:bg-red-700 px-4 py-2 rounded-lg"
+                              >
+                                <span className="material-symbols-outlined text-xl">delete</span>
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="mt-3 text-sm text-gray-700">
@@ -1171,18 +1220,43 @@ const TravelExperiencesSection = () => {
                     >
                       View likes
                     </button>
-                     <button 
-                      onClick={handleViewLikes}
-                      className="flex items-center space-x-1 text-amber-500 hover:text-amber-400 text-sm"
-                    >
-                      delete
-                    </button>
-                     <button 
-                      onClick={handleViewLikes}
-                      className="flex items-center space-x-1 text-amber-500 hover:text-amber-400 text-sm"
-                    >
-                      update
-                    </button>
+
+                  <button onClick={()=>{dispatch(UpdateExperienceid(selectedExperience.id));navigate('/UpdateExperience')}}className="rounded-lg flex items-center text-white space-x-1 px-4 py-2  bg-blue-600 hover:bg-blue-700">Update</button>
+                    <button onClick={() => setOpenDeleteBox(true)}className="bg-red-500 text-white px-4 py-2 rounded-lg">Delete</button>
+
+                            
+                      {openDeleteBox && (
+                        <div className="fixed inset- bg-opacity-40 flex justify-center items-center z-50">
+                          <div className="bg-white p-6 rounded-xl shadow-xl w-80">
+                            <h2 className="text-lg font-semibold mb-4">Are you sure?</h2>
+                            <p className="text-gray-600 mb-5">Do you want to delete this experience?</p>
+
+                            <div className="flex justify-between">
+                              
+                          
+                              <button
+                                onClick={() => setOpenDeleteBox(false)}
+                                className="flex items-center gap-1 bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded-lg"
+                              >
+                                <span className="material-symbols-outlined text-xl">close</span>
+                                Cancel
+                              </button>
+
+                          
+                              <button
+                                onClick={()=>handleDelete(experiences.id)}
+                                className="flex items-center gap-1 bg-red-600 text-white hover:bg-red-700 px-4 py-2 rounded-lg"
+                              >
+                                <span className="material-symbols-outlined text-xl">delete</span>
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+ 
+                
                   </div>
                 </div>
                 
@@ -2045,3 +2119,20 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -44,7 +44,7 @@ const appSlice = createSlice({
     },
     UpdateExperienceid:(state,action)=>{
       state.updateexperienceid=action.payload
-    }
+    },
   },
 });
 
