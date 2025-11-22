@@ -430,15 +430,12 @@ export default function HomeSide() {
 
   // Fetch experiences with profile data included
   useEffect(() => {
-    if (!token) return;
 
     const fetchExperiences = async () => {
       try {
         setLoadingExperiences(true);
         setErrorExperiences(null);
-        const res = await axios.get("http://127.0.0.1:8004/TravelExperienceListAPIViewbypage/", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await axios.get("http://127.0.0.1:8004/TravelExperienceListAPIViewbypage/");
         setExperiences(res.data.results || []);
         console.log('Experiences with profiles:', res.data.results);
       } catch (error) {
@@ -449,13 +446,13 @@ export default function HomeSide() {
       }
     };
     fetchExperiences();
-  }, [token]);
+  }, []);
 
   // Navigation handler
   const goToDashboard = (value = null) => {
     const access_token = localStorage.getItem("access_token");
     const refreshtoken = localStorage.getItem("refresh_token");
-    
+    console.log('acccss ',access_token,'refreshh',refreshtoken) 
     if (!access_token && !refreshtoken) {
       return navigate("/RegistrationForm");
     } else {

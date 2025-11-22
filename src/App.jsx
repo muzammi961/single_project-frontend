@@ -133,6 +133,10 @@ import LiveTripMap from './components/Bt_live journy/Bt_live_locaction.jsx'
 
 
 
+// sttings
+import PaymentMethodsDeleteSt from './components/profile/settings/PaymentMethodsDeleteSt.jsx'
+
+
 
 
 // import   MyMap from './components/componone.jsx'
@@ -297,7 +301,7 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
             <Route path='LiveTripMap/:trip_id/' element={<LiveTripMap/>}/>
 
                
-
+            <Route path='PaymentMethodsDeleteSt/' element={<PaymentMethodsDeleteSt/>}/>
 
 {/* http://localhost:5173/BtliveTripChat/{trip.unique_trip_id}/live/ */}
           </Routes>
