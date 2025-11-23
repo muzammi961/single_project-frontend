@@ -770,6 +770,7 @@ const TravelExperiencesSection = () => {
 
   // Experience Card Component
   const ExperienceCard = ({ experience }) => {
+    // console.log('experienen......',exper)
     const hasMedia = experience.media !== null;
     return (
       <div
