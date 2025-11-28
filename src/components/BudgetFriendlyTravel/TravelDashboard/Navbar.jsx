@@ -184,13 +184,7 @@ const Navbar = () => {
           <p className="button-text">Travel Map</p>
         </button>
           
-        <button 
-          onClick={() => handleNavigation('/TravelPlannerItinerary')} 
-          className={`nav-button ${isActive('/TravelPlannerItinerary') ? 'active' : ''}`}
-        >
-          <span className="material-symbols-outlined">route</span>
-          <p className="button-text">Travel Planner</p>
-        </button>
+      
       </div>
     </nav>
   );

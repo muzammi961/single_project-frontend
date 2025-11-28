@@ -43,7 +43,6 @@ import LikesPage from './components/profile/LikesPage.jsx'
 
 
 
-// import Dashboard from './components/Customizetravelplanning/Dashboard.jsx';
 import TripPlannerofCustome from './components/Customizetravelplanning/TripPlannerofCustome.jsx';
 import ExpenseTracker from './components/Customizetravelplanning/ExpenseTracker .jsx';
 import GroupExpenses from './components/Customizetravelplanning/GroupExpenses .jsx';
@@ -73,7 +72,6 @@ import Attractions from './components/BudgetFriendlyTravel/TravelDashboard/Attra
 import DailyItinerary from './components/BudgetFriendlyTravel/TravelDashboard/DailyItinerary.jsx'
 import TravelMap from './components/BudgetFriendlyTravel/TravelDashboard/TravelMap.jsx'
 import Navbar from './components/BudgetFriendlyTravel/TravelDashboard/Navbar.jsx'
-import TravelPlannerItinerary from './components/BudgetFriendlyTravel/TravelDashboard/TravelPlannerItinerary.jsx'
 
 
 
@@ -245,7 +243,7 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
             <Route path='/Attractions' element={<Attractions/>}/>
             <Route path='/DailyItinerary' element={<DailyItinerary/>}/>
             <Route path='/TravelMap' element={<TravelMap/>}/>
-            <Route path='/TravelPlannerItinerary' element={<TravelPlannerItinerary/>}/>
+            {/* <Route path='/TravelPlannerItinerary' element={<TravelPlannerItinerary/>}/> */}
 
 
             {/* <Route path='/MyMap' element={<MyMap/>}/> */}
@@ -292,7 +290,7 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
             <Route path='/TripSummarylayoutpublic/:invatetripid' element={<TripSummarylayoutpublic/>}/>
             <Route path='Joininthepublictrip/:invatetripid' element={<Joininthepublictrip/>}/>
 
-            <Route path='PaymentPage/:trip_id/payment/:userid/' element={<PaymentPage/>}/>
+            <Route path='PaymentPage/:userid/payment/:trip_id/' element={<PaymentPage/>}/>
 
 
             <Route path='BtLiveJournymap/:trip_id/live/' element={<BtLiveJournymap/>}/>

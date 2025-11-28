@@ -253,7 +253,7 @@ const ExperienceSide = () => {
       });
       
       console.log("AI Overview API Response:", overres.data);
-      setPlaceOverview(overres.data);
+      setPlaceOverview(overres.data.data);
     } catch (error) {
       console.error("Error fetching AI overview:", error.response?.data || error.message);
       // Fallback data if API fails
