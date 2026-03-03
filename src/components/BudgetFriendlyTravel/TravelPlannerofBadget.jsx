@@ -176,7 +176,7 @@ const TravelPlannerofBadget = () => {
 
   return (
     <div>
-      <div className="relative flex min-h-screen w-full flex-col items-center justify-center bg-white overflow-x-hidden">
+      <div className="relative flex min-h-screen w-full flex-col items-center justify-center bg-white overflow-x-hidden overflow-y-hidden ">
         <div className="relative flex h-full grow flex-col justify-center py-10 px-4">
           <div className="flex flex-col max-w-[960px] flex-1 mx-auto">
             <div className="flex flex-col items-center justify-center gap-6 p-4 md:p-8 bg-white rounded-xl shadow-lg">
@@ -191,11 +191,11 @@ const TravelPlannerofBadget = () => {
               <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
                 <label className="flex flex-col">
                   <p className="text-black text-base font-medium leading-normal pb-2 font-display">
-                    Your Budget *
+                    Your Budget 
                   </p>
                   <div className="relative">
                     <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                      attach_money
+                      currency_rupee
                     </span>
                     <input
                       required
@@ -217,7 +217,7 @@ const TravelPlannerofBadget = () => {
                 </label>
                 <label className="flex flex-col">
                   <p className="text-black text-base font-medium leading-normal pb-2 font-display">
-                    Starting Location *
+                    Starting Location 
                   </p>
                   <div className="relative">
                     <button
@@ -348,7 +348,7 @@ const TravelPlannerofBadget = () => {
                       onClick={() => toggleBudgetCategory('midrange')}
                       disabled={loading}
                     >
-                      <span className="material-symbols-outlined text-lg">attach_money</span>
+                  <span className="material-symbols-outlined text-lg">currency_rupee</span>
                       <p>Mid-range</p>
                     </button>
                     <button
@@ -449,10 +449,10 @@ const TravelPlannerofBadget = () => {
             <span className="material-symbols-outlined text-2xl">receipt_long</span>
             <span className="text-sm font-medium">Expense</span>
           </a>
-          <a onClick={() => navigate('/TripPlannerofCustome')} className="flex flex-col items-center gap-1 text-gray-600 hover:text-gray-500 transition-colors duration-200 cursor-pointer">
+          {/* <a onClick={() => navigate('/TripPlannerofCustome')} className="flex flex-col items-center gap-1 text-gray-600 hover:text-gray-500 transition-colors duration-200 cursor-pointer">
             <span className="material-symbols-outlined text-2xl">tune</span>
             <span className="text-sm font-medium">Customize</span>
-          </a>
+          </a> */}
         </nav>
       </footer>
     </div>

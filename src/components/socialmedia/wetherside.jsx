@@ -563,7 +563,7 @@ const WeatherCard = () => {
 
           {/* 5-Day Forecast */}
           <div className="bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg">
-            <h3 className="text-lg font-bold mb-4">5-Day Forecast</h3>
+            <h3 className="text-lg font-bold mb-4">6-Day Forecast</h3>
             <ul className="space-y-3 sm:space-y-4">
               {forecast.map((item, index) => (
                 <li key={index} className="flex justify-between items-center text-base sm:text-lg">

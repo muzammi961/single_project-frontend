@@ -92,9 +92,13 @@ export default function LoginPage({ dark = true }) {
 
       localStorage.setItem("access_token", res.data.access);
       localStorage.setItem("refresh_token", res.data.refresh);
-
+      console.log('resssss',res.data) 
+      if (res.data.is_superuser){
+        navigate('/Showuserlistbyadmin')
+       }
       accessToken = localStorage.getItem("access_token") || "";
       if (accessToken) await fetchProfile(accessToken)
+      
 
       
     } catch (err) {
@@ -138,21 +142,21 @@ export default function LoginPage({ dark = true }) {
       const maybeAppend = (k, v) => {
         if (v !== undefined && v !== null && v !== "") form.append(k, v);
       };
-
+      profileData.social_links=null
       maybeAppend("name", profileData.name);
       maybeAppend("contact_number", profileData.contact_number);
       maybeAppend("bio", profileData.bio);
       maybeAppend("location", profileData.location);
       maybeAppend("gender", profileData.gender);
       maybeAppend("date_of_birth", profileData.date_of_birth);
-
-      if (profileData.social_links) {
-        if (typeof profileData.social_links === "object") {
-          form.append("social_links", JSON.stringify(profileData.social_links));
-        } else {
-          form.append("social_links", profileData.social_links);
-        }
-      }
+      maybeAppend("date_of_birth", profileData.social_links);
+      // if (profileData.social_links) {
+      //   if (typeof profileData.social_links === "object") {
+      //     form.append("social_links", JSON.stringify(profileData.social_links));
+      //   } else {
+      //     form.append("social_links", profileData.social_links);
+      //   }
+      // }
       if (profileData.cover_photo instanceof File) {
         form.append("cover_photo", profileData.cover_photo);
       }
@@ -387,7 +391,7 @@ export default function LoginPage({ dark = true }) {
                 aria-label="Date of birth"
               />
 
-              <input
+              {/* <input
                 className="w-full rounded-lg border-none bg-white/10 pl-4 pr-4 py-2 sm:py-3 text-sm focus:ring-2 focus:ring-teal-500 focus:outline-none text-white placeholder:text-gray-200 transition-all duration-300"
                 type="url"
                 inputMode="url"
@@ -397,7 +401,7 @@ export default function LoginPage({ dark = true }) {
                   setProfileData((p) => ({ ...p, social_links: e.target.value }))
                 }
                 aria-label="Social links URL"
-              />
+              /> */}
 
               <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
                 <button

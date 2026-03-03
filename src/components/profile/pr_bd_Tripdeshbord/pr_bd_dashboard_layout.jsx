@@ -143,8 +143,9 @@ const InviteJoinThrougEmailfunc = async () => {
     try {
     const response=await axios.post(`http://127.0.0.1:8006/InviteJoinThrougEmailAPIView/${trip_id}/`,{'email':email});
     // if(response.data.message){
-    //   alert(response.data.message)
+      alert(response.data.message)
     // }
+    console.log(response.data)
     }catch(error) {
       alert(response.data.error)
   };

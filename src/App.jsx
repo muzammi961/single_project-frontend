@@ -136,6 +136,7 @@ import PaymentMethodsDeleteSt from './components/profile/settings/PaymentMethods
 
 
 
+import Showuserlistbyadmin from './components/adminside/showuserlistbyadmin.jsx'
 
 // import   MyMap from './components/componone.jsx'
 function App() {
@@ -149,7 +150,7 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 
 
-
+TravelPlannerofBadget
 
    
 
@@ -302,6 +303,11 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
             <Route path='PaymentMethodsDeleteSt/' element={<PaymentMethodsDeleteSt/>}/>
 
 {/* http://localhost:5173/BtliveTripChat/{trip.unique_trip_id}/live/ */}
+
+
+               
+
+            <Route path='/Showuserlistbyadmin' element={<Showuserlistbyadmin/>}/>   
           </Routes>
       </BrowserRouter>
   )

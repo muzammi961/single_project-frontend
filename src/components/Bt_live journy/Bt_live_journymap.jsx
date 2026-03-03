@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 
-const BtLiveJournymap = () => {
+const BtLiveJournymap = () => { 
   const uniqelivecode=useParams()
   console.log('uniqelivecode',uniqelivecode)
   return (
